@@ -1,0 +1,12 @@
+<ion-list>
+  <ion-item *ngFor="let merchant of merchants.data?.results; trackBy: trackById" [href]="merchant.place_url">
+    <ion-label>
+      <h3>{{ merchant.place.name }}</h3>
+      <p>{{ (merchant.place.opening_hours.open_now ? 'open_now' : 'closed') | translate }}</p>
+    </ion-label>
+    <ion-icon name="time" [color]="merchant.place.opening_hours.open_now ? 'primary' : 'danger'"></ion-icon>
+  </ion-item>
+</ion-list>
+<ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore.emit()" [disabled]="!merchants.data?.more">
+  <ion-infinite-scroll-content></ion-infinite-scroll-content>
+</ion-infinite-scroll>

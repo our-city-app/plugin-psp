@@ -1,0 +1,11 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ 'participating_merchants' | translate }}</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/projects"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <merchant-list [merchants]="merchants$ | async" (loadMore)="loadMore()"></merchant-list>
+</ion-content>

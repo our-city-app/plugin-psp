@@ -1,0 +1,12 @@
+{
+  "actions": "actions",
+  "ends_on_x": "Ends on {{ date }}",
+  "your_actions": "Your actions",
+  "loading": "Loading",
+  "participating_merchants": "Participating merchants",
+  "open_now": "Open now",
+  "closed": "Closed",
+  "participation_box": "Participation piggy bank",
+  "details": "Details",
+  "merchants": "Merchants"
+}

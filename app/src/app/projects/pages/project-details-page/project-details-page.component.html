@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ (project$ | async)?.data?.title }}</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/projects"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content *ngIf="project$ | async as project">
+  <div style="display: flex; justify-content: center; margin: 16px;">
+    <ion-spinner *ngIf="project.loading || !project.data; else tmpl"></ion-spinner>
+  </div>
+  <ng-template #tmpl>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          {{ project.data.budget.amount | currency : project.data.budget.currency : 'symbol': '1.0' }}
+        </ion-card-title>
+        <ion-card-subtitle>{{ 'ends_on_x' | translate : {date: project.data.end_date | date} }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ project.data.description }}</p>
+        <h4>{{ project.data.statistics.total }} / {{ project.data.action_count }} {{ 'actions' | translate }}</h4>
+        <p>{{ 'your_actions' | translate }}: <b>{{ project.data.statistics.personal.amount }}</b></p>
+      </ion-card-content>
+    </ion-card>
+  </ng-template>
+  <ion-fab vertical="bottom" horizontal="center" slot="fixed">
+    <ion-fab-button (click)="startScanning()">
+      <ion-icon name="camera"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
