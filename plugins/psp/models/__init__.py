@@ -15,8 +15,9 @@
 #
 # @@license_version:1.3@@
 
-from framework.models.common import NdbModel
 from google.appengine.ext import ndb
+
+from framework.models.common import NdbModel
 from plugins.psp.consts import NAMESPACE
 
 
@@ -28,7 +29,7 @@ class GeneralSettings(NdbModel):
 
     @classmethod
     def create_key(cls):
-        return ndb.Key(cls, 'PSP', namespace=NAMESPACE)
+        return ndb.Key(cls, 'GeneralSettings', namespace=NAMESPACE)
 
     @classmethod
     def instance(cls):
@@ -41,13 +42,13 @@ class City(NdbModel):
     api_key = ndb.StringProperty(indexed=False)
     avatar_url = ndb.StringProperty(indexed=False)
 
-    @classmethod
-    def create_key(cls, app_id):
-        return ndb.Key(cls, app_id, namespace=NAMESPACE)
-
     @property
-    def app_id(self):
-        return self.key.id()
+    def id(self):
+        return self.key.id().decode('utf-8')
+
+    @classmethod
+    def create_key(cls, city_id):
+        return ndb.Key(cls, city_id, namespace=NAMESPACE)
 
 
 class Project(NdbModel):
@@ -82,7 +83,7 @@ class OpeningHour(ndb.Model):
     time = ndb.StringProperty(indexed=False, repeated=True)
 
 
-class OpeningPeriod():
+class OpeningPeriod(NdbModel):
     # open contains a pair of day and time objects describing when the place opens:
     open = ndb.LocalStructuredProperty(OpeningHour)
     # close may contain a pair of day and time objects describing when the place closes.
@@ -95,8 +96,8 @@ class Merchant(NdbModel):
     NAMESPACE = NAMESPACE
     name = ndb.StringProperty(indexed=False)
     address = ndb.TextProperty()
-    opening_hours = ndb.LocalStructuredProperty(OpeningPeriod, True)
-    city_id = ndb.StringProperty()
+    opening_hours = ndb.LocalStructuredProperty(OpeningPeriod)
+    city_id = ndb.IntegerProperty()
     qr_id = ndb.IntegerProperty()
     google_place_id = ndb.StringProperty()
 
@@ -108,7 +109,7 @@ class Merchant(NdbModel):
 class Scan(NdbModel):
     NAMESPACE = NAMESPACE
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
-    app_user = ndb.UserProperty()
+    app_user = ndb.StringProperty()
     merchant_id = ndb.IntegerProperty()
     project_id = ndb.IntegerProperty()
 

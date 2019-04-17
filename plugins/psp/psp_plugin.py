@@ -21,12 +21,14 @@ from framework.plugin_loader import Plugin
 from framework.utils.plugins import Handler
 from mcfw.consts import NOT_AUTHENTICATED
 from mcfw.restapi import rest_functions
-from plugins.psp import api
+from plugins.psp.api import cities
 
 
 class PspPlugin(Plugin):
 
     def get_handlers(self, auth):
         if auth == Handler.AUTH_UNAUTHENTICATED:
-            for url, handler in rest_functions(api, authentication=NOT_AUTHENTICATED):
-                yield Handler(url=url, handler=handler)
+            modules = [cities]
+            for mod in modules:
+                for url, handler in rest_functions(mod, authentication=NOT_AUTHENTICATED):
+                    yield Handler(url=url, handler=handler)

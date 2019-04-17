@@ -14,23 +14,3 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
-from mcfw.restapi import rest
-from mcfw.rpc import returns, arguments
-import webapp2
-
-
-@rest('/city/<city_id:[^/]+>', 'get')
-@returns([CityTO])
-@arguments(city_id=int)
-def api_get_city(city_id):
-    city = City.get_by_id(city_id)
-    if not city:
-        webapp2.abort(404)
-    return map(CityTO.from_model, )
-
-
-@rest('/city', 'post')
-@returns([CityTO])
-@arguments(city=CityTO)
-def api_get_city():
-    return map(CityTO.from_model, get_city())

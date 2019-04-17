@@ -20,7 +20,7 @@ from mcfw.properties import unicode_property
 
 
 class CityTO(TO):
-    app_id = unicode_property('app_id')
+    id = unicode_property('id')
     secret = unicode_property('secret')
     api_key = unicode_property('api_key')
     avatar_url = unicode_property('avatar_url')

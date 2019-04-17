@@ -47,7 +47,7 @@ export class RogerthatService {
     }
     if (this.translate) {
       console.log(`Set language to ${lang}`);
-      return this.translate.use(lang);
+      this.translate.use(lang);
     }
   }
 
