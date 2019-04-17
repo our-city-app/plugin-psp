@@ -1,0 +1,6 @@
+<mat-nav-list>
+  <a mat-list-item [routerLink]="city.id" *ngFor="let city of cities$ | async">
+    <img matListAvatar [src]="city.avatar_url">
+    <h3 matLine>{{ city.name }}</h3>
+  </a>
+</mat-nav-list>

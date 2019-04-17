@@ -1,0 +1,15 @@
+<mat-list>
+  <mat-list-item *ngFor="let batch of qrBatches$ | async">
+    <h4 matLine>{{ batch.date | date }}</h4>
+    <p matLine>{{ 'psp.amount' | translate }}: {{ batch.amount }}</p>
+    <button mat-icon-button type="button" (click)="downloadBatch(batch)">
+      <mat-icon>cloud_download</mat-icon>
+    </button>
+  </mat-list-item>
+</mat-list>
+
+<div class="psp-fab-bottom-right">
+  <button type="button" mat-fab (click)="addButtonClicked()">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

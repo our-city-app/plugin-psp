@@ -16,7 +16,7 @@
 # @@license_version:1.3@@
 
 from framework.to import TO
-from mcfw.properties import unicode_property
+from mcfw.properties import unicode_property, long_property
 
 
 class CityTO(TO):
@@ -24,3 +24,11 @@ class CityTO(TO):
     secret = unicode_property('secret')
     api_key = unicode_property('api_key')
     avatar_url = unicode_property('avatar_url')
+    name = unicode_property('name')
+
+
+class QRBatchTO(TO):
+    id = long_property('id')
+    city_id = unicode_property('city_id')
+    date = unicode_property('date')
+    amount = long_property('amount')

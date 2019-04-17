@@ -22,6 +22,10 @@ from plugins.psp.models import City
 from plugins.psp.to import CityTO
 
 
+def list_cities():
+    return City.list()
+
+
 def get_city(city_id):
     # type: (unicode) -> City
     city = City.create_key(city_id).get()
@@ -55,4 +59,5 @@ def _populate_city(city, data):
     city.populate(
         avatar_url=data.avatar_url,
         api_key=data.api_key,
+        name=data.name,
     )

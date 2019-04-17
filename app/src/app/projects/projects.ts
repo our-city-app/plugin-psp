@@ -15,7 +15,7 @@ export interface ProjectDetails {
       amount: number;
       last_entry_date: string;
     }
-  }
+  };
 }
 
 export interface DayTime {

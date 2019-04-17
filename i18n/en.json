@@ -1,0 +1,14 @@
+{
+  "psp": {
+    "amount": "Amount",
+    "details": "Details",
+    "enter_amount": "Enter amount",
+    "generate_how_many_qr_codes": "How many QR codes should be generated?",
+    "name": "Name",
+    "ok": "Ok",
+    "cancel": "Cancel",
+    "psp_admin": "Participation moneybox",
+    "qr_codes": "QR codes",
+    "save": "Save"
+  }
+}

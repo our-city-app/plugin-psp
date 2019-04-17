@@ -25,6 +25,7 @@ class GeneralSettings(NdbModel):
     NAMESPACE = NAMESPACE
 
     secret = ndb.StringProperty(indexed=False)
+    qr_domain = ndb.StringProperty(indexed=False)
     google_maps_key = ndb.StringProperty(indexed=False)
 
     @classmethod
@@ -41,6 +42,7 @@ class City(NdbModel):
     secret = ndb.StringProperty(indexed=False)
     api_key = ndb.StringProperty(indexed=False)
     avatar_url = ndb.StringProperty(indexed=False)
+    name = ndb.StringProperty()
 
     @property
     def id(self):
@@ -49,6 +51,10 @@ class City(NdbModel):
     @classmethod
     def create_key(cls, city_id):
         return ndb.Key(cls, city_id, namespace=NAMESPACE)
+
+    @classmethod
+    def list(cls):
+        return cls.query().order(cls.name)
 
 
 class Project(NdbModel):
@@ -65,15 +71,43 @@ class Project(NdbModel):
         return self.key.id()
 
 
-class QR(NdbModel):
+class QRBatch(NdbModel):
     NAMESPACE = NAMESPACE
-    app_id = ndb.StringProperty()
-    city_id = ndb.IntegerProperty()
-    merchant_id = ndb.IntegerProperty()
+    date = ndb.DateTimeProperty(auto_now_add=True)
+    city_id = ndb.StringProperty()
+    amount = ndb.IntegerProperty(indexed=False)
 
     @property
     def id(self):
         return self.key.id()
+
+    @classmethod
+    def create_key(cls, id_):
+        return ndb.Key(cls, id_, namespace=NAMESPACE)
+
+    @classmethod
+    def list_by_city(cls, city_id):
+        return cls.query(cls.city_id == city_id)
+
+
+class QRCode(NdbModel):
+    NAMESPACE = NAMESPACE
+    city_id = ndb.StringProperty()
+    merchant_id = ndb.IntegerProperty()
+    batch_id = ndb.IntegerProperty()
+    content = ndb.StringProperty(indexed=False)  # Should be an url
+
+    @property
+    def id(self):
+        return self.key.id()
+
+    @classmethod
+    def list_by_batch(cls, batch_id):
+        return cls.query(cls.batch_id == batch_id)
+
+    @classmethod
+    def create_key(cls, id_):
+        return ndb.Key(cls, id_, namespace=NAMESPACE)
 
 
 class OpeningHour(ndb.Model):

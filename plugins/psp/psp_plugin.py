@@ -17,18 +17,24 @@
 
 from __future__ import unicode_literals
 
+from google.appengine.api import users
+
 from framework.plugin_loader import Plugin
-from framework.utils.plugins import Handler
+from framework.utils.plugins import Handler, Module
 from mcfw.consts import NOT_AUTHENTICATED
 from mcfw.restapi import rest_functions
-from plugins.psp.api import cities
+from plugins.psp.api import cities, qr_codes
 
 
 class PspPlugin(Plugin):
 
     def get_handlers(self, auth):
         if auth == Handler.AUTH_UNAUTHENTICATED:
-            modules = [cities]
+            modules = [cities, qr_codes]
             for mod in modules:
                 for url, handler in rest_functions(mod, authentication=NOT_AUTHENTICATED):
                     yield Handler(url=url, handler=handler)
+
+    def get_modules(self):
+        if users.is_current_user_admin():
+            yield Module(u'psp_admin', [], 1)

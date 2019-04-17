@@ -17,10 +17,17 @@
 
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
-from plugins.psp.bizz.cities import create_city, update_city, get_city
+from plugins.psp.bizz.cities import create_city, update_city, get_city, list_cities
 from plugins.psp.bizz.general import validate_admin_request_auth
 
 from plugins.psp.to import CityTO
+
+
+@rest('/cities', 'get', custom_auth_method=validate_admin_request_auth)
+@returns([CityTO])
+@arguments()
+def api_list_cities():
+    return [CityTO.from_model(model) for model in list_cities()]
 
 
 @rest('/cities', 'post', custom_auth_method=validate_admin_request_auth)

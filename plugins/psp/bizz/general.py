@@ -16,6 +16,8 @@
 # @@license_version:1.3@@
 from base64 import b64decode
 
+from google.appengine.api import users
+
 from mcfw.restapi import GenericRESTRequestHandler
 from plugins.psp.models import GeneralSettings
 
@@ -25,8 +27,10 @@ def get_general_settings():
     return GeneralSettings.create_key().get()
 
 
-def validate_admin_request_auth(handler):
-    # type: (GenericRESTRequestHandler) -> bool
+def validate_admin_request_auth(func, handler):
+    # type: (function, GenericRESTRequestHandler) -> bool
+    if users.is_current_user_admin():
+        return True
     auth = handler.request.headers.get('Authentication')
     try:
         type_, encoded = auth.split(' ')

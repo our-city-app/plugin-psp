@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "projects": {
+    "gae-plugin-framework-cli": {
+      "architect": {
+        "build": {
+          "options": {
+            "styles": [
+              "src/psp/client/styles/global.scss",
+              "src/psp/client/styles/theme.scss"
+            ]
+          }
+        },
+        "test": {
+          "options": {
+            "styles": [
+              "src/psp/client/styles/global.scss",
+              "src/psp/client/styles/theme.scss"
+            ]
+          }
+        },
+        "lint": {
+          "options": {
+            "tsConfig": [
+              "src/psp/tslint.json"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

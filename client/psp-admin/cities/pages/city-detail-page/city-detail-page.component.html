@@ -1,0 +1,16 @@
+<ng-container *ngIf="city$ | async as city">
+  <mat-toolbar>
+    <button mat-icon-button routerLink="..">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h3>{{ city.name }}</h3>
+  </mat-toolbar>
+  <mat-tab-group>
+    <mat-tab [label]="'psp.details' | translate">
+      <psp-city-detail [city]="city" (saved)="saveCity($event)"></psp-city-detail>
+    </mat-tab>
+    <mat-tab [label]="'psp.qr_codes' | translate">
+      <psp-city-qr-batches-page></psp-city-qr-batches-page>
+    </mat-tab>
+  </mat-tab-group>
+</ng-container>

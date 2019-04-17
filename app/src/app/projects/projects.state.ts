@@ -3,9 +3,9 @@ import { DEFAULT_LIST_LOADABLE, DEFAULT_LOADABLE, Loadable } from '../loadable';
 import { MerchantList, ProjectDetails } from './projects';
 
 export interface ProjectsState {
-  currentProject: number | null,
+  currentProject: number | null;
   projects: Loadable<ProjectDetails[]>;
-  merchants: Loadable<MerchantList>
+  merchants: Loadable<MerchantList>;
 }
 
 const getFeatureState = createFeatureSelector<ProjectsState>('projects');
