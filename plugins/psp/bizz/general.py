@@ -18,7 +18,6 @@ from base64 import b64decode
 
 from google.appengine.api import users
 
-from mcfw.restapi import GenericRESTRequestHandler
 from plugins.psp.models import GeneralSettings
 
 
@@ -31,13 +30,39 @@ def validate_admin_request_auth(func, handler):
     # type: (function, GenericRESTRequestHandler) -> bool
     if users.is_current_user_admin():
         return True
+
     auth = handler.request.headers.get('Authentication')
+    if not auth:
+        return False
+
     try:
         type_, encoded = auth.split(' ')
         if type_ != 'Basic':
             return False
-        decoded_auth = b64decode(auth)
+
         settings = get_general_settings()
-        return settings.secret == decoded_auth
+        return settings.secret == b64decode(encoded)
+    except TypeError:
+        return False
+
+
+def validate_city_request_auth(func, handler):
+    # type: (function, GenericRESTRequestHandler) -> bool
+    if users.is_current_user_admin():
+        return True
+
+    auth = handler.request.headers.get('Authentication')
+    if not auth:
+        return False
+
+    from plugins.psp.bizz.cities import get_city
+    try:
+        type_, encoded = auth.split(' ')
+        if type_ != 'Basic':
+            return False
+
+        kwargs = handler.request.route.match(handler.request)[-1]
+        city = get_city(kwargs['city_id'])
+        return city.secret == b64decode(encoded)
     except TypeError:
         return False

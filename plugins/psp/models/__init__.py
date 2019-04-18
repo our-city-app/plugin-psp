@@ -57,18 +57,36 @@ class City(NdbModel):
         return cls.query().order(cls.name)
 
 
+class ProjectBudget(ndb.Model):
+    amount = ndb.IntegerProperty(indexed=False)  # amount in `currency`, no demicals
+    currency = ndb.StringProperty(indexed=False)
+
+
 class Project(NdbModel):
     NAMESPACE = NAMESPACE
     title = ndb.StringProperty(indexed=False)
     description = ndb.TextProperty()
     start_time = ndb.DateTimeProperty()
     end_time = ndb.DateTimeProperty()
-    target_budget = ndb.IntegerProperty(indexed=False)
-    target_scan_count = ndb.IntegerProperty(indexed=False)
+    budget = ndb.LocalStructuredProperty(ProjectBudget)
+    action_count = ndb.IntegerProperty(indexed=False)
 
     @property
     def id(self):
         return self.key.id()
+
+    @classmethod
+    def create_key(cls, city_id, project_id):
+        return ndb.Key(cls, project_id, parent=City.create_key(city_id), namespace=NAMESPACE)
+
+    @classmethod
+    def list_by_city(cls, city_id):
+        return cls.query(ancestor=City.create_key(city_id)).order(-cls.start_time)
+
+    @classmethod
+    def list_projects_after(cls, city_id, timestamp):
+        return cls.query(ancestor=City.create_key(city_id)) \
+            .filter(cls.start_time < timestamp)
 
 
 class QRBatch(NdbModel):

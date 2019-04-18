@@ -1,0 +1,6 @@
+indexes:
+- kind: Project
+  ancestor: yes
+  properties:
+  - name: start_time
+    direction: desc

@@ -16,7 +16,7 @@
 # @@license_version:1.3@@
 
 from framework.to import TO
-from mcfw.properties import unicode_property, long_property
+from mcfw.properties import unicode_property, long_property, typed_property
 
 
 class CityTO(TO):
@@ -32,3 +32,18 @@ class QRBatchTO(TO):
     city_id = unicode_property('city_id')
     date = unicode_property('date')
     amount = long_property('amount')
+
+
+class ProjectBudgetTO(TO):
+    amount = long_property('amount')  # amount in `currency`, no demicals
+    currency = unicode_property('currency')
+
+
+class ProjectTO(TO):
+    id = long_property('id')
+    title = unicode_property('title')
+    description = unicode_property('description')
+    start_time = unicode_property('start_time')
+    end_time = unicode_property('end_time')
+    budget = typed_property('budget', ProjectBudgetTO)
+    action_count = long_property('action_count')
