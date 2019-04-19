@@ -14,21 +14,25 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
+from datetime import datetime
 
 import dateutil.parser
-
 from mcfw.consts import MISSING
 from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException
 from plugins.psp.models import Project, ProjectBudget, City
-from datetime import datetime
+from plugins.psp.to import ProjectTO
 
 
-def list_projects(city_id):
-    return Project.list_by_city(city_id)
+def list_projects(city_id, active):
+    qry = Project.list_by_city(city_id)  # type: list[Project]
+    if active:
+        now = datetime.now()
+        return [p for p in qry if not p.end_time or p.end_time >= now]
+    return qry
 
 
 def get_project(city_id, project_id):
-    # type: (unicode) -> Project
+    # type: (unicode, int) -> Project
     project = Project.create_key(city_id, project_id).get()
     if not project:
         raise HttpNotFoundException('project_not_found', {'id': project_id, 'city_id': city_id})
@@ -36,7 +40,7 @@ def get_project(city_id, project_id):
 
 
 def create_project(city_id, data):
-    # type: (ProjectTO) -> Project
+    # type: (int, ProjectTO) -> Project
     if data.id is not MISSING:
         key = Project.create_key(city_id, data.id)
         if key.get():
@@ -48,7 +52,7 @@ def create_project(city_id, data):
 
 
 def update_project(city_id, project_id, data):
-    # type: (unicode, unicode, ProjectTO) -> Project
+    # type: (unicode, int, ProjectTO) -> Project
     if data.id != project_id:
         raise HttpBadRequestException('bad_project_id')
     project = get_project(city_id, project_id)

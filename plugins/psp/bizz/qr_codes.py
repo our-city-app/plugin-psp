@@ -45,7 +45,7 @@ def create_qr_batch(data):
     to_put = [QRCode(key=QRCode.create_key(id_),
                      city_id=data.city_id,
                      batch_id=batch.id,
-                     content='%s/%s/psp-admin/%s' % (settings.qr_domain, data.city_id, id_)) for id_ in iterable]
+                     content='%s/qr/%s/%s' % (settings.qr_domain, data.city_id, id_)) for id_ in iterable]
     ndb.put_multi(to_put)
     return batch
 

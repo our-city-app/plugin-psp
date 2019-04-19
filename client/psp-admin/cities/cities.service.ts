@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { PspConfig } from '../../psp-config';
-import { City, QRBatch } from './cities';
+import { ActivateMerchant, City, Project, QRBatch } from './cities';
 
 @Injectable({ providedIn: 'root' })
 export class CitiesService {
@@ -21,8 +21,7 @@ export class CitiesService {
   }
 
   getQrBatches(cityId: string) {
-    let params = new HttpParams();
-    params = params.set('city_id', cityId);
+    const params = new HttpParams({ fromObject: { city_id: cityId } });
     return this.http.get<QRBatch[]>(`${PspConfig.API_URL}/qr-batches`, { params });
   }
 
@@ -32,5 +31,23 @@ export class CitiesService {
 
   createQrCodes(cityId: string, amount: number) {
     return this.http.post<QRBatch>(`${PspConfig.API_URL}/qr-batches`, { city_id: cityId, amount });
+  }
+
+  listProjects(cityId: string, active = true) {
+    const params = new HttpParams({ fromObject: { active: active.toString() } });
+    return this.http.get<Project[]>(`${PspConfig.API_URL}/cities/${cityId}/projects`, { params });
+  }
+
+  linkQR(cityId: string, data: ActivateMerchant) {
+    return this.http.post<ActivateMerchant>(`${PspConfig.API_URL}/cities/${cityId}/link`, data);
+  }
+
+  searchPlaces(query: string, location: string) {
+    const params = new HttpParams({ fromObject: { query, location } });
+    return this.http.get<google.maps.places.PlaceResult[]>(`${PspConfig.API_URL}/places`, { params });
+  }
+
+  getPlaceDetails(placeId: string) {
+    return this.http.get<google.maps.places.PlaceResult>(`${PspConfig.API_URL}/places/${placeId}`);
   }
 }

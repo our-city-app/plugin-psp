@@ -147,11 +147,12 @@ class OpeningPeriod(NdbModel):
 class Merchant(NdbModel):
     NAMESPACE = NAMESPACE
     name = ndb.StringProperty(indexed=False)
-    address = ndb.TextProperty()
-    opening_hours = ndb.LocalStructuredProperty(OpeningPeriod)
+    formatted_address = ndb.TextProperty()
+    location = ndb.GeoPtProperty()
+    opening_hours = ndb.LocalStructuredProperty(OpeningPeriod, repeated=True)
     city_id = ndb.IntegerProperty()
     qr_id = ndb.IntegerProperty()
-    google_place_id = ndb.StringProperty()
+    place_id = ndb.StringProperty()
 
     @property
     def id(self):

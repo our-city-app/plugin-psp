@@ -22,11 +22,11 @@ from plugins.psp.bizz.projects import create_project, update_project, get_projec
 from plugins.psp.to import ProjectTO
 
 
-@rest('/projects/<city_id:[^/]+>', 'get', custom_auth_method=validate_city_request_auth)
+@rest('/cities/<city_id:[^/]+>/projects', 'get', custom_auth_method=validate_city_request_auth)
 @returns([ProjectTO])
-@arguments(city_id=unicode)
-def api_list_projects(city_id):
-    return [ProjectTO.from_model(model) for model in list_projects(city_id)]
+@arguments(city_id=unicode, active=bool)
+def api_list_projects(city_id, active=False):
+    return [ProjectTO.from_model(model) for model in list_projects(city_id, active)]
 
 
 @rest('/projects/<city_id:[^/]+>', 'post', custom_auth_method=validate_city_request_auth)
