@@ -1,32 +1,44 @@
 <div *ngFor="let openingHour of openingHours" class="opening-hour-list">
-  <mat-form-field>
-    <mat-label>{{ 'psp.day' | translate }}</mat-label>
-    <mat-select [(ngModel)]="openingHour.open.day" ngModelOptions="{standalone: true}"
-                (ngModelChange)="setCloseTime(openingHour)">
-      <mat-option *ngFor="let day of DAYS" [value]="day.value">
-        {{ day.label | translate }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{ 'psp.opening_time' | translate }}</mat-label>
-    <mat-select [(ngModel)]="openingHour.open.time" ngModelOptions="{standalone: true}">
-      <mat-option *ngFor="let hourSlot of HOUR_SLOTS" [value]="hourSlot.value">
-        {{ hourSlot.label }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <ng-container *ngIf="openingHour.close">
-    <span>—</span>
+  <div>
+    <div>
+      <mat-form-field>
+        <mat-label>{{ 'psp.opening_day' | translate }}</mat-label>
+        <mat-select [(ngModel)]="openingHour.open.day" ngModelOptions="{standalone: true}"
+                    (ngModelChange)="setCloseTime(openingHour)">
+          <mat-option *ngFor="let day of DAYS" [value]="day.value">
+            {{ day.label | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'psp.opening_time' | translate }}</mat-label>
+        <mat-select [(ngModel)]="openingHour.open.time" ngModelOptions="{standalone: true}">
+          <mat-option *ngFor="let hourSlot of HOUR_SLOTS" [value]="hourSlot.value">
+            {{ hourSlot.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div *ngIf="openingHour.close">
     <mat-form-field>
-      <mat-label>{{ 'psp.close_time' | translate }}</mat-label>
-      <mat-select [(ngModel)]="openingHour.close.time" ngModelOptions="{standalone: true}">
-        <mat-option *ngFor="let hourSlot of HOUR_SLOTS" [value]="hourSlot.value">
-          {{ hourSlot.label }}
+      <mat-label>{{ 'psp.close_day' | translate }}</mat-label>
+      <mat-select [(ngModel)]="openingHour.close.day" ngModelOptions="{standalone: true}"
+                  (ngModelChange)="setCloseTime(openingHour)">
+        <mat-option *ngFor="let day of DAYS" [value]="day.value">
+          {{ day.label | translate }}
         </mat-option>
       </mat-select>
     </mat-form-field>
-  </ng-container>
+      <mat-form-field>
+        <mat-label>{{ 'psp.close_time' | translate }}</mat-label>
+        <mat-select [(ngModel)]="openingHour.close.time" ngModelOptions="{standalone: true}">
+          <mat-option *ngFor="let hourSlot of HOUR_SLOTS" [value]="hourSlot.value">
+            {{ hourSlot.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
   <button mat-icon-button (click)="deleteOpeningHour(openingHour)">
     <mat-icon>delete</mat-icon>
   </button>

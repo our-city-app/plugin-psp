@@ -22,6 +22,34 @@ export function citiesReducer(state = initialCitiesState, action: CitiesActions)
       return { ...state, newMerchant: onLoadableSuccess(action.payload) };
     case CitiesActionTypes.LINK_QR_FAILED:
       return { ...state, newMerchant: onLoadableError(action.payload) };
+    case CitiesActionTypes.SET_CURRENT_CITY:
+      return { ...state, currentCityId: action.payload.id };
+    case CitiesActionTypes.GET_CITY:
+      return { ...state, currentCity: onLoadableLoad(initialCitiesState.currentCity.data) };
+    case CitiesActionTypes.GET_CITY_COMPLETE:
+      return { ...state, currentCity: onLoadableSuccess(action.payload) };
+    case CitiesActionTypes.GET_CITY_FAILED:
+      return { ...state, currentCity: onLoadableError(action.payload) };
+    case CitiesActionTypes.SAVE_CITY:
+      return { ...state, currentCity: onLoadableLoad(action.payload) };
+    case CitiesActionTypes.SAVE_CITY_COMPLETE:
+      return { ...state, currentCity: onLoadableSuccess(action.payload) };
+    case CitiesActionTypes.SAVE_CITY_FAILED:
+      return { ...state, currentCity: onLoadableError(action.payload) };
+    case CitiesActionTypes.GET_MERCHANTS:
+      return { ...state, merchants: onLoadableLoad(initialCitiesState.merchants.data) };
+    case CitiesActionTypes.GET_MORE_MERCHANTS:
+      return { ...state, merchants: onLoadableLoad(state.merchants.data) };
+    case CitiesActionTypes.GET_MERCHANTS_COMPLETE:
+      return {
+        ...state,
+        merchants: onLoadableSuccess({
+          ...action.payload,
+          results: [ ...(state.merchants.data ? state.merchants.data.results : []), ...action.payload.results ],
+        }),
+      };
+    case CitiesActionTypes.GET_MERCHANTS_FAILED:
+      return { ...state, merchants: onLoadableError(action.payload) };
   }
   return state;
 }

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { MetaGuard } from '@ngx-meta/core';
 import { Route } from '../../framework/client/app.routes';
 import { IAppState } from '../../framework/client/ngrx';
-import { AddRoutesAction } from '../../framework/client/sidebar/actions';
+import { AddRoutesAction } from '../../framework/client/nav/sidebar/actions';
 
 const routes: Route[] = [ {
   path: 'psp',

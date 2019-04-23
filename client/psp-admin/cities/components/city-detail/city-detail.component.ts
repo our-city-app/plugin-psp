@@ -9,6 +9,7 @@ import { City } from '../../cities';
 })
 export class CityDetailComponent {
   @Input() city: City;
+  @Input() disabled = false;
   @Output() saved = new EventEmitter<City>();
 
   submit() {

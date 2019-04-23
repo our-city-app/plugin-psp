@@ -73,4 +73,4 @@ class PspPlugin(Plugin):
 
     def get_modules(self):
         if users.is_current_user_admin():
-            yield Module('psp_admin', [], 1)
+            yield Module(u'psp_admin', [], 1)

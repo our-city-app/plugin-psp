@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { City, Project } from '../../cities';
-import { CitiesService } from '../../cities.service';
+import { Loadable } from '../../../../../app/src/app/loadable';
+import { City } from '../../cities';
+import { SaveCityAction } from '../../cities.actions';
+import { CitiesState, getCity } from '../../cities.state';
 
 @Component({
   selector: 'psp-city-detail-page-component',
@@ -10,21 +12,17 @@ import { CitiesService } from '../../cities.service';
   templateUrl: 'city-detail-page.component.html',
 })
 export class CityDetailPageComponent implements OnInit {
-  city$: Observable<City>;
-  projects$: Observable<Project[]>;
+  city$: Observable<Loadable<City>>;
 
-  constructor(private citiesService: CitiesService,
-              private route: ActivatedRoute) {
+  constructor(private store: Store<CitiesState>) {
   }
 
   ngOnInit(): void {
-    const cityId: string = this.route.snapshot.params.id;
-    this.city$ = this.citiesService.getCity(cityId);
-    this.projects$ = this.citiesService.listProjects(cityId);
+    this.city$ = this.store.pipe(select(getCity));
   }
 
   saveCity(city: City) {
-    this.citiesService.saveCity(city).subscribe();
+    this.store.dispatch(new SaveCityAction(city));
   }
 
 }

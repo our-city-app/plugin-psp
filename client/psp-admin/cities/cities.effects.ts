@@ -1,25 +1,35 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { catchError, debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { DialogService } from '../../../../framework/client/dialog';
+import { filterNull } from '../../../../framework/client/ngrx';
 import {
   CitiesActions,
   CitiesActionTypes,
+  GetCityCompleteAction,
+  GetCityFailedAction,
+  GetMerchantsAction,
+  GetMerchantsCompleteAction,
+  GetMerchantsFailedAction,
+  GetMoreMerchantsAction,
   GetPlaceDetailsAction,
   GetPlaceDetailsCompleteAction,
   GetPlaceDetailsFailedAction,
   LinkQRActionAction,
   LinkQRActionCompleteAction,
   LinkQRActionFailedAction,
+  SaveCityAction,
+  SaveCityCompleteAction,
+  SaveCityFailedAction,
   SearchPlacesAction,
   SearchPlacesCompleteAction,
   SearchPlacesFailedAction,
 } from './cities.actions';
 import { CitiesService } from './cities.service';
-import { CitiesState } from './cities.state';
+import { CitiesState, getCurrentCityId, getMerchantsCursor } from './cities.state';
 
 @Injectable()
 export class CitiesEffects {
@@ -43,7 +53,7 @@ export class CitiesEffects {
     ofType<LinkQRActionAction>(CitiesActionTypes.LINK_QR),
     switchMap(action => this.citiesService.linkQR(action.payload.cityId, action.payload.data).pipe(
       map(data => new LinkQRActionCompleteAction(data)),
-      catchError(err => of(new LinkQRActionCompleteAction(err)))),
+      catchError(err => of(new LinkQRActionFailedAction(err)))),
     ));
 
   @Effect({ dispatch: false }) afterFailed$ = this.actions$.pipe(
@@ -51,11 +61,44 @@ export class CitiesEffects {
     tap(action => {
       this.dialogService.openAlert({
         ok: this.translate.instant('psp.ok'),
-        message: action.payload.error.error,
+        message: this.translate.instant(action.payload.error.error, action.payload.error.data),
         title: this.translate.instant('psp.error'),
       });
     }),
   );
+
+  @Effect() getCity$ = this.actions$.pipe(
+    ofType(CitiesActionTypes.GET_CITY),
+    switchMap(() => this.store.pipe(select(getCurrentCityId), filterNull())),
+    switchMap(cityId => this.citiesService.getCity(cityId).pipe(
+      map(data => new GetCityCompleteAction(data)),
+      catchError(err => of(new GetCityFailedAction(err)))),
+    ));
+
+  @Effect() saveCity$ = this.actions$.pipe(
+    ofType<SaveCityAction>(CitiesActionTypes.SAVE_CITY),
+    switchMap(action => this.citiesService.saveCity(action.payload).pipe(
+      map(data => new SaveCityCompleteAction(data)),
+      catchError(err => of(new SaveCityFailedAction(err)))),
+    ));
+
+
+  @Effect() getMerchants$ = this.actions$.pipe(
+    ofType<GetMerchantsAction>(CitiesActionTypes.GET_MERCHANTS),
+    switchMap(() => this.store.pipe(select(getCurrentCityId), filterNull())),
+    switchMap(cityId => this.citiesService.getMerchants(cityId).pipe(
+      map(data => new GetMerchantsCompleteAction(data)),
+      catchError(err => of(new GetMerchantsFailedAction(err)))),
+    ));
+
+  @Effect() getMoreMerchants$ = this.actions$.pipe(
+    ofType<GetMoreMerchantsAction>(CitiesActionTypes.GET_MORE_MERCHANTS),
+    switchMap(() => this.store.pipe(select(getCurrentCityId), filterNull())),
+    withLatestFrom(this.store.pipe(select(getMerchantsCursor))),
+    switchMap(([ cityId, cursor ]) => this.citiesService.getMerchants(cityId, cursor).pipe(
+      map(data => new GetMerchantsCompleteAction(data)),
+      catchError(err => of(new GetMerchantsFailedAction(err)))),
+    ));
 
   constructor(private actions$: Actions<CitiesActions>,
               private store: Store<CitiesState>,

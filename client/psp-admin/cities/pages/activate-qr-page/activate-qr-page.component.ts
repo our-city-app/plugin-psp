@@ -1,16 +1,16 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { ActivatedRoute } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
+import { filterNull } from '../../../../../../framework/client/ngrx';
 import { Loadable } from '../../../../../app/src/app/loadable';
 import { ActivateMerchant, OpeningHours } from '../../cities';
 import { GetPlaceDetailsAction, LinkQRActionAction, SearchPlacesAction } from '../../cities.actions';
 import { CitiesService } from '../../cities.service';
-import { CitiesState, getNewMerchant, getPlaceDetails, getPlaces } from '../../cities.state';
+import { CitiesState, getCurrentCityId, getNewMerchant, getPlaceDetails, getPlaces } from '../../cities.state';
 import PlaceResult = google.maps.places.PlaceResult;
 
 
@@ -31,10 +31,10 @@ export class ActivateQrPageComponent implements OnInit, OnDestroy {
     place_id: null,
   };
   currentDevice: MediaDeviceInfo | null = null;
-  cityId: string;
   currentPosition: Position;
   positionDenied = false;
 
+  cityId$: Observable<string>;
   places$: Observable<Loadable<google.maps.places.PlaceResult[]>>;
   activateStatus$: Observable<Loadable<ActivateMerchant>>;
 
@@ -42,14 +42,13 @@ export class ActivateQrPageComponent implements OnInit, OnDestroy {
 
   constructor(private citiesService: CitiesService,
               private store: Store<CitiesState>,
-              private route: ActivatedRoute,
               private changeDetectorRef: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
-    this.cityId = this.route.snapshot.params.id;
     this.places$ = this.store.pipe(select(getPlaces));
     this.activateStatus$ = this.store.pipe(select(getNewMerchant));
+    this.cityId$ = this.store.pipe(select(getCurrentCityId), filterNull());
     this.store.pipe(select(getPlaceDetails), takeUntil(this.destroyed$)).subscribe(place => {
       if (place.data) {
         const openingHours = place.data.opening_hours ? place.data.opening_hours.periods : [];
@@ -70,7 +69,7 @@ export class ActivateQrPageComponent implements OnInit, OnDestroy {
 
   linkQr(form: NgForm) {
     if (form.form.valid) {
-      this.store.dispatch(new LinkQRActionAction({ cityId: this.cityId, data: this.data }));
+      this.cityId$.pipe(take(1)).subscribe(cityId => this.store.dispatch(new LinkQRActionAction({ cityId, data: this.data })));
     }
   }
 

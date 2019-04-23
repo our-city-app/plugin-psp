@@ -40,7 +40,6 @@ def search_places(query, location):
     result = urlfetch.fetch(url)  # type: urlfetch._URLFetchResult
     if result.status_code == 200:
         content = json.loads(result.content)
-        logging.warning(result.content)
         if content['status'] in ('OK', 'ZERO_RESULTS'):
             if api == 'nearbysearch':
                 return content['results']

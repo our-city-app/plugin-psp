@@ -17,10 +17,10 @@
 
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
-from plugins.psp.bizz.qr_codes import list_qr_batches, download_qr_code_batch, create_qr_batch
+from plugins.psp.bizz.qr_codes import list_qr_batches, download_qr_code_batch, create_qr_batch, link_qr_code
 
 # TODO: auth using another plugin
-from plugins.psp.to import QRBatchTO
+from plugins.psp.to import QRBatchTO, LinkQRTO, MerchantTO
 
 
 @rest('/qr-batches', 'get')
@@ -43,3 +43,10 @@ def api_create_qr_batch(data):
 @arguments(batch_id=(int, long))
 def api_download_qr_batch(batch_id):
     return {'download_url': download_qr_code_batch(batch_id)}
+
+
+@rest('/cities/<city_id:[^/]+>/link', 'post')
+@returns(MerchantTO)
+@arguments(city_id=unicode, data=LinkQRTO)
+def api_link_qr(city_id, data):
+    return MerchantTO.from_model(link_qr_code(city_id, data))

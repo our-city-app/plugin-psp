@@ -1,0 +1,17 @@
+<mat-toolbar>
+  <a mat-icon-button routerLink="../..">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+  <h3>{{ 'psp.merchants' | translate }}</h3>
+</mat-toolbar>
+<ng-container *ngIf="(merchants$ | async).data as data">
+  <mat-list>
+    <mat-list-item *ngFor="let merchant of data.results">
+      <h4 matLine>{{ merchant.name }}</h4>
+      <p matLine>{{ merchant.formatted_address }}</p>
+    </mat-list-item>
+  </mat-list>
+  <button type="button" mat-raised-button (click)="loadMore()" *ngIf="data.more">
+    {{ 'psp.load_more' | translate }}
+  </button>
+</ng-container>

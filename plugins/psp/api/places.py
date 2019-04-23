@@ -19,14 +19,14 @@ from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.places import search_places, get_place_details
 
 
-@rest('/places', 'get')
+@rest('/places', 'get', silent_result=True)
 @returns([dict])
 @arguments(query=unicode, location=unicode)
 def api_search_places(query, location=None):
     return search_places(query, location)
 
 
-@rest('/places/<place_id:[^/]+>', 'get')
+@rest('/places/<place_id:[^/]+>', 'get', silent_result=True)
 @returns(dict)
 @arguments(place_id=unicode)
 def api_place_details(place_id):

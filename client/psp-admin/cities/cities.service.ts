@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MerchantList } from '../../../app/src/app/projects/projects';
 import { PspConfig } from '../../psp-config';
 import { ActivateMerchant, City, Project, QRBatch } from './cities';
 
@@ -49,5 +50,13 @@ export class CitiesService {
 
   getPlaceDetails(placeId: string) {
     return this.http.get<google.maps.places.PlaceResult>(`${PspConfig.API_URL}/places/${placeId}`);
+  }
+
+  getMerchants(cityId: string, cursor?: string | null) {
+    let params;
+    if (cursor) {
+      params = new HttpParams({ fromObject: { cursor } });
+    }
+    return this.http.get<MerchantList>(`${PspConfig.API_URL}/cities/${cityId}/merchants`, { params });
   }
 }

@@ -15,8 +15,9 @@
 #
 # @@license_version:1.3@@
 
-from framework.to import TO
 from google.appengine.api import users
+
+from framework.to import TO
 from mcfw.properties import unicode_property, long_property, typed_property, float_property, bool_property
 
 
@@ -34,8 +35,8 @@ class CityTO(TO):
 
 
 class GeoPointTO(TO):
-    lat = float_property('1')
-    lon = float_property('2')
+    lat = float_property('lat')
+    lng = float_property('lng')
 
 
 class OpeningHourTO(TO):
@@ -47,16 +48,30 @@ class OpeningPeriodTO(TO):
     open = typed_property('open', OpeningHourTO)
     close = typed_property('close', OpeningHourTO)
 
+    @classmethod
+    def from_model(cls, model):
+        return cls(open=OpeningHourTO(day=model.open.day, time=model.open.time) if model.open else None,
+                   close=OpeningHourTO(day=model.close.day, time=model.close.time) if model.close else None)
+
 
 class MerchantTO(TO):
     id = long_property('id')
-    name = unicode_property('city_id')
-    formatted_address = unicode_property('city_id')
+    name = unicode_property('name')
+    formatted_address = unicode_property('formatted_address')
     location = typed_property('location', GeoPointTO)
     opening_hours = typed_property('opening_hours', OpeningPeriodTO, True)
     city_id = unicode_property('city_id')
-    qr_id = long_property('qr_id')
     place_id = unicode_property('place_id')
+
+    @classmethod
+    def from_model(cls, model):
+        return cls(id=model.id,
+                   name=model.name,
+                   formatted_address=model.formatted_address,
+                   location=GeoPointTO(lat=model.location.lat, lng=model.location.lon) if model.location else None,
+                   opening_hours=[OpeningPeriodTO.from_model(period) for period in model.opening_hours],
+                   city_id=model.city_id,
+                   place_id=model.place_id)
 
 
 class MerchantListResultTO(ListResultTO):
@@ -93,6 +108,30 @@ class ProjectTO(TO):
     end_time = unicode_property('end_time')
     budget = typed_property('budget', ProjectBudgetTO)
     action_count = long_property('action_count')
+
+
+class LocationTO(TO):
+    lat = float_property('lat')
+    lng = float_property('lng')
+
+
+class DayTimeTO(TO):
+    time = unicode_property('time')
+    day = long_property('day')
+
+
+class OpeningHoursTO(TO):
+    close = typed_property('close', DayTimeTO)
+    open = typed_property('open', DayTimeTO)
+
+
+class LinkQRTO(TO):
+    qr_content = unicode_property('qr_content')
+    name = unicode_property('name')
+    formatted_address = unicode_property('formatted_address')
+    location = typed_property('location', LocationTO)  # type: LocationTO
+    opening_hours = typed_property('opening_hours', OpeningHoursTO, True)  # type: list[OpeningHoursTO]
+    place_id = unicode_property('place_id')
 
 
 class ProjectDetailsTO(ProjectTO):

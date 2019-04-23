@@ -6,8 +6,13 @@ import { OpeningHours } from '../../cities';
   selector: 'psp-opening-hours',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: 'opening-hours.component.html',
-  styles: [ `.opening-hour-list .mat-form-field {
-    margin: 0 16px
+  styles: [ `.opening-hour-list {
+    display: flex;
+    align-items: center;
+  }
+
+  .opening-hour-list .mat-form-field {
+    margin: 0 16px;
   }` ],
 })
 

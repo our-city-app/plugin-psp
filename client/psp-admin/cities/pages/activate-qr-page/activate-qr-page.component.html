@@ -1,4 +1,10 @@
-<form (ngSubmit)="linkQr(form)" fxFlex fxLayout="column" class="psp-default-component-margin container" #form="ngForm">
+<mat-toolbar>
+  <a mat-icon-button routerLink="../..">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+  <h3>{{ 'psp.activate_qr' | translate }}</h3>
+</mat-toolbar>
+<form (ngSubmit)="linkQr(form)" class="psp-default-component-margin container" #form="ngForm">
   <div>
     <button type="button" mat-raised-button (click)="scanQR()">
       {{ 'psp.scan_qr_code' | translate }}

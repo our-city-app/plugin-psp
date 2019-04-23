@@ -17,8 +17,9 @@
 
 import random
 
-from framework.models.common import NdbModel
 from google.appengine.ext import ndb
+
+from framework.models.common import NdbModel
 from mcfw.cache import CachedModelMixIn, invalidate_cache
 from mcfw.serialization import register, List, s_any, ds_any
 from plugins.psp.consts import NAMESPACE
@@ -97,7 +98,7 @@ class Project(CachedModelMixIn, NdbModel):
 
     def invalidateCache(self):
         from plugins.psp.bizz.projects import list_active_projects
-        invalidate_cache(list_active_projects, self.city_)
+        invalidate_cache(list_active_projects, self.city_id)
 
 
 class QRBatch(NdbModel):
@@ -143,7 +144,13 @@ class OpeningHour(ndb.Model):
     # day: a number from 0–6, corresponding to the days of the week, starting on Sunday. For example, 2 means Tuesday.
     day = ndb.IntegerProperty(indexed=False)
     # time may contain a time in 24-hour hhmm format. Values are in the range 0000–2359 (in the place's time zone).
-    time = ndb.StringProperty(indexed=False, repeated=True)
+    time = ndb.StringProperty(indexed=False)
+
+    @classmethod
+    def from_to(cls, to):
+        if not to:
+            return None
+        return cls(day=to.day, time=to.time)
 
 
 class OpeningPeriod(NdbModel):
@@ -153,9 +160,12 @@ class OpeningPeriod(NdbModel):
     close = ndb.LocalStructuredProperty(OpeningHour)
     # Note: If a place is always open, close will be None.
     # Always-open is represented as an open period containing day with value 0 and time with value 0000, and no close.
+    @classmethod
+    def from_to(cls, period):
+        return cls(close=OpeningHour.from_to(period.close), open=OpeningHour.from_to(period.open))
 
 
-class Merchant(CachedModelMixIn, NdbModel):
+class Merchant(NdbModel):
     NAMESPACE = NAMESPACE
     name = ndb.StringProperty(indexed=False)
     formatted_address = ndb.TextProperty()
@@ -171,7 +181,15 @@ class Merchant(CachedModelMixIn, NdbModel):
 
     @classmethod
     def list_by_city_id(cls, city_id):
-        return cls.query().filter(cls.city_id == city_id).order(cls.name)
+        return cls.query().filter(cls.city_id == city_id)  # .order(cls.name)
+
+    @classmethod
+    def list_by_place_id(cls, place_id):
+        return cls.query().filter(cls.place_id == place_id)
+
+    @classmethod
+    def create_key(cls, merchant_id):
+        return ndb.Key(cls, merchant_id, namespace=NAMESPACE)
 
 
 class Scan(NdbModel):

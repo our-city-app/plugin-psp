@@ -1,5 +1,7 @@
 {
+  "Participation moneybox": "Participation moneybox",
   "psp": {
+    "activate_qr": "Activate QR code",
     "add_hours": "Add hours",
     "address": "Address",
     "allow_gps_location_for_better_results": "Allow GPS location for better results",
@@ -9,13 +11,15 @@
     "camera_device": "Camera device",
     "cancel": "Cancel",
     "close_time": "Close time",
-    "day": "Day",
+    "opening_day": "Opening day",
+    "close_day": "Close day",
     "details": "Details",
-    "enter_amount": "Enter amount",
     "error": "Error",
     "friday": "Friday",
     "generate_how_many_qr_codes": "How many QR codes should be generated?",
+    "generate_qr_codes": "Generate QR codes",
     "link_qr_code": "Link QR code",
+    "merchants": "Merchants",
     "monday": "Monday",
     "name": "Name",
     "ok": "Ok",
@@ -34,6 +38,13 @@
     "sunday": "Sunday",
     "thursday": "Thursday",
     "tuesday": "Tuesday",
-    "wednesday": "Wednesday"
+    "wednesday": "Wednesday",
+    "errors": {
+      "invalid_qr_code": "Invalid QR code",
+      "qr_code_for_different_city": "This is not a QR code for {{ expected }}, but for {{ actual }}",
+      "qr_already_linked": "This QR code has already been linked to a merchant: {{ name }}",
+      "merchant_exists": "This merchant already exists",
+      "qr_code_not_found": "QR code not found"
+    }
   }
 }

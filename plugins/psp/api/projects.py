@@ -66,13 +66,14 @@ def api_get_project_statistics(city_id, project_id, data=None):
 @arguments(city_id=unicode, cursor=unicode)
 def api_get_merchants(city_id, cursor=None):
     merchants, new_cursor, has_more = list_merchants(city_id, cursor)
-    return MerchantListResultTO(results=map(MerchantTO.from_model, merchants),
+    # TODO: Should return if  merchant is open now or not (open_now) + weekday_text
+    return MerchantListResultTO(results=[MerchantTO.from_model(merchant) for merchant in merchants],
                                 cursor=new_cursor,
                                 more=has_more)
 
 
 @rest('/scan', 'post')
-@returns([QRScanResultTO])
+@returns(QRScanResultTO)
 @arguments(data=QRScanTO)
 def api_scanned(data):
     project, user_stats, total_scan_count = qr_scanned(data)

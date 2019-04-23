@@ -65,29 +65,14 @@ export interface LatLng {
   lng: number;
 }
 
-/**
- * https://developers.google.com/places/web-service/details
- */
-export interface GooglePlace {
-  opening_hours: OpeningHours;
-  icon: string;
-  place_id: string;
-  formatted_address?: string;
-  formatted_phone_number?: string;
-  geometry: {
-    location: LatLng;
-    viewport: {
-      northeast: LatLng;
-      southwest: LatLng;
-    } | null;
-  };
-  name: string;
-}
-
 export interface Merchant {
+  city_id: string;
+  formatted_address: string;
   id: number;
-  place_url: string;
-  place: GooglePlace;
+  location: LatLng;
+  name: string;
+  opening_hours: OpeningHours;
+  place_id: string;
 }
 
 export interface MerchantList {

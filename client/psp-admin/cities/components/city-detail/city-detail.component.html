@@ -1,22 +1,22 @@
 <form (ngSubmit)="submit()" fxFlex fxLayout="column" class="psp-default-component-margin">
   <mat-form-field>
     <mat-label>{{ 'psp.name' | translate }}</mat-label>
-    <input name="name" matInput [(ngModel)]="city.name" required>
+    <input name="name" matInput [(ngModel)]="city.name" required [disabled]="disabled">
   </mat-form-field>
 
   <mat-form-field>
     <mat-label>{{ 'psp.avatar_url' | translate }}</mat-label>
-    <input name="avatar_url" matInput [(ngModel)]="city.avatar_url" required>
+    <input name="avatar_url" matInput [(ngModel)]="city.avatar_url" required [disabled]="disabled">
   </mat-form-field>
   <mat-form-field>
     <mat-label>{{ 'psp.api_key' | translate }}</mat-label>
-    <input name="api_key" matInput [value]="city.api_key" readonly>
+    <input name="api_key" matInput [value]="city.api_key" readonly [disabled]="disabled">
   </mat-form-field>
   <mat-form-field>
     <mat-label>{{ 'psp.secret' | translate }}</mat-label>
-    <input name="secret" matInput [value]="city.secret" readonly>
+    <input name="secret" matInput [value]="city.secret" readonly [disabled]="disabled">
   </mat-form-field>
   <div>
-    <button mat-raised-button>{{ 'psp.save' | translate }}</button>
+    <button mat-raised-button [disabled]="disabled">{{ 'psp.save' | translate }}</button>
   </div>
 </form>

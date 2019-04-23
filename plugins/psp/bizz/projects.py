@@ -14,17 +14,19 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
-from datetime import datetime
-import dateutil.parser
 import logging
+from datetime import datetime
 
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb.query import Cursor
+
+import dateutil.parser
 from mcfw.cache import cached
 from mcfw.consts import MISSING
 from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, HttpConflictException
 from mcfw.rpc import returns, arguments
-from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStaticstics, ProjectStatisticShard,\
+from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStaticstics, \
+    ProjectStatisticShard, \
     ProjectStatisticShardConfig, Merchant
 
 
@@ -40,6 +42,7 @@ def list_projects(city_id):
 def list_active_projects(city_id):
     # type: (unicode) -> [Project]
     now = datetime.now()
+    # TODO: return keys instead of models
     return [p for p in Project.list_projects_after(city_id, now)
             if p.end_time and p.end_time > now]
 
