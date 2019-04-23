@@ -22,7 +22,7 @@ from mcfw.properties import unicode_property, long_property, typed_property, flo
 
 class ListResultTO(TO):
     cursor = unicode_property('cursor')
-    has_more = bool_property('has_more')
+    more = bool_property('more')
 
 
 class CityTO(TO):
@@ -60,7 +60,7 @@ class MerchantTO(TO):
 
 
 class MerchantListResultTO(ListResultTO):
-    merchants = typed_property('merchants', MerchantTO, True)
+    results = typed_property('results', MerchantTO, True)
 
 
 class QRBatchTO(TO):

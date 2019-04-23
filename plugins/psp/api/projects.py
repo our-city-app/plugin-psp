@@ -66,9 +66,9 @@ def api_get_project_statistics(city_id, project_id, data=None):
 @arguments(city_id=unicode, cursor=unicode)
 def api_get_merchants(city_id, cursor=None):
     merchants, new_cursor, has_more = list_merchants(city_id, cursor)
-    return MerchantListResultTO(merchants=map(MerchantTO.from_model, merchants),
+    return MerchantListResultTO(results=map(MerchantTO.from_model, merchants),
                                 cursor=new_cursor,
-                                has_more=has_more)
+                                more=has_more)
 
 
 @rest('/scan', 'post')
