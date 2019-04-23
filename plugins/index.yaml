@@ -4,3 +4,7 @@ indexes:
   properties:
   - name: start_time
     direction: desc
+- kind: Merchant
+  properties:
+  - name: city_id
+  - name: name

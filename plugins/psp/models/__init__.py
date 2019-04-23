@@ -15,9 +15,12 @@
 #
 # @@license_version:1.3@@
 
-from google.appengine.ext import ndb
+import random
 
 from framework.models.common import NdbModel
+from google.appengine.ext import ndb
+from mcfw.cache import CachedModelMixIn, invalidate_cache
+from mcfw.serialization import register, List, s_any, ds_any
 from plugins.psp.consts import NAMESPACE
 
 
@@ -62,7 +65,7 @@ class ProjectBudget(ndb.Model):
     currency = ndb.StringProperty(indexed=False)
 
 
-class Project(NdbModel):
+class Project(CachedModelMixIn, NdbModel):
     NAMESPACE = NAMESPACE
     title = ndb.StringProperty(indexed=False)
     description = ndb.TextProperty()
@@ -74,6 +77,10 @@ class Project(NdbModel):
     @property
     def id(self):
         return self.key.id()
+
+    @property
+    def city_id(self):
+        return self.key.parent().id()
 
     @classmethod
     def create_key(cls, city_id, project_id):
@@ -87,6 +94,10 @@ class Project(NdbModel):
     def list_projects_after(cls, city_id, timestamp):
         return cls.query(ancestor=City.create_key(city_id)) \
             .filter(cls.start_time < timestamp)
+
+    def invalidateCache(self):
+        from plugins.psp.bizz.projects import list_active_projects
+        invalidate_cache(list_active_projects, self.city_)
 
 
 class QRBatch(NdbModel):
@@ -144,19 +155,23 @@ class OpeningPeriod(NdbModel):
     # Always-open is represented as an open period containing day with value 0 and time with value 0000, and no close.
 
 
-class Merchant(NdbModel):
+class Merchant(CachedModelMixIn, NdbModel):
     NAMESPACE = NAMESPACE
     name = ndb.StringProperty(indexed=False)
     formatted_address = ndb.TextProperty()
     location = ndb.GeoPtProperty()
     opening_hours = ndb.LocalStructuredProperty(OpeningPeriod, repeated=True)
-    city_id = ndb.IntegerProperty()
+    city_id = ndb.StringProperty()
     qr_id = ndb.IntegerProperty()
     place_id = ndb.StringProperty()
 
     @property
     def id(self):
         return self.key.id()
+
+    @classmethod
+    def list_by_city_id(cls, city_id):
+        return cls.query().filter(cls.city_id == city_id).order(cls.name)
 
 
 class Scan(NdbModel):
@@ -169,3 +184,59 @@ class Scan(NdbModel):
     @property
     def id(self):
         return self.key.id()
+
+    @classmethod
+    def list_by_user(cls, app_user, project_id):
+        return cls.query().filter(Scan.app_user == app_user).filter(Scan.project_id == project_id)
+
+
+class ProjectStatisticShardConfig(NdbModel):
+    shard_count = ndb.IntegerProperty(default=5)  # increase as needed. 5 => ~5 writes (project scans) / sec
+
+    @property
+    def project_id(self):
+        return self.key.id()
+
+    def get_random_shard_number(self):
+        return random.randint(0, self.shard_count - 1)
+
+    def get_random_shard_key(self):
+        return ProjectStatisticShard.create_key(
+            ProjectStatisticShard.SHARD_KEY_TEMPLATE % (self.project_id, self.get_random_shard_number()))
+
+    @classmethod
+    def create_key(cls, project_id):
+        return ndb.Key(cls, project_id)
+
+    @classmethod
+    def get_all_keys(cls, project_id):
+        key = cls.create_key(project_id)
+        config = key.get()
+        if not config:
+            config = cls(key=key)
+            config.put()
+        shard_key_strings = [ProjectStatisticShard.SHARD_KEY_TEMPLATE % (project_id, i)
+                             for i in range(config.shard_count)]
+        return [ProjectStatisticShardConfig.create_key(shard_key) for shard_key in shard_key_strings]
+
+
+class ProjectStatisticShard(NdbModel):
+    NAMESPACE = NAMESPACE
+    SHARD_KEY_TEMPLATE = '%d-%d'
+    total = ndb.IntegerProperty(indexed=False, default=0)
+    merchants = ndb.JsonProperty(compressed=True)  # {str(merchant_id): count}
+
+
+class ProjectUserStaticstics(NdbModel):
+    NAMESPACE = NAMESPACE
+    total = ndb.IntegerProperty(indexed=False, default=0)
+    last_entry = ndb.DateTimeProperty(auto_now=True)
+
+    @classmethod
+    def create_key(cls, project_id, app_user):
+        return ndb.Key(cls, project_id, parent=ndb.Key('psp', app_user.email(), namespace=NAMESPACE),
+                       namespace=NAMESPACE)
+
+
+register(List(Project), s_any, ds_any)
+register(List(Merchant), s_any, ds_any)

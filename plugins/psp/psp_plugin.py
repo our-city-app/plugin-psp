@@ -15,7 +15,7 @@
 #
 # @@license_version:1.3@@
 
-from __future__ import unicode_literals
+import json
 
 from google.appengine.api import users
 
@@ -24,6 +24,38 @@ from framework.utils.plugins import Handler, Module
 from mcfw.consts import NOT_AUTHENTICATED
 from mcfw.restapi import rest_functions
 from plugins.psp.api import cities, qr_codes, projects, places
+import webapp2
+
+
+class TestHandler(webapp2.RequestHandler):
+
+    def get(self):
+        self.response.write('<a href="https://oca-participation.appspot.com/rogerthat/123">Open Rogerthat</a> '
+                            '<a href="https://oca-participation.appspot.com/be-loc/123">Open Lochristi</a>')
+
+
+class TestAppHandler(webapp2.RequestHandler):
+
+    def get(self, app_id):
+        self.response.write(app_id)
+
+
+class AppleAssociatedDomainsHandler(webapp2.RequestHandler):
+
+    def get(self):
+        self.response.headers.update({'Content-Type': 'application/json'})
+        json.dump({
+            'applinks': {
+                'apps': [],
+                'details': [{
+                    'appID': 'UU262B5BGP.com.mobicage.rogerthat',
+                    'paths': ['/rogerthat/*']
+                }, {
+                    'appID': 'TPQK5J2QH8.com.mobicage.rogerthat.be-loc',
+                    'paths': ['/be-loc/*']
+                }]
+            }
+        }, self.response)
 
 
 class PspPlugin(Plugin):
@@ -34,7 +66,11 @@ class PspPlugin(Plugin):
             for mod in modules:
                 for url, handler in rest_functions(mod, authentication=NOT_AUTHENTICATED):
                     yield Handler(url=url, handler=handler)
+        yield Handler(url='/test', handler=TestHandler)
+        yield Handler(url='/<app_id:[^/]+>/123', handler=TestAppHandler)
+        yield Handler(url='/.well-known/apple-app-site-association', handler=AppleAssociatedDomainsHandler)
+        yield Handler(url='/apple-app-site-association', handler=AppleAssociatedDomainsHandler)
 
     def get_modules(self):
         if users.is_current_user_admin():
-            yield Module(u'psp_admin', [], 1)
+            yield Module('psp_admin', [], 1)
