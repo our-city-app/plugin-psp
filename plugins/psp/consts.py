@@ -16,3 +16,4 @@
 # @@license_version:1.3@@
 
 NAMESPACE = 'PSP'
+PREFIX = 'psp'

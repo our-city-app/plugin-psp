@@ -15,9 +15,12 @@
 #
 # @@license_version:1.3@@
 
+import datetime
+
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.general import validate_city_request_auth
+from plugins.psp.bizz.places import is_open, weekday_text
 from plugins.psp.bizz.projects import create_project, update_project, get_project, list_projects, list_active_projects,\
     qr_scanned, get_project_stats, list_merchants
 from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanResultTO, QRScanTO, UserInfoTO, MerchantTO,\
@@ -63,13 +66,15 @@ def api_get_project_statistics(city_id, project_id, data=None):
 
 @rest('/cities/<city_id:[^/]+>/merchants', 'get')
 @returns(MerchantListResultTO)
-@arguments(city_id=unicode, cursor=unicode)
-def api_get_merchants(city_id, cursor=None):
+@arguments(city_id=unicode, user_timezone=unicode, lang=unicode, cursor=unicode)
+def api_get_merchants(city_id, user_timezone, lang=None, cursor=None):
     merchants, new_cursor, has_more = list_merchants(city_id, cursor)
-    # TODO: Should return if  merchant is open now or not (open_now) + weekday_text
-    return MerchantListResultTO(results=[MerchantTO.from_model(merchant) for merchant in merchants],
-                                cursor=new_cursor,
-                                more=has_more)
+    now = datetime.datetime.now()
+    results = [MerchantTO.from_model(m,
+                                     is_open(m.opening_hours, now),
+                                     weekday_text(m.opening_hours, lang))
+               for m in merchants]
+    return MerchantListResultTO(results=results, cursor=new_cursor, more=has_more)
 
 
 @rest('/scan', 'post')

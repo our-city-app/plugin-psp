@@ -62,16 +62,20 @@ class MerchantTO(TO):
     opening_hours = typed_property('opening_hours', OpeningPeriodTO, True)
     city_id = unicode_property('city_id')
     place_id = unicode_property('place_id')
+    open_now = unicode_property('open_now')
+    weekday_text = unicode_property('weekday_text')
 
     @classmethod
-    def from_model(cls, model):
+    def from_model(cls, model, open_now, weekday_text):
         return cls(id=model.id,
                    name=model.name,
                    formatted_address=model.formatted_address,
                    location=GeoPointTO(lat=model.location.lat, lng=model.location.lon) if model.location else None,
                    opening_hours=[OpeningPeriodTO.from_model(period) for period in model.opening_hours],
                    city_id=model.city_id,
-                   place_id=model.place_id)
+                   place_id=model.place_id,
+                   open_now=open_now,
+                   weekday_text=weekday_text)
 
 
 class MerchantListResultTO(ListResultTO):

@@ -15,11 +15,11 @@
 #
 # @@license_version:1.3@@
 
+import datetime
 import random
 
-from google.appengine.ext import ndb
-
 from framework.models.common import NdbModel
+from google.appengine.ext import ndb
 from mcfw.cache import CachedModelMixIn, invalidate_cache
 from mcfw.serialization import register, List, s_any, ds_any
 from plugins.psp.consts import NAMESPACE
@@ -146,6 +146,10 @@ class OpeningHour(ndb.Model):
     # time may contain a time in 24-hour hhmm format. Values are in the range 0000–2359 (in the place's time zone).
     time = ndb.StringProperty(indexed=False)
 
+    @property
+    def datetime(self):
+        return self.time and datetime.time(int(self.time[:2]), int(self.time[2:]))
+
     @classmethod
     def from_to(cls, to):
         if not to:
@@ -160,6 +164,7 @@ class OpeningPeriod(NdbModel):
     close = ndb.LocalStructuredProperty(OpeningHour)
     # Note: If a place is always open, close will be None.
     # Always-open is represented as an open period containing day with value 0 and time with value 0000, and no close.
+
     @classmethod
     def from_to(cls, period):
         return cls(close=OpeningHour.from_to(period.close), open=OpeningHour.from_to(period.open))
