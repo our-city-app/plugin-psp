@@ -89,10 +89,6 @@ def is_always_open(opening_hours):
     return period.open.day == 0 and period.open.time == '0000'
 
 
-def to_time(s):
-    return s and datetime.time(int(s[:2]), int(s[2:]))
-
-
 def is_open(opening_hours, now):
     # type: ([OpeningPeriod], unicode) -> bool
     if is_always_open(opening_hours):
@@ -103,20 +99,20 @@ def is_open(opening_hours, now):
     for period in opening_hours:
         if period.open and period.close:
             if period.open.day == weekday:
-                if now_time >= to_time(period.open.time):
-                    if period.close.day != weekday or now_time < to_time(period.close.time):
+                if now_time >= period.open.datetime:
+                    if period.close.day != weekday or now_time < period.close.datetime:
                         return True
             elif period.close.day == weekday:
                 # open.day != weekday, only needed to check the time
-                if now_time < to_time(period.close.time):
+                if now_time < period.close.datetime:
                     return True
         elif period.open:
             # close is NULL
-            if period.open.day == weekday and now_time >= to_time(period.open.time):
+            if period.open.day == weekday and now_time >= period.open.datetime:
                 return True
         elif period.close:
             # open is NULL
-            if period.close.day == weekday and now_time < to_time(period.close.time):
+            if period.close.day == weekday and now_time < period.close.datetime:
                 return True
 
     return False
@@ -139,7 +135,7 @@ def get_weekday_names(lang):
 
 def format_opening_hour(opening_hour, lang):
     # type: (OpeningHour, unicode) -> unicode
-    return format_time(to_time(opening_hour and opening_hour.time or '0000'), 'short', locale=lang)
+    return format_time(opening_hour and opening_hour.datetime or '0000', 'short', locale=lang)
 
 
 def format_period(period, lang):

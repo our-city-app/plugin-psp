@@ -32,7 +32,7 @@ from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanResultTO, QRScanTO
 @arguments(city_id=unicode, active=bool)
 def api_list_projects(city_id, active=False):
     projects = list_active_projects(city_id) if active else list_projects(city_id)
-    return [ProjectTO.from_model(model) for model in projects]
+    return ProjectTO.from_list(projects)
 
 
 @rest('/cities/<city_id:[^/]+>/projects', 'post', custom_auth_method=validate_city_request_auth)

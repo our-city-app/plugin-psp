@@ -14,20 +14,19 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
+from datetime import datetime, timedelta
+import dateutil.parser
 import logging
-from datetime import datetime
 
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb.query import Cursor
-
-import dateutil.parser
 from mcfw.cache import cached
 from mcfw.consts import MISSING
 from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, HttpConflictException
 from mcfw.rpc import returns, arguments
 from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStaticstics, \
     ProjectStatisticShard, \
-    ProjectStatisticShardConfig, Merchant
+    ProjectStatisticShardConfig, Merchant, parent_key
 
 
 def list_projects(city_id):
@@ -115,20 +114,24 @@ def qr_scanned(data):
         logging.info('There is no active project for %s', qr_code.city_id)
         raise HttpConflictException('no_active_project')
 
-    # TODO: get last UserScan for this merchant and check if there's enough time in between
-
     # At this moment only 1 active project
     project = active_projects[0]
-    project_shard_config = ProjectStatisticShardConfig.create_key(project.id).get()
-    user_stats = add_project_scan(project_shard_config, project.id, qr_code.merchant_id, data.app_user)
+    city, shard_config = ndb.get_multi([
+        City.create_key(qr_code.city_id),
+        ProjectStatisticShardConfig.create_key(project.id)
+    ])
+    user_stats = add_project_scan(shard_config, project.id, qr_code.merchant_id, data.app_user, city.min_interval)
     return project, user_stats, get_project_stats(project.id, None)[0]
 
 
 @ndb.transactional(xg=True)
-def add_project_scan(project_shard_config, project_id, merchant_id, app_user):
+def add_project_scan(project_shard_config, project_id, merchant_id, app_user, min_interval):
     # type: (long, long, users.User) -> ProjectUserStaticstics
+    if Scan.has_recent_scan(app_user, merchant_id, datetime.now() - timedelta(seconds=min_interval)):
+        raise HttpConflictException('already_scanned_recently')
+
     to_put = []
-    scan = Scan(app_user=app_user, merchant_id=merchant_id, project_id=project_id)
+    scan = Scan(parent=parent_key(app_user), merchant_id=merchant_id, project_id=project_id)
     to_put.append(scan)
 
     user_stats_key = ProjectUserStaticstics.create_key(project_id, app_user)
@@ -142,9 +145,10 @@ def add_project_scan(project_shard_config, project_id, merchant_id, app_user):
     if project_stats_shard.merchants is None:
         project_stats_shard.merchants = {}
     merchant_str_id = str(merchant_id)
-    project_stats_shard.merchants[merchant_str_id] = project_stats_shard.merchants.get(merchant_str_id, 0)
+    project_stats_shard.merchants[merchant_str_id] = project_stats_shard.merchants.get(merchant_str_id, 0) + 1
     to_put.append(project_stats_shard)
 
+    logging.info('Saving user scan: %s', to_put)
     ndb.put_multi(to_put)
 
     return user_stats
@@ -157,8 +161,7 @@ def get_project_stats(project_id, app_user=None):
         keys.append(ProjectUserStaticstics.create_key(project_id, app_user))
     models = ndb.get_multi(keys)
     user_stats = app_user and models.pop(-1)
-    total_count = sum([shard.total_count for shard in models if shard])
-
+    total_count = sum([shard.total for shard in models if shard])
     return user_stats, total_count
 
 

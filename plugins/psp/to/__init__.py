@@ -95,8 +95,8 @@ class ProjectBudgetTO(TO):
 
 
 class PersonalProjectStatisticsTO(TO):
-    amount = long_property('amount')  # amount in `currency`, no demicals
-    last_entry_date = unicode_property('last_entry_date')
+    total = long_property('total')  # amount in `currency`, no demicals
+    last_entry = unicode_property('last_entry')
 
 
 class ProjectStatisticsTO(TO):
@@ -112,6 +112,19 @@ class ProjectTO(TO):
     end_time = unicode_property('end_time')
     budget = typed_property('budget', ProjectBudgetTO)
     action_count = long_property('action_count')
+
+
+class ProjectDetailsTO(ProjectTO):
+    statistics = typed_property('statistics', ProjectStatisticsTO)
+
+    @classmethod
+    def from_model(cls, project, user_stats, total_scan_count):
+        details = super(ProjectDetailsTO, cls).from_model(project)
+        details.statistics = ProjectStatisticsTO(
+            total=total_scan_count,
+            personal=user_stats and PersonalProjectStatisticsTO.from_model(user_stats)
+        )
+        return details
 
 
 class LocationTO(TO):
@@ -136,19 +149,6 @@ class LinkQRTO(TO):
     location = typed_property('location', LocationTO)  # type: LocationTO
     opening_hours = typed_property('opening_hours', OpeningHoursTO, True)  # type: list[OpeningHoursTO]
     place_id = unicode_property('place_id')
-
-
-class ProjectDetailsTO(ProjectTO):
-    statistics = typed_property('statistics', ProjectStatisticsTO)
-
-    @classmethod
-    def from_model(cls, project, user_stats, total_scan_count):
-        details = super(ProjectDetailsTO, cls).from_model(project)
-        details.statistics = ProjectStatisticsTO(
-            total=total_scan_count,
-            personal=user_stats and PersonalProjectStatisticsTO.from_model(user_stats)
-        )
-        return details
 
 
 class UserInfoTO(TO):

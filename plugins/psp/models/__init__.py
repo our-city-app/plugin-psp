@@ -19,10 +19,15 @@ import datetime
 import random
 
 from framework.models.common import NdbModel
+from google.appengine.api import users
 from google.appengine.ext import ndb
 from mcfw.cache import CachedModelMixIn, invalidate_cache
 from mcfw.serialization import register, List, s_any, ds_any
 from plugins.psp.consts import NAMESPACE
+
+
+def parent_key(user):
+    return ndb.Key(NAMESPACE, user.email(), namespace=NAMESPACE)
 
 
 class GeneralSettings(NdbModel):
@@ -47,6 +52,7 @@ class City(NdbModel):
     api_key = ndb.StringProperty(indexed=False)
     avatar_url = ndb.StringProperty(indexed=False)
     name = ndb.StringProperty()
+    min_interval = ndb.IntegerProperty(indexed=False, default=7200)  # minimum time between 2 scans at the same merchant
 
     @property
     def id(self):
@@ -140,15 +146,22 @@ class QRCode(NdbModel):
         return ndb.Key(cls, id_, namespace=NAMESPACE)
 
 
+def _validate_opening_time(prop, value):
+    if value is None or len(value) == 4:
+        return value
+
+    raise ValueError('OpeningHour.time should be None or have length 4. Got "%s".' % value)
+
+
 class OpeningHour(ndb.Model):
     # day: a number from 0–6, corresponding to the days of the week, starting on Sunday. For example, 2 means Tuesday.
     day = ndb.IntegerProperty(indexed=False)
     # time may contain a time in 24-hour hhmm format. Values are in the range 0000–2359 (in the place's time zone).
-    time = ndb.StringProperty(indexed=False)
+    time = ndb.StringProperty(indexed=False, validator=_validate_opening_time)
 
     @property
     def datetime(self):
-        return self.time and datetime.time(int(self.time[:2]), int(self.time[2:]))
+        return self.time and datetime.time(hour=int(self.time[:2]), minute=int(self.time[2:]))
 
     @classmethod
     def from_to(cls, to):
@@ -200,7 +213,6 @@ class Merchant(NdbModel):
 class Scan(NdbModel):
     NAMESPACE = NAMESPACE
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
-    app_user = ndb.StringProperty()
     merchant_id = ndb.IntegerProperty()
     project_id = ndb.IntegerProperty()
 
@@ -208,9 +220,30 @@ class Scan(NdbModel):
     def id(self):
         return self.key.id()
 
+    @property
+    def app_user(self):
+        return users.User(self.key.parent().id())
+
     @classmethod
     def list_by_user(cls, app_user, project_id):
-        return cls.query().filter(Scan.app_user == app_user).filter(Scan.project_id == project_id)
+        return cls.query(ancestor=parent_key(app_user)).filter(Scan.project_id == project_id)
+
+    @classmethod
+    def has_recent_scan(cls, app_user, merchant_id, max_date_time):
+        return cls.query(ancestor=parent_key(app_user)) \
+            .filter(Scan.merchant_id == merchant_id) \
+            .filter(Scan.timestamp > max_date_time).get() is not None
+
+
+class ProjectStatisticShard(NdbModel):
+    NAMESPACE = NAMESPACE
+    SHARD_KEY_TEMPLATE = '%d-%d'
+    total = ndb.IntegerProperty(indexed=False, default=0)
+    merchants = ndb.JsonProperty(compressed=True)  # {str(merchant_id): count}
+
+    @classmethod
+    def create_key(cls, project_id, shard_number):
+        return ndb.Key(cls, cls.SHARD_KEY_TEMPLATE % (project_id, shard_number))
 
 
 class ProjectStatisticShardConfig(NdbModel):
@@ -224,8 +257,7 @@ class ProjectStatisticShardConfig(NdbModel):
         return random.randint(0, self.shard_count - 1)
 
     def get_random_shard_key(self):
-        return ProjectStatisticShard.create_key(
-            ProjectStatisticShard.SHARD_KEY_TEMPLATE % (self.project_id, self.get_random_shard_number()))
+        return ProjectStatisticShard.create_key(self.project_id, self.get_random_shard_number())
 
     @classmethod
     def create_key(cls, project_id):
@@ -238,16 +270,7 @@ class ProjectStatisticShardConfig(NdbModel):
         if not config:
             config = cls(key=key)
             config.put()
-        shard_key_strings = [ProjectStatisticShard.SHARD_KEY_TEMPLATE % (project_id, i)
-                             for i in range(config.shard_count)]
-        return [ProjectStatisticShardConfig.create_key(shard_key) for shard_key in shard_key_strings]
-
-
-class ProjectStatisticShard(NdbModel):
-    NAMESPACE = NAMESPACE
-    SHARD_KEY_TEMPLATE = '%d-%d'
-    total = ndb.IntegerProperty(indexed=False, default=0)
-    merchants = ndb.JsonProperty(compressed=True)  # {str(merchant_id): count}
+        return [ProjectStatisticShard.create_key(project_id, i) for i in xrange(config.shard_count)]
 
 
 class ProjectUserStaticstics(NdbModel):
@@ -257,8 +280,7 @@ class ProjectUserStaticstics(NdbModel):
 
     @classmethod
     def create_key(cls, project_id, app_user):
-        return ndb.Key(cls, project_id, parent=ndb.Key('psp', app_user.email(), namespace=NAMESPACE),
-                       namespace=NAMESPACE)
+        return ndb.Key(cls, project_id, parent=parent_key(app_user), namespace=NAMESPACE)
 
 
 register(List(Project), s_any, ds_any)
