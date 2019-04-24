@@ -5,10 +5,24 @@ import { initialProjectsState, ProjectsState } from './projects.state';
 
 export function projectsReducer(state = initialProjectsState, action: ProjectsActions): ProjectsState {
   switch (action.type) {
-    case ProjectsActionTypes.SET_PROJECT:
-      return { ...state, currentProject: action.payload.id };
+    case ProjectsActionTypes.GET_PROJECT_DETAILS:
+      return {
+        ...state,
+        currentProjectId: action.payload.id,
+        projectDetails: onLoadableLoad(initialProjectsState.projectDetails.data),
+      };
+    case ProjectsActionTypes.GET_PROJECT_DETAILS_COMPLETE:
+      return {
+        ...state,
+        projectDetails: onLoadableSuccess(action.payload),
+      };
+    case ProjectsActionTypes.GET_PROJECT_DETAILS_FAILED:
+      return {
+        ...state,
+        projectDetails: onLoadableError(action.payload),
+      };
     case ProjectsActionTypes.GET_PROJECTS:
-      return { ...state, projects: onLoadableLoad() };
+      return { ...state, projects: onLoadableLoad(state.projects.data) };
     case ProjectsActionTypes.GET_PROJECTS_COMPLETE:
       return { ...state, projects: onLoadableSuccess(action.payload) };
     case ProjectsActionTypes.GET_PROJECTS_FAILED:
@@ -26,7 +40,7 @@ export function projectsReducer(state = initialProjectsState, action: ProjectsAc
         ...state,
         merchants: onLoadableSuccess({
           ...action.payload,
-          results: [ ...state.merchants.data!.results, ...action.payload.results ],
+          results: [ ...(state.merchants.data ? state.merchants.data.results : []), ...action.payload.results ],
         }),
       };
     case ProjectsActionTypes.GET_MORE_MERCHANTS_FAILED:
@@ -34,7 +48,7 @@ export function projectsReducer(state = initialProjectsState, action: ProjectsAc
     case ProjectsActionTypes.ADD_PARTICIPATION_COMPLETE:
       return {
         ...state,
-        currentProject: action.payload.id,
+        currentProjectId: action.payload.id,
         projects: {
           ...state.projects,
           data: updateItem(state.projects.data || [], action.payload, 'id'),

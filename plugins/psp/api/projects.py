@@ -15,18 +15,20 @@
 #
 # @@license_version:1.3@@
 
+from google.appengine.api import users
+
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.cities import get_city
 from plugins.psp.bizz.general import validate_city_request_auth
 from plugins.psp.bizz.places import get_opening_hours_info
-from plugins.psp.bizz.projects import create_project, update_project, get_project, list_projects, list_active_projects,\
+from plugins.psp.bizz.projects import create_project, update_project, get_project, list_projects, list_active_projects, \
     qr_scanned, get_project_stats, list_merchants
-from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanResultTO, QRScanTO, UserInfoTO, MerchantTO,\
+from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanResultTO, QRScanTO, MerchantTO, \
     MerchantListResultTO
 
 
-@rest('/cities/<city_id:[^/]+>/projects', 'get', custom_auth_method=validate_city_request_auth)
+@rest('/cities/<city_id:[^/]+>/projects', 'get', cors=True)
 @returns([ProjectTO])
 @arguments(city_id=unicode, active=bool)
 def api_list_projects(city_id, active=False):
@@ -55,18 +57,20 @@ def api_save_project(city_id, project_id, data):
     return ProjectTO.from_model(update_project(city_id, project_id, data))
 
 
-@rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/statistics', 'post')
+@rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/statistics', 'get', cors=True)
 @returns(ProjectDetailsTO)
-@arguments(city_id=unicode, project_id=long, data=UserInfoTO)
-def api_get_project_statistics(city_id, project_id, data=None):
-    user_stats, total_scan_count = get_project_stats(project_id, data and data.app_user)
+@arguments(city_id=unicode, project_id=long, app_user=unicode)
+def api_get_project_statistics(city_id, project_id, app_user=None):
+    user_stats, total_scan_count = get_project_stats(project_id, app_user and users.User(app_user))
     return ProjectDetailsTO.from_model(get_project(city_id, project_id), user_stats, total_scan_count)
 
 
-@rest('/cities/<city_id:[^/]+>/merchants', 'get')
+@rest('/cities/<city_id:[^/]+>/merchants', 'get', cors=True)
 @returns(MerchantListResultTO)
-@arguments(city_id=unicode, user_timezone=unicode, lang=unicode, cursor=unicode)
-def api_get_merchants(city_id, user_timezone, lang=None, cursor=None):
+@arguments(city_id=unicode, lang=unicode, cursor=unicode)
+def api_get_merchants(city_id, lang=None, cursor=None):
+    if not lang:
+        lang = 'en'
     city = get_city(city_id)
     merchants, new_cursor, has_more = list_merchants(city_id, cursor)
     results = [MerchantTO.from_model(m, *get_opening_hours_info(m.opening_hours, city.timezone, lang))

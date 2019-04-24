@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
-import logging
 from urlparse import urlparse
 
 from google.appengine.api.app_identity import app_identity
@@ -78,7 +77,6 @@ def link_qr_code(city_id, data):
     url = urlparse(data.qr_content)
     split_path = url.path.strip('/').split('/')
     try:
-        logging.warning(split_path)
         if split_path[0] != 'qr':
             raise HttpBadRequestException('psp.errors.invalid_qr_code')
         if split_path[1] != city_id:

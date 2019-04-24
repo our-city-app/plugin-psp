@@ -14,19 +14,21 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
-from datetime import datetime, timedelta
-import dateutil.parser
 import logging
+from datetime import datetime, timedelta
 
+from google.appengine.api import users
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb.query import Cursor
+
+import dateutil.parser
 from mcfw.cache import cached
 from mcfw.consts import MISSING
 from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, HttpConflictException
 from mcfw.rpc import returns, arguments
 from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStaticstics, \
-    ProjectStatisticShard, \
-    ProjectStatisticShardConfig, Merchant, parent_key
+    ProjectStatisticShard, parent_key, ProjectStatisticShardConfig, Merchant
+from plugins.psp.to import ProjectTO, QRScanTO
 
 
 def list_projects(city_id):
@@ -34,7 +36,7 @@ def list_projects(city_id):
     return Project.list_by_city(city_id)
 
 
-# This cache is cleared when a Project is updated, or when the end_time is reached
+# This cache is cleared when a Project is updated, or when the end_date is reached
 @cached(version=1, lifetime=0, request=True, memcache=True, datastore='list_active_projects')
 @returns([Project])
 @arguments(city_id=unicode)
@@ -43,7 +45,7 @@ def list_active_projects(city_id):
     now = datetime.now()
     # TODO: return keys instead of models
     return [p for p in Project.list_projects_after(city_id, now)
-            if p.end_time and p.end_time > now]
+            if p.end_date and p.end_date > now]
 
 
 def get_project(city_id, project_id):
@@ -78,12 +80,12 @@ def update_project(city_id, project_id, data):
 
 def _populate_project(project, data):
     # type: (Project, ProjectTO) -> None
-    start_time = MISSING.default(data.start_time, None) and dateutil.parser.parse(data.start_time).replace(tzinfo=None)
-    end_time = MISSING.default(data.end_time, None) and dateutil.parser.parse(data.end_time).replace(tzinfo=None)
+    start_date = MISSING.default(data.start_date, None) and dateutil.parser.parse(data.start_date).replace(tzinfo=None)
+    end_date = MISSING.default(data.end_date, None) and dateutil.parser.parse(data.end_date).replace(tzinfo=None)
     project.populate(title=data.title,
                      description=data.description,
-                     start_time=start_time,
-                     end_time=end_time,
+                     start_date=start_date,
+                     end_date=end_date,
                      budget=ProjectBudget(amount=data.budget.amount,
                                           currency=data.budget.currency),
                      action_count=data.action_count)
@@ -96,26 +98,23 @@ def _required(*args):
 
 
 def qr_scanned(data):
-    # type: QRScanTO -> (Project, ProjectUserStaticstics, long)
+    # type: (QRScanTO) -> (Project, ProjectUserStaticstics, long)
     _required(data, data.email, data.app_id, data.qr_content)
 
     qr_id = long(data.qr_content.split('/')[-1])
     qr_code = QRCode.create_key(qr_id).get()
     if not qr_code:
         logging.info('No QR code found for %s', data.qr_content)
-        raise HttpNotFoundException('qr_code_not_found')
+        raise HttpNotFoundException('psp.errors.qr_code_not_found')
 
     if not qr_code.merchant_id:
         logging.warn('QR code is not linked: %s', qr_code)
-        raise HttpConflictException('qr_code_not_linked')
+        raise HttpConflictException('psp.errors.qr_code_not_linked')
+    project_id = data.project_id
+    project = get_project(qr_code.city_id, project_id)
+    if not project.is_active:
+        raise HttpBadRequestException('psp.errors.project_not_active')
 
-    active_projects = list_active_projects(qr_code.city_id)
-    if not active_projects:
-        logging.info('There is no active project for %s', qr_code.city_id)
-        raise HttpConflictException('no_active_project')
-
-    # At this moment only 1 active project
-    project = active_projects[0]
     city, shard_config = ndb.get_multi([
         City.create_key(qr_code.city_id),
         ProjectStatisticShardConfig.create_key(project.id)
@@ -126,18 +125,15 @@ def qr_scanned(data):
 
 @ndb.transactional(xg=True)
 def add_project_scan(project_shard_config, project_id, merchant_id, app_user, min_interval):
-    # type: (long, long, users.User) -> ProjectUserStaticstics
+    # type: (ProjectStatisticShardConfig, long, long, users.User, long) -> ProjectUserStaticstics
     if Scan.has_recent_scan(app_user, merchant_id, datetime.now() - timedelta(seconds=min_interval)):
-        raise HttpConflictException('already_scanned_recently')
+        raise HttpConflictException('psp.errors.already_scanned_recently')
 
-    to_put = []
     scan = Scan(parent=parent_key(app_user), merchant_id=merchant_id, project_id=project_id)
-    to_put.append(scan)
 
     user_stats_key = ProjectUserStaticstics.create_key(project_id, app_user)
     user_stats = user_stats_key.get() or ProjectUserStaticstics(key=user_stats_key)
     user_stats.total += 1
-    to_put.append(user_stats)
 
     project_stats_key = project_shard_config.get_random_shard_key()
     project_stats_shard = project_stats_key.get() or ProjectStatisticShard(key=project_stats_key)
@@ -146,8 +142,8 @@ def add_project_scan(project_shard_config, project_id, merchant_id, app_user, mi
         project_stats_shard.merchants = {}
     merchant_str_id = str(merchant_id)
     project_stats_shard.merchants[merchant_str_id] = project_stats_shard.merchants.get(merchant_str_id, 0) + 1
-    to_put.append(project_stats_shard)
 
+    to_put = [scan, user_stats, project_stats_shard]
     logging.info('Saving user scan: %s', to_put)
     ndb.put_multi(to_put)
 
@@ -155,7 +151,7 @@ def add_project_scan(project_shard_config, project_id, merchant_id, app_user, mi
 
 
 def get_project_stats(project_id, app_user=None):
-    # type: (long, users.User) -> (ProjectUserStaticstics, long)
+    # type: (long, users.User) -> [ProjectUserStaticstics, long]
     keys = ProjectStatisticShardConfig.get_all_keys(project_id)
     if app_user:
         keys.append(ProjectUserStaticstics.create_key(project_id, app_user))
@@ -166,7 +162,7 @@ def get_project_stats(project_id, app_user=None):
 
 
 def list_merchants(city_id, cursor=None):
-    # type: (unicode, unicode) -> ([Merchant], unicode, bool)
+    # type: (unicode, unicode) -> tuple[list[Merchant], unicode, bool]
     merchants, new_cursor, has_more = Merchant.list_by_city_id(city_id).fetch_page(
         50, start_cursor=Cursor.from_websafe_string(cursor) if cursor else None, keys_only=False)
     new_cursor = new_cursor.to_websafe_string().decode('utf-8') if new_cursor and has_more else None

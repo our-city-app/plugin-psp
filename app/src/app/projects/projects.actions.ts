@@ -1,9 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Action } from '@ngrx/store';
-import { MerchantList, ProjectDetails } from './projects';
+import { MerchantList, Project, ProjectDetails } from './projects';
 
 export const enum ProjectsActionTypes {
-  SET_PROJECT = '[projects] Set project',
+  GET_PROJECT_DETAILS = '[projects] Get project details',
+  GET_PROJECT_DETAILS_COMPLETE = '[projects] Get project details complete',
+  GET_PROJECT_DETAILS_FAILED = '[projects] Get project details failed',
   GET_PROJECTS = '[projects] Get projects',
   GET_PROJECTS_COMPLETE = '[projects] Get projects complete',
   GET_PROJECTS_FAILED = '[projects] Get projects failed',
@@ -18,10 +20,24 @@ export const enum ProjectsActionTypes {
   GET_MORE_MERCHANTS_FAILED = '[projects] Get more merchants failed',
 }
 
-export class SetProjectAction implements Action {
-  readonly type = ProjectsActionTypes.SET_PROJECT;
+export class GetProjectDetailsAction implements Action {
+  readonly type = ProjectsActionTypes.GET_PROJECT_DETAILS;
 
   constructor(public payload: { id: number }) {
+  }
+}
+
+export class GetProjectDetailsCompleteAction implements Action {
+  readonly type = ProjectsActionTypes.GET_PROJECT_DETAILS_COMPLETE;
+
+  constructor(public payload: ProjectDetails) {
+  }
+}
+
+export class GetProjectDetailsFailedAction implements Action {
+  readonly type = ProjectsActionTypes.GET_PROJECT_DETAILS_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
   }
 }
 
@@ -32,7 +48,7 @@ export class GetProjectsAction implements Action {
 export class GetProjectsCompleteAction implements Action {
   readonly type = ProjectsActionTypes.GET_PROJECTS_COMPLETE;
 
-  constructor(public payload: ProjectDetails[]) {
+  constructor(public payload: Project[]) {
   }
 }
 
@@ -100,7 +116,9 @@ export class GetMoreMerchantsFailedAction implements Action {
   }
 }
 
-export type ProjectsActions = SetProjectAction
+export type ProjectsActions = GetProjectDetailsAction
+  | GetProjectDetailsCompleteAction
+  | GetProjectDetailsFailedAction
   | GetProjectsAction
   | GetProjectsCompleteAction
   | GetProjectsFailedAction

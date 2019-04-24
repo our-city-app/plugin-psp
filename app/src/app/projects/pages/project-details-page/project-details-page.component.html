@@ -21,7 +21,9 @@
       <ion-card-content>
         <p>{{ project.data.description }}</p>
         <h4>{{ project.data.statistics.total }} / {{ project.data.action_count }} {{ 'actions' | translate }}</h4>
-        <p>{{ 'your_actions' | translate }}: <b>{{ project.data.statistics.personal.amount }}</b></p>
+        <p *ngIf="project.data.statistics.personal">
+          {{ 'your_actions' | translate }}: <b>{{ project.data.statistics.personal.amount }}</b>
+        </p>
       </ion-card-content>
     </ion-card>
   </ng-template>

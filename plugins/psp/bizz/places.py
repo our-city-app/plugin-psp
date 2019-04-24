@@ -15,19 +15,21 @@
 #
 # @@license_version:1.3@@
 
-from collections import defaultdict
 import datetime
 import json
 import logging
-import pytz
 import urllib
+from collections import defaultdict
 
+from google.appengine.api import urlfetch
+
+import pytz
 from babel.dates import format_date, format_time
 from framework.i18n_utils import translate
-from google.appengine.api import urlfetch
 from mcfw.exceptions import HttpException
 from plugins.psp.bizz.general import get_general_settings
 from plugins.psp.consts import PREFIX
+from plugins.psp.models import OpeningHour, OpeningPeriod
 
 
 def search_places(query, location):
@@ -77,7 +79,7 @@ def get_place_details(place_id):
 
 
 def is_always_open(opening_hours):
-    # type: [OpeningPeriod] -> bool
+    # type: (list[OpeningPeriod]) -> bool
     # If a place is always open, close will be None.
     # Always-open is represented as an open period containing day with value 0 and time with value 0000, and no close.
     if len(opening_hours) != 1:
@@ -91,7 +93,7 @@ def is_always_open(opening_hours):
 
 
 def get_opening_hours_info(opening_hours, timezone, lang):
-    # type: ([OpeningPeriod], unicode, unicode) -> (bool, unicode, [unicode])
+    # type: (list[OpeningPeriod], unicode, unicode) -> [bool, unicode, [unicode]]
     now_open, open_until = is_now_open(opening_hours, timezone, lang)
     weekday_text = get_weekday_text(opening_hours, lang)
     return now_open, open_until, weekday_text
@@ -105,7 +107,7 @@ def is_now_open(opening_hours, timezone, lang):
 
 
 def get_open_until(opening_hours, now, lang):
-    # type: ([OpeningPeriod], datetime.datetime, unicode) -> (bool, unicode)
+    # type: (list[OpeningPeriod], datetime.datetime, unicode) -> [bool, unicode]
     if is_always_open(opening_hours):
         return True, translate(lang, PREFIX, 'open_24_hours')
 
@@ -138,7 +140,7 @@ def _get_weekday(datetime):
 
 
 def _get_weekday_names(lang):
-    # type: unicode -> dict
+    # type: (unicode) -> dict
     day_names = {}
     today = datetime.datetime.today()
     for days in xrange(7):
@@ -154,7 +156,7 @@ def _format_opening_hour(opening_hour, lang):
 
 
 def get_weekday_text(opening_hours, lang):
-    # type: ([OpeningPeriod], unicode) -> unicode
+    # type: (list[OpeningPeriod], unicode) -> list[unicode]
     if is_always_open(opening_hours):
         open_24_h = translate(lang, PREFIX, 'open_24_hours')
         periods = {x: [open_24_h] for x in xrange(7)}

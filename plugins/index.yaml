@@ -2,7 +2,7 @@ indexes:
 - kind: Project
   ancestor: yes
   properties:
-  - name: start_time
+  - name: start_date
     direction: desc
 
 - kind: Merchant

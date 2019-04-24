@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { Loadable } from '../../../loadable';
-import { ProjectDetails } from '../../projects';
+import { Project, ProjectDetails } from '../../projects';
 import { AddParticipationAction, GetProjectsAction } from '../../projects.actions';
 import { getProjects, ProjectsState } from '../../projects.state';
 
@@ -14,7 +14,7 @@ import { getProjects, ProjectsState } from '../../projects.state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectsPageComponent implements OnInit {
-  projects$: Observable<Loadable<ProjectDetails[]>>;
+  projects$: Observable<Loadable<Project[]>>;
   scannedQr: string | null = null;
 
   constructor(private store: Store<ProjectsState>,

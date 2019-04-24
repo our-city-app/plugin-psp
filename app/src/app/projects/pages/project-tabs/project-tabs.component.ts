@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { SetProjectAction } from '../../projects.actions';
+import { GetProjectDetailsAction } from '../../projects.actions';
 import { ProjectsState } from '../../projects.state';
 
 @Component({
@@ -18,7 +18,7 @@ export class ProjectTabsComponent implements OnInit {
 
   ngOnInit() {
     const projectId: number = parseInt(this.route.snapshot.params.id);
-    this.store.dispatch(new SetProjectAction({ id: projectId }));
+    this.store.dispatch(new GetProjectDetailsAction({ id: projectId }));
   }
 
 }

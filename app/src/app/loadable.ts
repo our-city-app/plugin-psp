@@ -19,7 +19,7 @@ export const DEFAULT_LOADABLE: Loadable<null> = {
   error: null,
 };
 
-export const DEFAULT_LIST_LOADABLE: Loadable<any[]> = {
+export const DEFAULT_LIST_LOADABLE: NonNullLoadable<any[]> = {
   loading: false,
   success: false,
   data: [],

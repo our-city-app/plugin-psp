@@ -77,8 +77,8 @@ class Project(CachedModelMixIn, NdbModel):
     NAMESPACE = NAMESPACE
     title = ndb.StringProperty(indexed=False)
     description = ndb.TextProperty()
-    start_time = ndb.DateTimeProperty()
-    end_time = ndb.DateTimeProperty()
+    start_date = ndb.DateTimeProperty()
+    end_date = ndb.DateTimeProperty()
     budget = ndb.LocalStructuredProperty(ProjectBudget)
     action_count = ndb.IntegerProperty(indexed=False)
 
@@ -88,7 +88,11 @@ class Project(CachedModelMixIn, NdbModel):
 
     @property
     def city_id(self):
-        return self.key.parent().id()
+        return self.key.parent().id().decode('utf-8')
+
+    @property
+    def is_active(self):
+        return self.end_date < datetime.datetime.now()
 
     @classmethod
     def create_key(cls, city_id, project_id):
@@ -96,16 +100,20 @@ class Project(CachedModelMixIn, NdbModel):
 
     @classmethod
     def list_by_city(cls, city_id):
-        return cls.query(ancestor=City.create_key(city_id)).order(-cls.start_time)
+        return cls.query(ancestor=City.create_key(city_id)).order(-cls.start_date)
 
     @classmethod
     def list_projects_after(cls, city_id, timestamp):
         return cls.query(ancestor=City.create_key(city_id)) \
-            .filter(cls.start_time < timestamp)
+            .filter(cls.start_date < timestamp)
 
     def invalidateCache(self):
         from plugins.psp.bizz.projects import list_active_projects
         invalidate_cache(list_active_projects, self.city_id)
+
+    def to_dict(self, extra_properties=None, include=None, exclude=None):
+        extra_properties = extra_properties or ['id', 'city_id']
+        return super(Project, self).to_dict(extra_properties, include, exclude)
 
 
 class QRBatch(NdbModel):

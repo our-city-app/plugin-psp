@@ -1,14 +1,18 @@
-export interface ProjectDetails {
-  id: number;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date: string;
+export interface Project {
+  action_count: number;
+  city_id: string;
   budget: {
     amount: number;
     currency: string;
   };
-  action_count: number;
+  description: string;
+  end_date: string;
+  id: number;
+  start_date: string;
+  title: string;
+}
+
+export interface ProjectDetails extends Project {
   statistics: {
     total: number;
     personal: {
@@ -73,10 +77,19 @@ export interface Merchant {
   name: string;
   opening_hours: OpeningHours;
   place_id: string;
+  place_url: string | null;
 }
 
 export interface MerchantList {
   results: Merchant[];
   cursor: string | null;
   more: boolean;
+}
+
+
+export interface AddParticipationData {
+  qr_content: string;
+  project_id: number;
+  email: string;
+  app_id: string;
 }
