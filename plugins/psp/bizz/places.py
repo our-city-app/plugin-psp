@@ -91,6 +91,7 @@ def is_always_open(opening_hours):
 
 
 def get_opening_hours_info(opening_hours, timezone, lang):
+    # type: ([OpeningPeriod], unicode, unicode) -> (bool, unicode, [unicode])
     now_open, open_until = is_now_open(opening_hours, timezone, lang)
     weekday_text = get_weekday_text(opening_hours, lang)
     return now_open, open_until, weekday_text
