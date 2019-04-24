@@ -15,10 +15,10 @@
 #
 # @@license_version:1.3@@
 
-from google.appengine.api import users
-
 from framework.to import TO
-from mcfw.properties import unicode_property, long_property, typed_property, float_property, bool_property
+from google.appengine.api import users
+from mcfw.properties import unicode_property, long_property, typed_property, float_property, bool_property,\
+    unicode_list_property
 
 
 class ListResultTO(TO):
@@ -63,10 +63,11 @@ class MerchantTO(TO):
     city_id = unicode_property('city_id')
     place_id = unicode_property('place_id')
     open_now = unicode_property('open_now')
-    weekday_text = unicode_property('weekday_text')
+    open_until = unicode_property('open_until')
+    weekday_text = unicode_list_property('weekday_text')
 
     @classmethod
-    def from_model(cls, model, open_now, weekday_text):
+    def from_model(cls, model, open_now, open_until, weekday_text):
         return cls(id=model.id,
                    name=model.name,
                    formatted_address=model.formatted_address,
@@ -75,6 +76,7 @@ class MerchantTO(TO):
                    city_id=model.city_id,
                    place_id=model.place_id,
                    open_now=open_now,
+                   open_until=open_until,
                    weekday_text=weekday_text)
 
 
