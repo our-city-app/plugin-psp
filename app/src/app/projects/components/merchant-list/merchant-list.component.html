@@ -3,9 +3,14 @@
             target="_blank">
     <ion-label>
       <h3>{{ merchant.name }}</h3>
-      <p>{{ (merchant.opening_hours.open_now ? 'open_now' : 'closed') | translate }}</p>
+      <ng-container *ngIf="merchant.opening_hours">
+        <div class="open-until">
+          <span [class.open]="merchant.opening_hours.open_now" [class.closed]="!merchant.opening_hours.open_now">
+            {{ merchant.opening_hours.open_until }}
+          </span>
+        </div>
+      </ng-container>
     </ion-label>
-    <ion-icon name="time" [color]="merchant.opening_hours.open_now ? 'primary' : 'danger'"></ion-icon>
   </ion-item>
 </ion-list>
 <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore.emit()" [disabled]="!merchants.data?.more">

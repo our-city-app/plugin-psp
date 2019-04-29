@@ -24,6 +24,7 @@
     "monday": "Monday",
     "name": "Name",
     "ok": "Ok",
+    "open_until": "Open until {{ time }}",
     "opening_hours": "Opening hours",
     "opening_time": "Opening time",
     "open_24_hours": "Open 24 hours",

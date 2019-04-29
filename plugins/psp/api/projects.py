@@ -17,6 +17,8 @@
 
 from google.appengine.api import users
 
+from framework.bizz.authentication import get_browser_language
+from framework.i18n_utils import get_supported_locale
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.cities import get_city
@@ -24,7 +26,7 @@ from plugins.psp.bizz.general import validate_city_request_auth
 from plugins.psp.bizz.places import get_opening_hours_info
 from plugins.psp.bizz.projects import create_project, update_project, get_project, list_projects, list_active_projects, \
     qr_scanned, get_project_stats, list_merchants
-from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanResultTO, QRScanTO, MerchantTO, \
+from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanTO, MerchantTO, \
     MerchantListResultTO
 
 
@@ -33,7 +35,7 @@ from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanResultTO, QRScanTO
 @arguments(city_id=unicode, active=bool)
 def api_list_projects(city_id, active=False):
     projects = list_active_projects(city_id) if active else list_projects(city_id)
-    return ProjectTO.from_list(projects)
+    return [ProjectTO.from_model(project) for project in projects]
 
 
 @rest('/cities/<city_id:[^/]+>/projects', 'post', custom_auth_method=validate_city_request_auth)
@@ -69,8 +71,7 @@ def api_get_project_statistics(city_id, project_id, app_user=None):
 @returns(MerchantListResultTO)
 @arguments(city_id=unicode, lang=unicode, cursor=unicode)
 def api_get_merchants(city_id, lang=None, cursor=None):
-    if not lang:
-        lang = 'en'
+    lang = get_supported_locale(lang) if lang else get_browser_language()
     city = get_city(city_id)
     merchants, new_cursor, has_more = list_merchants(city_id, cursor)
     results = [MerchantTO.from_model(m, *get_opening_hours_info(m.opening_hours, city.timezone, lang))
@@ -78,9 +79,16 @@ def api_get_merchants(city_id, lang=None, cursor=None):
     return MerchantListResultTO(results=results, cursor=new_cursor, more=has_more)
 
 
-@rest('/scan', 'post')
-@returns(QRScanResultTO)
+@rest('/scan', 'post', cors=True)
+@returns(ProjectDetailsTO)
 @arguments(data=QRScanTO)
 def api_scanned(data):
     project, user_stats, total_scan_count = qr_scanned(data)
-    return QRScanResultTO.from_model(project, user_stats, total_scan_count)
+    return ProjectDetailsTO.from_model(project, user_stats, total_scan_count)
+
+
+@rest('/scan', 'options', cors=True)
+@returns(dict)
+@arguments()
+def api_scanned_options():
+    return {}

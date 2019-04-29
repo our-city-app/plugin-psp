@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { AlertOptions, LoadingOptions } from '@ionic/core';
 import { Action } from '@ngrx/store';
 import { MerchantList, Project, ProjectDetails } from './projects';
 
@@ -18,6 +19,8 @@ export const enum ProjectsActionTypes {
   GET_MORE_MERCHANTS = '[projects] Get more merchants',
   GET_MORE_MERCHANTS_COMPLETE = '[projects] Get more merchants complete',
   GET_MORE_MERCHANTS_FAILED = '[projects] Get more merchants failed',
+  SHOW_DIALOG = '[projects] Show dialog',
+  DISMISS_DIALOG = '[projects] Dismiss dialog',
 }
 
 export class GetProjectDetailsAction implements Action {
@@ -116,6 +119,20 @@ export class GetMoreMerchantsFailedAction implements Action {
   }
 }
 
+export class ShowDialogAction implements Action {
+  readonly type = ProjectsActionTypes.SHOW_DIALOG;
+
+  constructor(public data: { type: 'dialog', options: AlertOptions } | { type: 'loading', options: LoadingOptions }) {
+  }
+}
+
+export class DismissDialogAction implements Action {
+  readonly type = ProjectsActionTypes.DISMISS_DIALOG;
+
+  constructor(public dialogType: 'dialog' | 'loading') {
+  }
+}
+
 export type ProjectsActions = GetProjectDetailsAction
   | GetProjectDetailsCompleteAction
   | GetProjectDetailsFailedAction
@@ -130,5 +147,7 @@ export type ProjectsActions = GetProjectDetailsAction
   | GetMerchantsFailedAction
   | GetMoreMerchantsAction
   | GetMoreMerchantsCompleteAction
-  | GetMoreMerchantsFailedAction;
+  | GetMoreMerchantsFailedAction
+  | ShowDialogAction
+  | DismissDialogAction;
 

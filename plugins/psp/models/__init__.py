@@ -18,10 +18,12 @@
 import datetime
 import random
 
-from framework.models.common import NdbModel
 from google.appengine.api import users
 from google.appengine.ext import ndb
+
+from framework.models.common import NdbModel
 from mcfw.cache import CachedModelMixIn, invalidate_cache
+from mcfw.consts import DEBUG
 from mcfw.serialization import register, List, s_any, ds_any
 from plugins.psp.consts import NAMESPACE
 
@@ -53,7 +55,8 @@ class City(NdbModel):
     avatar_url = ndb.StringProperty(indexed=False)
     name = ndb.StringProperty()
     timezone = ndb.StringProperty(indexed=False, default='Europe/Brussels')
-    min_interval = ndb.IntegerProperty(indexed=False, default=7200)  # minimum time between 2 scans at the same merchant
+    # minimum time between 2 scans at the same merchant
+    min_interval = ndb.IntegerProperty(indexed=False, default=30 if DEBUG else 7200)
 
     @property
     def id(self):
@@ -92,7 +95,7 @@ class Project(CachedModelMixIn, NdbModel):
 
     @property
     def is_active(self):
-        return self.end_date < datetime.datetime.now()
+        return self.end_date > datetime.datetime.now()
 
     @classmethod
     def create_key(cls, city_id, project_id):
@@ -252,7 +255,7 @@ class ProjectStatisticShard(NdbModel):
 
     @classmethod
     def create_key(cls, project_id, shard_number):
-        return ndb.Key(cls, cls.SHARD_KEY_TEMPLATE % (project_id, shard_number))
+        return ndb.Key(cls, cls.SHARD_KEY_TEMPLATE % (project_id, shard_number), namespace=NAMESPACE)
 
 
 class ProjectStatisticShardConfig(NdbModel):
@@ -270,7 +273,7 @@ class ProjectStatisticShardConfig(NdbModel):
 
     @classmethod
     def create_key(cls, project_id):
-        return ndb.Key(cls, project_id)
+        return ndb.Key(cls, project_id, namespace=NAMESPACE)
 
     @classmethod
     def get_all_keys(cls, project_id):
@@ -282,7 +285,7 @@ class ProjectStatisticShardConfig(NdbModel):
         return [ProjectStatisticShard.create_key(project_id, i) for i in xrange(config.shard_count)]
 
 
-class ProjectUserStaticstics(NdbModel):
+class ProjectUserStatistics(NdbModel):
     NAMESPACE = NAMESPACE
     total = ndb.IntegerProperty(indexed=False, default=0)
     last_entry = ndb.DateTimeProperty(auto_now=True)

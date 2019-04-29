@@ -26,7 +26,7 @@ from mcfw.cache import cached
 from mcfw.consts import MISSING
 from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, HttpConflictException
 from mcfw.rpc import returns, arguments
-from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStaticstics, \
+from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStatistics, \
     ProjectStatisticShard, parent_key, ProjectStatisticShardConfig, Merchant
 from plugins.psp.to import ProjectTO, QRScanTO
 
@@ -98,10 +98,14 @@ def _required(*args):
 
 
 def qr_scanned(data):
-    # type: (QRScanTO) -> (Project, ProjectUserStaticstics, long)
+    # type: (QRScanTO) -> (Project, ProjectUserStatistics, long)
     _required(data, data.email, data.app_id, data.qr_content)
 
-    qr_id = long(data.qr_content.split('/')[-1])
+    try:
+        qr_id = long(data.qr_content.split('/')[-1])
+    except ValueError:
+        raise HttpBadRequestException('psp.errors.invalid_qr_code')
+
     qr_code = QRCode.create_key(qr_id).get()
     if not qr_code:
         logging.info('No QR code found for %s', data.qr_content)
@@ -120,19 +124,19 @@ def qr_scanned(data):
         ProjectStatisticShardConfig.create_key(project.id)
     ])
     user_stats = add_project_scan(shard_config, project.id, qr_code.merchant_id, data.app_user, city.min_interval)
-    return project, user_stats, get_project_stats(project.id, None)[0]
+    return project, user_stats, get_project_stats(project.id, None)[1]
 
 
 @ndb.transactional(xg=True)
 def add_project_scan(project_shard_config, project_id, merchant_id, app_user, min_interval):
-    # type: (ProjectStatisticShardConfig, long, long, users.User, long) -> ProjectUserStaticstics
+    # type: (ProjectStatisticShardConfig, long, long, users.User, long) -> ProjectUserStatistics
     if Scan.has_recent_scan(app_user, merchant_id, datetime.now() - timedelta(seconds=min_interval)):
         raise HttpConflictException('psp.errors.already_scanned_recently')
 
     scan = Scan(parent=parent_key(app_user), merchant_id=merchant_id, project_id=project_id)
 
-    user_stats_key = ProjectUserStaticstics.create_key(project_id, app_user)
-    user_stats = user_stats_key.get() or ProjectUserStaticstics(key=user_stats_key)
+    user_stats_key = ProjectUserStatistics.create_key(project_id, app_user)
+    user_stats = user_stats_key.get() or ProjectUserStatistics(key=user_stats_key)
     user_stats.total += 1
 
     project_stats_key = project_shard_config.get_random_shard_key()
@@ -151,13 +155,13 @@ def add_project_scan(project_shard_config, project_id, merchant_id, app_user, mi
 
 
 def get_project_stats(project_id, app_user=None):
-    # type: (long, users.User) -> [ProjectUserStaticstics, long]
+    # type: (long, users.User) -> [ProjectUserStatistics, long]
     keys = ProjectStatisticShardConfig.get_all_keys(project_id)
     if app_user:
-        keys.append(ProjectUserStaticstics.create_key(project_id, app_user))
+        keys.append(ProjectUserStatistics.create_key(project_id, app_user))
     models = ndb.get_multi(keys)
     user_stats = app_user and models.pop(-1)
-    total_count = sum([shard.total for shard in models if shard])
+    total_count = sum(shard.total for shard in models if shard)
     return user_stats, total_count
 
 

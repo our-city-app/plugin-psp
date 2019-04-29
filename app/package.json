@@ -5,7 +5,7 @@
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --port 8100",
+    "start": "ionic serve",
     "build": "ng build --prod && rm -f psp.zip && cd www && zip -qr ../psp.zip .",
     "test": "ng test",
     "lint": "ng lint",

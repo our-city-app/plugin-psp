@@ -1,12 +1,22 @@
 {
-  "Participation moneybox": "Participation moneybox",
+  "participation_moneybox": "Participation moneybox",
   "actions": "actions",
   "ends_on_x": "Ends on {{ date }}",
+  "error": "Error",
   "your_actions": "Your actions",
   "loading": "Loading",
   "participating_merchants": "Participating merchants",
   "open_now": "Open now",
   "closed": "Closed",
   "details": "Details",
-  "merchants": "Merchants"
+  "unknown_error": "An error has occurred, please try again later.",
+  "merchants": "Merchants",
+  "select_a_project": "Select a project",
+  "psp.errors": {
+    "already_scanned_recently": "You have recently already participated for this merchant, try again later!",
+    "invalid_qr_code": "Invalid QR code",
+    "project_not_active": "This project is no longer active, you cannot add new actions.",
+    "qr_code_not_linked": "This QR code has not been linked to a merchant yet",
+    "qr_code_not_found": "QR code not found"
+  }
 }

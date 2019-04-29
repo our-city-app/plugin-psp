@@ -25,19 +25,21 @@ export class ProjectDetailsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.project$ = this.store.pipe(select(getCurrentProject));
-    this.store.pipe(
+
+  }
+
+  startScanning() {
+    this.store.dispatch(new ScanQrCodeAction('back'));
+    const subscription = this.store.pipe(
       select(getScannedQr),
       takeUntil(this._destroyed$),
       withLatestFrom(this.store.pipe(select(getCurrentProjectId))),
     ).subscribe(([ scan, projectId ]) => {
       if (scan.success && scan.data) {
         this.store.dispatch(new AddParticipationAction({ projectId: projectId as number, qrContent: scan.data.content }));
+        subscription.unsubscribe();
       }
     });
-  }
-
-  startScanning() {
-    this.store.dispatch(new ScanQrCodeAction('back'));
   }
 
   ngOnDestroy(): void {

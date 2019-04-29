@@ -1,6 +1,7 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -11,6 +12,7 @@ import {
   AddParticipationAction,
   AddParticipationCompleteAction,
   AddParticipationFailedAction,
+  DismissDialogAction,
   GetMerchantsAction,
   GetMerchantsCompleteAction,
   GetMerchantsFailedAction,
@@ -25,6 +27,7 @@ import {
   GetProjectsFailedAction,
   ProjectsActions,
   ProjectsActionTypes,
+  ShowDialogAction,
 } from './projects.actions';
 import { ProjectsService } from './projects.service';
 import { getCurrentProject, getMerchants, ProjectsState } from './projects.state';
@@ -49,28 +52,44 @@ export class ProjectsEffects {
 
   @Effect() addParticipation$ = this.actions$.pipe(
     ofType<AddParticipationAction>(ProjectsActionTypes.ADD_PARTICIPATION),
-    switchMap(async action => {
-        const loadingDialog = await this.loadingController.create({
-          message: this.translate.instant('loading'),
-          translucent: true,
-        });
-        await loadingDialog.present();
-      return this.projectsService.addParticipation({
-        project_id: action.payload.projectId,
-        qr_content: action.payload.qrContent,
-        app_id: rogerthat.system.appId,
-        email: rogerthat.user.account,
-      }).pipe(
+    tap(() => this.store.dispatch(new ShowDialogAction({
+      type: 'loading',
+      options: {
+        message: this.translate.instant('loading'),
+        translucent: true,
+      },
+    }))),
+    switchMap(action => {
+        return this.projectsService.addParticipation({
+          project_id: action.payload.projectId,
+          qr_content: action.payload.qrContent,
+          app_id: rogerthat.system.appId,
+          email: rogerthat.user.account,
+        }).pipe(
           map(data => new AddParticipationCompleteAction(data)),
           tap(data => {
-            loadingDialog.dismiss();
             this.router.navigate([ '/projects', data.payload.id ]);
           }),
           catchError(err => {
-            loadingDialog.dismiss();
             return of(new AddParticipationFailedAction(err));
           }));
       },
+    ));
+
+  @Effect() afterAddParticipation$ = this.actions$.pipe(
+    ofType<AddParticipationCompleteAction>(ProjectsActionTypes.ADD_PARTICIPATION_COMPLETE),
+    map(() => new DismissDialogAction('loading')));
+
+  @Effect() afterAddParticipationFailed$ = this.actions$.pipe(
+    ofType<AddParticipationFailedAction>(ProjectsActionTypes.ADD_PARTICIPATION_FAILED),
+    tap(() => this.store.dispatch(new DismissDialogAction('loading'))),
+    map(action => new ShowDialogAction({
+        type: 'dialog',
+        options: {
+          header: this.translate.instant('error'),
+          message: this.getErrorMessage(action.payload),
+        },
+      }),
     ));
 
   @Effect() getCityMerchants$ = this.actions$.pipe(
@@ -93,11 +112,34 @@ export class ProjectsEffects {
         catchError(err => of(new GetMoreMerchantsFailedAction(err)))),
       ))));
 
+  @Effect({ dispatch: false }) showDialog$ = this.actions$.pipe(
+    ofType<ShowDialogAction>(ProjectsActionTypes.SHOW_DIALOG),
+    switchMap(action => {
+      if (action.data.type === 'loading') {
+        return this.loadingController.create(action.data.options).then(dialog => dialog.present());
+      } else {
+        return this.alertController.create(action.data.options).then(dialog => dialog.present());
+      }
+    }));
+
+  @Effect({ dispatch: false }) dismissDialog$ = this.actions$.pipe(
+    ofType<DismissDialogAction>(ProjectsActionTypes.DISMISS_DIALOG),
+    switchMap(action => action.dialogType === 'loading' ? this.loadingController.dismiss() : this.alertController.dismiss()));
+
+  private getErrorMessage(response: HttpErrorResponse) {
+    if (response.status.toString().startsWith('4') && response.error && response.error.error) {
+      return this.translate.instant(response.error.error, response.error.data);
+    }
+    return this.translate.instant('unknown_error');
+  }
+
+
   constructor(private actions$: Actions<ProjectsActions>,
               private router: Router,
               private store: Store<ProjectsState>,
               private projectsService: ProjectsService,
               private translate: TranslateService,
+              private alertController: AlertController,
               private loadingController: LoadingController) {
   }
 }

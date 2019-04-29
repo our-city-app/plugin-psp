@@ -53,6 +53,7 @@ export function projectsReducer(state = initialProjectsState, action: ProjectsAc
           ...state.projects,
           data: updateItem(state.projects.data || [], action.payload, 'id'),
         },
+        projectDetails: onLoadableSuccess(action.payload),
       };
   }
   return state;

@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { Loadable } from '../../../loadable';
-import { Project, ProjectDetails } from '../../projects';
+import { Project } from '../../projects';
 import { AddParticipationAction, GetProjectsAction } from '../../projects.actions';
 import { getProjects, ProjectsState } from '../../projects.state';
 
@@ -30,10 +30,14 @@ export class ProjectsPageComponent implements OnInit {
     this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
   }
 
-  projectClicked(project: ProjectDetails) {
+  projectClicked(project: Project) {
     if (this.scannedQr) {
       this.store.dispatch(new AddParticipationAction({ projectId: project.id, qrContent: this.scannedQr }));
     }
     this.router.navigate([ project.id ], { relativeTo: this.route });
+  }
+
+  exit() {
+    rogerthat.app.exit();
   }
 }

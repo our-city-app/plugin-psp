@@ -1,13 +1,14 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>{{ 'Participation moneybox' | translate }}</ion-title>
+    <ion-title>{{ 'participation_moneybox' | translate }}</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="" (click)="exit()"></ion-back-button>
+    </ion-buttons>
   </ion-toolbar>
-  <ion-buttons slot="start">
-    <ion-back-button></ion-back-button>
-  </ion-buttons>
 </ion-header>
 <ion-content *ngIf="projects$ | async as projects">
   <ion-spinner *ngIf="projects.loading"></ion-spinner>
+  <p *ngIf="projects.success && scannedQr">{{ 'select_a_project' | translate }}</p>
   <ion-card *ngFor="let project of projects.data" (click)="projectClicked(project)">
     <ion-card-header>
       <ion-card-title>

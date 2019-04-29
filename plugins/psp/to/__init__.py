@@ -58,7 +58,7 @@ class OpeningPeriodTO(TO):
 
 class OpeningInfoTO(TO):
     open_now = bool_property('open_now')
-    open_until = bool_property('open_until')
+    open_until = unicode_property('open_until')
     periods = typed_property('periods', OpeningPeriodTO, True)
     weekday_text = unicode_list_property('weekday_text')
 
@@ -115,7 +115,7 @@ class ProjectBudgetTO(TO):
 
 
 class PersonalProjectStatisticsTO(TO):
-    total = long_property('total')  # amount in `currency`, no demicals
+    total = long_property('total')  # amount of scans
     last_entry = unicode_property('last_entry')
 
 
@@ -178,17 +178,11 @@ class UserInfoTO(TO):
 
     @property
     def app_user(self):
-        return users.User(u"%s:%s" % (self.email, self.app_id))
+        if self.app_id != 'rogerthat':
+            return users.User(u'%s:%s' % (self.email, self.app_id))
+        return users.User(self.email)
 
 
 class QRScanTO(UserInfoTO):
     qr_content = unicode_property('qr_content')
     project_id = long_property('project_id')
-
-
-class QRScanResultTO(TO):
-    project_details = typed_property('project_details', ProjectDetailsTO, True)
-
-    @classmethod
-    def from_model(cls, project, user_stats, total_scan_count):
-        return cls(project_details=ProjectDetailsTO.from_model(project, user_stats, total_scan_count))

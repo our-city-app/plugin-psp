@@ -31,6 +31,9 @@ from plugins.psp.bizz.general import get_general_settings
 from plugins.psp.consts import PREFIX
 from plugins.psp.models import OpeningHour, OpeningPeriod
 
+MIDNIGHT = datetime.time(hour=0, minute=0)
+_NAMES = {}
+
 
 def search_places(query, location):
     # type: (str, str) -> object
@@ -117,22 +120,32 @@ def get_open_until(opening_hours, now, lang):
         if period.open and period.close:
             if period.open.day == weekday:
                 if now_time >= period.open.datetime:
-                    if period.close.day != weekday or now_time < period.close.datetime:
-                        return True, _format_opening_hour(period.close, lang)
+                    if period.close.day != weekday:
+                        day_name = _get_weekday_names(lang)[period.close.day]
+                        hour_str = _format_opening_hour(period and period.close, lang)
+                        open_until_str = translate(lang, PREFIX, 'open_until', time='%s %s' % (day_name, hour_str))
+                        return True, open_until_str
+                    elif now_time < period.close.datetime:
+                        return True, _format_open_until(period, lang)
+
             elif period.close.day == weekday:
                 # open.day != weekday, only needed to check the time
                 if now_time < period.close.datetime:
-                    return True, _format_opening_hour(period.close, lang)
+                    return True, _format_open_until(period, lang)
         elif period.open:
             # close is NULL
             if period.open.day == weekday and now_time >= period.open.datetime:
-                return True, _format_opening_hour(None, lang)
+                return True, _format_open_until(None, lang)
         elif period.close:
             # open is NULL
             if period.close.day == weekday and now_time < period.close.datetime:
-                return True, _format_opening_hour(period.close, lang)
+                return True, _format_open_until(period, lang)
 
     return False, translate(lang, PREFIX, 'closed')
+
+
+def _format_open_until(period, lang):
+    return translate(lang, PREFIX, 'open_until', time=_format_opening_hour(period and period.close, lang))
 
 
 def _get_weekday(datetime):
@@ -141,18 +154,21 @@ def _get_weekday(datetime):
 
 def _get_weekday_names(lang):
     # type: (unicode) -> dict
+    if lang in _NAMES:
+        return _NAMES[lang]
     day_names = {}
     today = datetime.datetime.today()
     for days in xrange(7):
         date = today + datetime.timedelta(days=days)
         weekday = _get_weekday(date)
         day_names[weekday] = format_date(date, 'EEEE', locale=lang)
+    _NAMES[lang] = day_names
     return day_names
 
 
 def _format_opening_hour(opening_hour, lang):
     # type: (OpeningHour, unicode) -> unicode
-    return format_time(opening_hour and opening_hour.datetime or '0000', 'short', locale=lang)
+    return format_time(opening_hour and opening_hour.datetime or MIDNIGHT, 'short', locale=lang)
 
 
 def get_weekday_text(opening_hours, lang):

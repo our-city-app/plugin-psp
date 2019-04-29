@@ -16,7 +16,7 @@ export interface ProjectDetails extends Project {
   statistics: {
     total: number;
     personal: {
-      amount: number;
+      total: number;
       last_entry_date: string;
     }
   };
@@ -54,6 +54,7 @@ export interface OpeningHours {
    * A boolean value indicating if the place is open at the current time.
    */
   open_now: boolean;
+  open_until: string;
   periods: OpeningHourPeriod[];
   /**
    * `weekday_text` is an array of seven strings representing the formatted opening hours for each day of the week.
@@ -75,7 +76,7 @@ export interface Merchant {
   id: number;
   location: LatLng;
   name: string;
-  opening_hours: OpeningHours;
+  opening_hours: OpeningHours | null;
   place_id: string;
   place_url: string | null;
 }
