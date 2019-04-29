@@ -14,3 +14,12 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
+
+from plugins.psp.bizz.projects import schedule_invalidate_caches
+import webapp2
+
+
+class ScheduleInvalidateCachesHandler(webapp2.RequestHandler):
+
+    def get(self):
+        schedule_invalidate_caches()

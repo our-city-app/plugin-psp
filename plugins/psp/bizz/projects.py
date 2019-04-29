@@ -14,21 +14,24 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
-import logging
+
+from collections import defaultdict
 from datetime import datetime, timedelta
-
-from google.appengine.api import users
-from google.appengine.ext import ndb
-from google.appengine.ext.ndb.query import Cursor
-
 import dateutil.parser
-from mcfw.cache import cached
+import logging
+
+from framework.utils.cloud_tasks import run_tasks
+from google.appengine.api import taskqueue
+from google.appengine.ext import ndb, deferred
+from google.appengine.ext.ndb.query import Cursor
+from mcfw.cache import cached, invalidate_cache
 from mcfw.consts import MISSING
 from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, HttpConflictException
 from mcfw.rpc import returns, arguments
+from plugins.psp.consts import SCHEDULED_QUEUE
 from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStatistics, \
-    ProjectStatisticShard, parent_key, ProjectStatisticShardConfig, Merchant
-from plugins.psp.to import ProjectTO, QRScanTO
+    ProjectStatisticShard, ProjectStatisticShardConfig, Merchant, parent_key
+from plugins.psp.to import ProjectTO, QRScanTO  # @UnusedImport
 
 
 def list_projects(city_id):
@@ -37,15 +40,18 @@ def list_projects(city_id):
 
 
 # This cache is cleared when a Project is updated, or when the end_date is reached
-@cached(version=1, lifetime=0, request=True, memcache=True, datastore='list_active_projects')
-@returns([Project])
+@cached(version=1, lifetime=0, request=True, memcache=True, datastore='list_active_project_keys')
+@returns([ndb.Key])
 @arguments(city_id=unicode)
+def list_active_project_keys(city_id):
+    now = datetime.now()
+    return [p.key for p in Project.list_projects_after(now, city_id)
+            if p.end_date and p.end_date > now]
+
+
 def list_active_projects(city_id):
     # type: (unicode) -> [Project]
-    now = datetime.now()
-    # TODO: return keys instead of models
-    return [p for p in Project.list_projects_after(city_id, now)
-            if p.end_date and p.end_date > now]
+    return ndb.get_multi(list_active_project_keys(city_id))
 
 
 def get_project(city_id, project_id):
@@ -68,12 +74,27 @@ def create_project(city_id, data):
     return project
 
 
+@ndb.transactional(xg=True)
 def update_project(city_id, project_id, data):
     # type: (unicode, int, ProjectTO) -> Project
     if data.id != project_id:
         raise HttpBadRequestException('bad_project_id')
     project = get_project(city_id, project_id)
+    old_end_date = project.end_date
+    old_start_date = project.start_date
     _populate_project(project, data)
+    if old_end_date != project.end_date:
+        delta = project.end_date - datetime.now()
+        if delta.days < 32:
+            logging.debug('Scheduling invalidate_cache of list_active_project_keys(%s) in %s', city_id, delta)
+            deferred.defer(invalidate_cache, list_active_project_keys, city_id,
+                           _countdown=delta.total_seconds(), _transactional=True, _queue=SCHEDULED_QUEUE)
+    if old_start_date != project.start_date:
+        delta = project.start_date - datetime.now()
+        if 0 <= delta.days < 32:
+            logging.debug('Scheduling invalidate_cache of list_active_project_keys(%s) in %s', city_id, delta)
+            deferred.defer(invalidate_cache, list_active_project_keys, city_id,
+                           _countdown=delta.total_seconds(), _transactional=True, _queue=SCHEDULED_QUEUE)
     project.put()
     return project
 
@@ -114,6 +135,7 @@ def qr_scanned(data):
     if not qr_code.merchant_id:
         logging.warn('QR code is not linked: %s', qr_code)
         raise HttpConflictException('psp.errors.qr_code_not_linked')
+
     project_id = data.project_id
     project = get_project(qr_code.city_id, project_id)
     if not project.is_active:
@@ -121,8 +143,9 @@ def qr_scanned(data):
 
     city, shard_config = ndb.get_multi([
         City.create_key(qr_code.city_id),
-        ProjectStatisticShardConfig.create_key(project.id)
+        ProjectStatisticShardConfig.create_key(project_id),
     ])
+
     user_stats = add_project_scan(shard_config, project.id, qr_code.merchant_id, data.app_user, city.min_interval)
     return project, user_stats, get_project_stats(project.id, None)[1]
 
@@ -171,3 +194,27 @@ def list_merchants(city_id, cursor=None):
         50, start_cursor=Cursor.from_websafe_string(cursor) if cursor else None, keys_only=False)
     new_cursor = new_cursor.to_websafe_string().decode('utf-8') if new_cursor and has_more else None
     return merchants, new_cursor, has_more
+
+
+def schedule_invalidate_caches():
+    now = datetime.now()
+    deadline = now + timedelta(days=30)
+    cities = defaultdict(list)
+    for project in Project.list_projects_after(now):
+        if project.start_date and project.start_date < deadline:
+            cities[project.city_id].append(project.start_date)
+        if project.end_date and project.end_date < deadline:
+            cities[project.city_id].append(project.end_date)
+
+    tasks = []
+    for city_id, dates in cities.iteritems():
+        payload = deferred.deferred.serialize(invalidate_cache, list_active_project_keys, city_id)
+        for date in dates:
+            logging.debug('Scheduling invalidate_cache of list_active_project_keys(%s) at %s', city_id, date)
+            countdown = (date - now).total_seconds()
+            tasks.append(taskqueue.Task(payload=payload,
+                                        url=deferred.deferred._DEFAULT_URL,
+                                        headers=deferred.deferred._TASKQUEUE_HEADERS,
+                                        countdown=countdown))
+    if tasks:
+        run_tasks(tasks, queue_name=SCHEDULED_QUEUE)

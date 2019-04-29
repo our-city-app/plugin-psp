@@ -95,7 +95,10 @@ class Project(CachedModelMixIn, NdbModel):
 
     @property
     def is_active(self):
-        return self.end_date > datetime.datetime.now()
+        now = datetime.datetime.now()
+        has_started = self.start_date is None or self.start_date >= now
+        has_not_ended = self.end_date is None or self.end_date < now
+        return has_started and has_not_ended
 
     @classmethod
     def create_key(cls, city_id, project_id):
@@ -106,13 +109,15 @@ class Project(CachedModelMixIn, NdbModel):
         return cls.query(ancestor=City.create_key(city_id)).order(-cls.start_date)
 
     @classmethod
-    def list_projects_after(cls, city_id, timestamp):
-        return cls.query(ancestor=City.create_key(city_id)) \
-            .filter(cls.start_date < timestamp)
+    def list_projects_after(cls, timestamp, city_id=None):
+        kwargs = {}
+        if city_id:
+            kwargs['ancestor'] = City.create_key(city_id)
+        return cls.query(**kwargs).filter(cls.start_date < timestamp)
 
     def invalidateCache(self):
-        from plugins.psp.bizz.projects import list_active_projects
-        invalidate_cache(list_active_projects, self.city_id)
+        from plugins.psp.bizz.projects import list_active_project_keys
+        invalidate_cache(list_active_project_keys, self.city_id)
 
     def to_dict(self, extra_properties=None, include=None, exclude=None):
         extra_properties = extra_properties or ['id', 'city_id']
@@ -295,5 +300,5 @@ class ProjectUserStatistics(NdbModel):
         return ndb.Key(cls, project_id, parent=parent_key(app_user), namespace=NAMESPACE)
 
 
-register(List(Project), s_any, ds_any)
+register(List(ndb.Key), s_any, ds_any)
 register(List(Merchant), s_any, ds_any)

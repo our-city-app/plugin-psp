@@ -17,3 +17,4 @@
 
 NAMESPACE = 'PSP'
 PREFIX = 'psp'
+SCHEDULED_QUEUE = "scheduled-queue"

@@ -1,0 +1,4 @@
+queue:
+- name: scheduled-queue
+  rate: 20/s
+  max_concurrent_requests: 20

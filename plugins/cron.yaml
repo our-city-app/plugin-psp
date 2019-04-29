@@ -1,0 +1,4 @@
+cron:
+- description: Refresh projects
+  url: /admin/cron/psp/schedule_invalidate_caches
+  schedule: 1 of month 8:00
