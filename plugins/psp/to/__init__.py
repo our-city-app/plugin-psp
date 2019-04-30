@@ -115,8 +115,8 @@ class ProjectBudgetTO(TO):
 
 
 class PersonalProjectStatisticsTO(TO):
-    total = long_property('total')  # amount of scans
-    last_entry = unicode_property('last_entry')
+    total = long_property('total', default=0)  # amount of scans
+    last_entry = unicode_property('last_entry', default=None)
 
 
 class ProjectStatisticsTO(TO):
@@ -143,7 +143,7 @@ class ProjectDetailsTO(ProjectTO):
         details = super(ProjectDetailsTO, cls).from_model(project)
         details.statistics = ProjectStatisticsTO(
             total=total_scan_count,
-            personal=user_stats and PersonalProjectStatisticsTO.from_model(user_stats)
+            personal=PersonalProjectStatisticsTO.from_model(user_stats) if user_stats else PersonalProjectStatisticsTO()
         )
         return details
 

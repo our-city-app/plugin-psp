@@ -1,23 +1,20 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>{{ 'participation_moneybox' | translate }}</ion-title>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="" (click)="exit()"></ion-back-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-<ion-content *ngIf="projects$ | async as projects">
-  <ion-spinner *ngIf="projects.loading"></ion-spinner>
-  <p *ngIf="projects.success && scannedQr">{{ 'select_a_project' | translate }}</p>
-  <ion-card *ngFor="let project of projects.data" (click)="projectClicked(project)">
-    <ion-card-header>
-      <ion-card-title>
-        {{ project.budget.amount | currency : project.budget.currency : 'symbol': '1.0' }}
-      </ion-card-title>
-      <ion-card-subtitle>{{ 'ends_on_x' | translate : {date: project.end_date | date} }}</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-button color="primary">{{ 'details' | translate }}</ion-button>
-    </ion-card-content>
-  </ion-card>
+<ion-content>
+  <div class="container">
+    <ion-spinner *ngIf="(projects$ | async)?.loading as loading"></ion-spinner>
+    <div class="project-content">
+      <ion-slides pager="false" [options]="{zoom:{enabled: false}}"
+                  (ionSlideDidChange)="loadProject()" #slider>
+        <ion-slide *ngFor="let project of projectList$ | async; let isFirst = first; let isLast = last;">
+          <div class="swiper-button-prev" (click)="slider.slidePrev()" *ngIf="!isFirst"></div>
+          <div class="swiper-button-next" (click)="slider.slideNext()" *ngIf="!isLast"></div>
+          <app-project-card [project]="project"
+                            [projectDetails]="(project$ | async)?.data?.id === project.id ? (project$ | async): dummyLoadable"
+                            (projectClicked)="projectClicked($event)"></app-project-card>
+        </ion-slide>
+      </ion-slides>
+    </div>
+    <ion-button (click)="startScanning()" class="scan-button">
+      <span>{{ 'scan' | translate }}</span>
+    </ion-button>
+  </div>
 </ion-content>

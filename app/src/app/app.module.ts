@@ -16,8 +16,7 @@ import { AppComponent } from './app.component';
 import { RogerthatModule } from './rogerthat/rogerthat.module';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'projects', pathMatch: 'full' },
-  { path: 'projects', loadChildren: './projects/projects.module#ProjectsModule' },
+  { path: '', loadChildren: './projects/projects.module#ProjectsModule' },
 ];
 
 export function HttpLoaderFactory(http: HttpClient) {

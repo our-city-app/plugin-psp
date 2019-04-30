@@ -1,0 +1,35 @@
+<ion-card (click)="projectClicked.emit(project)">
+  <ion-card-header>
+    <ion-card-subtitle class="project-title">{{ project.title }}</ion-card-subtitle>
+    <ion-card-title>
+      <b>{{ project.budget.amount | currency : project.budget.currency : 'symbol': '1.0' }}</b>
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <div class="trophy">
+      <div class="split-image">
+        <img src="/assets/trophy-full.png"/>
+      </div>
+      <div class="divider" [style.top]="uiPercent">
+        <span [style.bottom]="projectProgress > 90 ? 0: '24px'">
+          {{ projectProgress }}%
+        </span>
+        <hr>
+      </div>
+      <div class="split-image" [style.height]="uiPercent">
+        <img src="/assets/trophy-empty.png"/>
+      </div>
+    </div>
+    <div class="statistics">
+      <p>
+        {{ 'now_x_from_y_scans' | translate : {current: totalCount, total: project.action_count} }}
+      </p>
+      <ng-container *ngIf="projectDetails.loading">
+        <ion-spinner></ion-spinner>
+      </ng-container>
+      <p>
+        {{ 'me_x' | translate : {amount: personalCount} }}
+      </p>
+    </div>
+  </ion-card-content>
+</ion-card>

@@ -1,49 +1,27 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { select, Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil, withLatestFrom } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { Loadable } from '../../../loadable';
-import { ScanQrCodeAction } from '../../../rogerthat/rogerthat.actions';
-import { getScannedQr } from '../../../rogerthat/rogerthat.state';
 import { ProjectDetails } from '../../projects';
-import { AddParticipationAction } from '../../projects.actions';
-import { getCurrentProject, getCurrentProjectId, ProjectsState } from '../../projects.state';
+import { GetProjectDetailsAction } from '../../projects.actions';
+import { getCurrentProject, ProjectsState } from '../../projects.state';
 
 @Component({
-  selector: 'app-project-page',
-  templateUrl: './project-details-page.component.html',
-  styleUrls: [ './project-details-page.component.scss' ],
+  selector: 'app-project-details-page',
+  templateUrl: 'project-details-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProjectDetailsPageComponent implements OnInit, OnDestroy {
+export class ProjectDetailsPageComponent implements OnInit {
   project$: Observable<Loadable<ProjectDetails>>;
 
-  private _destroyed$ = new Subject();
-
-  constructor(private store: Store<ProjectsState>) {
+  constructor(private store: Store<ProjectsState>,
+              private route: ActivatedRoute) {
+    const projectId = parseInt(this.route.snapshot.params.id, 10);
+    this.store.dispatch(new GetProjectDetailsAction({ id: projectId }));
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.project$ = this.store.pipe(select(getCurrentProject));
-
-  }
-
-  startScanning() {
-    this.store.dispatch(new ScanQrCodeAction('back'));
-    const subscription = this.store.pipe(
-      select(getScannedQr),
-      takeUntil(this._destroyed$),
-      withLatestFrom(this.store.pipe(select(getCurrentProjectId))),
-    ).subscribe(([ scan, projectId ]) => {
-      if (scan.success && scan.data) {
-        this.store.dispatch(new AddParticipationAction({ projectId: projectId as number, qrContent: scan.data.content }));
-        subscription.unsubscribe();
-      }
-    });
-  }
-
-  ngOnDestroy(): void {
-    this._destroyed$.next();
-    this._destroyed$.complete();
   }
 }

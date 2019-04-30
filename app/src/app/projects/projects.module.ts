@@ -8,33 +8,40 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
 import { MerchantListComponent } from './components/merchant-list/merchant-list.component';
+import { ProjectCardComponent } from './components/project-card/project-card.component';
+import { HomePageComponent } from './pages/home-page/home-page.component';
+import { InfoPageComponent } from './pages/info-page/info-page.component';
 import { MerchantListPageComponent } from './pages/merchant-list-page/merchant-list-page.component';
 import { ProjectDetailsPageComponent } from './pages/project-details-page/project-details-page.component';
-import { ProjectTabsComponent } from './pages/project-tabs/project-tabs.component';
 import { ProjectsPageComponent } from './pages/projects-page/projects-page.component';
+import { MarkdownPipe } from './pipes/markdown.pipe';
 import { ProjectsEffects } from './projects.effects';
 import { projectsReducer } from './projects.reducer';
 
 const routes: Routes = [
-  { path: '', component: ProjectsPageComponent },
+  { path: '', redirectTo: 'psp', pathMatch: 'full' },
   {
-    path: ':id',
-    component: ProjectTabsComponent,
+    path: 'psp',
+    component: HomePageComponent,
     children: [
-      { path: '', redirectTo: 'details', pathMatch: 'full' },
-      { path: 'details', component: ProjectDetailsPageComponent },
+      { path: '', redirectTo: 'overview', pathMatch: 'full' },
+      { path: 'overview', component: ProjectsPageComponent },
       { path: 'merchants', component: MerchantListPageComponent },
-    ],
+      { path: 'info', component: InfoPageComponent } ],
   },
+  { path: 'psp/overview/:id', component: ProjectDetailsPageComponent },
 ];
 
 @NgModule({
   declarations: [
-    ProjectTabsComponent,
-    ProjectsPageComponent,
+    ProjectCardComponent,
     MerchantListPageComponent,
-    ProjectDetailsPageComponent,
+    ProjectsPageComponent,
     MerchantListComponent,
+    HomePageComponent,
+    ProjectDetailsPageComponent,
+    InfoPageComponent,
+    MarkdownPipe,
   ],
   imports: [
     IonicModule,

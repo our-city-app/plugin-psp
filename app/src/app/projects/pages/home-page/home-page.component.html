@@ -1,0 +1,26 @@
+<ion-tabs #tabs>
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>{{(tabs.getSelected() || '') | translate }}</ion-title>
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="" (click)="exit()"></ion-back-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="overview">
+      <ion-icon name="trophy"></ion-icon>
+      <ion-label>{{ 'overview' | translate }}</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="merchants">
+      <ion-icon name="cart"></ion-icon>
+      <ion-label>{{ 'merchants' | translate }}</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="info">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <ion-label>{{ 'info' | translate }}</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>

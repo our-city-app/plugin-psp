@@ -19,6 +19,7 @@ from google.appengine.api import users
 
 from framework.bizz.authentication import get_browser_language
 from framework.i18n_utils import get_supported_locale
+from mcfw.consts import DEBUG
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.cities import get_city
@@ -63,8 +64,12 @@ def api_save_project(city_id, project_id, data):
 @returns(ProjectDetailsTO)
 @arguments(city_id=unicode, project_id=long, app_user=unicode)
 def api_get_project_statistics(city_id, project_id, app_user=None):
+    project = get_project(city_id, project_id)
     user_stats, total_scan_count = get_project_stats(project_id, app_user and users.User(app_user))
-    return ProjectDetailsTO.from_model(get_project(city_id, project_id), user_stats, total_scan_count)
+    if DEBUG:
+        from random import randint
+        total_scan_count = randint(0, project.action_count * 1.5)
+    return ProjectDetailsTO.from_model(project, user_stats, total_scan_count)
 
 
 @rest('/cities/<city_id:[^/]+>/merchants', 'get', cors=True)
