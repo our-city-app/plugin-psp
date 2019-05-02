@@ -15,12 +15,12 @@
 #
 # @@license_version:1.3@@
 
-from mcfw.restapi import rest
+from mcfw.restapi import rest, GenericRESTRequestHandler
 from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.cities import create_city, update_city, get_city, list_cities
 from plugins.psp.bizz.general import validate_admin_request_auth
 
-from plugins.psp.to import CityTO
+from plugins.psp.to import CityTO, AppCityTO
 
 
 @rest('/cities', 'get', custom_auth_method=validate_admin_request_auth)
@@ -37,11 +37,16 @@ def api_create_city(data):
     return CityTO.from_model(create_city(data))
 
 
-@rest('/cities/<city_id:[^/]+>', 'get', custom_auth_method=validate_admin_request_auth)
-@returns(CityTO)
+@rest('/cities/<city_id:[^/]+>', 'get', cors=True)
+@returns((CityTO, AppCityTO))
 @arguments(city_id=unicode)
 def api_get_city(city_id):
-    return CityTO.from_model(get_city(city_id))
+    city = get_city(city_id)
+    handler = GenericRESTRequestHandler()
+    handler.request = GenericRESTRequestHandler.get_current_request()
+    if validate_admin_request_auth(None, handler):
+        return CityTO.from_model(city)
+    return AppCityTO.from_model(city)
 
 
 @rest('/cities/<city_id:[^/]+>', 'put', custom_auth_method=validate_admin_request_auth)

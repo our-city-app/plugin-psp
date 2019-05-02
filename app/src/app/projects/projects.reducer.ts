@@ -5,6 +5,15 @@ import { initialProjectsState, ProjectsState } from './projects.state';
 
 export function projectsReducer(state = initialProjectsState, action: ProjectsActions): ProjectsState {
   switch (action.type) {
+    case ProjectsActionTypes.GET_CITY:
+      return {
+        ...state,
+        city: onLoadableLoad(initialProjectsState.city.data),
+      };
+    case ProjectsActionTypes.GET_CITY_COMPLETE:
+      return { ...state, city: onLoadableSuccess(action.payload) };
+    case ProjectsActionTypes.GET_CITY_FAILED:
+      return { ...state, city: onLoadableError(action.payload) };
     case ProjectsActionTypes.GET_PROJECT_DETAILS:
       return {
         ...state,

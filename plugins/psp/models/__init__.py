@@ -54,6 +54,7 @@ class City(NdbModel):
     api_key = ndb.StringProperty(indexed=False)
     avatar_url = ndb.StringProperty(indexed=False)
     name = ndb.StringProperty()
+    info = ndb.TextProperty()
     timezone = ndb.StringProperty(indexed=False, default='Europe/Brussels')
     # minimum time between 2 scans at the same merchant
     min_interval = ndb.IntegerProperty(indexed=False, default=30 if DEBUG else 7200)

@@ -6,13 +6,16 @@ import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { catchError, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { createAppUser, filterNull } from '../util';
 import {
   AddParticipationAction,
   AddParticipationCompleteAction,
   AddParticipationFailedAction,
   DismissDialogAction,
+  GetCityAction,
+  GetCityCompleteAction,
+  GetCityFailedAction,
   GetMerchantsAction,
   GetMerchantsCompleteAction,
   GetMerchantsFailedAction,
@@ -34,6 +37,13 @@ import { getCurrentProject, getMerchants, ProjectsState } from './projects.state
 
 @Injectable()
 export class ProjectsEffects {
+
+  @Effect() getCity$ = this.actions$.pipe(
+    ofType<GetCityAction>(ProjectsActionTypes.GET_CITY),
+    switchMap(() => this.projectsService.getCity(rogerthat.system.appId).pipe(
+      map(data => new GetCityCompleteAction(data)),
+      catchError(err => of(new GetCityFailedAction(err)))),
+    ));
 
   @Effect() getProjects$ = this.actions$.pipe(
     ofType<GetProjectsAction>(ProjectsActionTypes.GET_PROJECTS),
@@ -94,8 +104,7 @@ export class ProjectsEffects {
 
   @Effect() getCityMerchants$ = this.actions$.pipe(
     ofType<GetMerchantsAction>(ProjectsActionTypes.GET_MERCHANTS),
-    switchMap(() => this.store.pipe(select(getCurrentProject), map(p => p.data), filterNull(), take(1))),
-    switchMap(project => this.projectsService.getCityMerchants(project.city_id).pipe(
+    switchMap(() => this.projectsService.getCityMerchants(rogerthat.system.appId).pipe(
       map(data => new GetMerchantsCompleteAction(data)),
       catchError(err => of(new GetMerchantsFailedAction(err)))),
     ));

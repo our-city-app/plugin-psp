@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AddParticipationData, MerchantList, Project, ProjectDetails } from './projects';
+import { AddParticipationData, City, MerchantList, Project, ProjectDetails } from './projects';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +10,10 @@ import { AddParticipationData, MerchantList, Project, ProjectDetails } from './p
 export class ProjectsService {
   BASE_URL = `${environment.baseUrl}/api/plugins/psp/v1.0`;
   constructor(private http: HttpClient) {
+  }
+
+  getCity(cityId: string) {
+    return this.http.get<City>(`${this.BASE_URL}/cities/${cityId}`);
   }
 
   getProjects(cityId: string): Observable<Project[]> {

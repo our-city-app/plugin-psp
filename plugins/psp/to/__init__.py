@@ -28,12 +28,16 @@ class ListResultTO(TO):
     more = bool_property('more')
 
 
-class CityTO(TO):
+class AppCityTO(TO):
     id = unicode_property('id')
-    secret = unicode_property('secret')
-    api_key = unicode_property('api_key')
     avatar_url = unicode_property('avatar_url')
     name = unicode_property('name')
+    info = unicode_property('info')
+
+
+class CityTO(TO):
+    secret = unicode_property('secret')
+    api_key = unicode_property('api_key')
 
 
 class GeoPointTO(TO):

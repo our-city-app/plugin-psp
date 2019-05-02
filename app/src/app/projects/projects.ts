@@ -94,3 +94,10 @@ export interface AddParticipationData {
   email: string;
   app_id: string;
 }
+
+export interface City {
+  id: string;
+  name: string;
+  info: string;
+  avatar_url: string;
+}

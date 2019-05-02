@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -11,6 +11,7 @@ import { getCurrentProject, ProjectsState } from '../../projects.state';
   selector: 'app-project-details-page',
   templateUrl: 'project-details-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
 export class ProjectDetailsPageComponent implements OnInit {
   project$: Observable<Loadable<ProjectDetails>>;

@@ -1,9 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertOptions, LoadingOptions } from '@ionic/core';
 import { Action } from '@ngrx/store';
-import { MerchantList, Project, ProjectDetails } from './projects';
+import { City, MerchantList, Project, ProjectDetails } from './projects';
 
 export const enum ProjectsActionTypes {
+  GET_CITY = '[projects] Get city',
+  GET_CITY_COMPLETE = '[projects] city complete',
+  GET_CITY_FAILED = '[projects] city failed',
   GET_PROJECT_DETAILS = '[projects] Get project details',
   GET_PROJECT_DETAILS_COMPLETE = '[projects] Get project details complete',
   GET_PROJECT_DETAILS_FAILED = '[projects] Get project details failed',
@@ -21,6 +24,27 @@ export const enum ProjectsActionTypes {
   GET_MORE_MERCHANTS_FAILED = '[projects] Get more merchants failed',
   SHOW_DIALOG = '[projects] Show dialog',
   DISMISS_DIALOG = '[projects] Dismiss dialog',
+}
+
+export class GetCityAction implements Action {
+  readonly type = ProjectsActionTypes.GET_CITY;
+
+  constructor(public payload: { id: string }) {
+  }
+}
+
+export class GetCityCompleteAction implements Action {
+  readonly type = ProjectsActionTypes.GET_CITY_COMPLETE;
+
+  constructor(public payload: City) {
+  }
+}
+
+export class GetCityFailedAction implements Action {
+  readonly type = ProjectsActionTypes.GET_CITY_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
+  }
 }
 
 export class GetProjectDetailsAction implements Action {
@@ -133,7 +157,10 @@ export class DismissDialogAction implements Action {
   }
 }
 
-export type ProjectsActions = GetProjectDetailsAction
+export type ProjectsActions = GetCityAction
+  | GetCityCompleteAction
+  | GetCityFailedAction
+  | GetProjectDetailsAction
   | GetProjectDetailsCompleteAction
   | GetProjectDetailsFailedAction
   | GetProjectsAction
