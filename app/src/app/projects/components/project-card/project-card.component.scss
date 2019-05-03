@@ -5,34 +5,30 @@
 .statistics {
   display: flex;
   justify-content: space-between;
+  margin-top: 16px
 }
-
-$image-height: calc(100vh - 308px);
 
 .trophy {
   position: relative;
   display: flex;
   justify-content: center;
   width: calc(100vw - 130px);
-  height: $image-height;
+}
 
-  .split-image {
-    overflow: hidden;
-    height: auto;
+.split-image {
+  overflow: hidden;
+  height: auto;
+  width: auto;
+  transition: height 700ms cubic-bezier(0.4, 0.0, 0.2, 1);
+
+  img {
     width: auto;
-    position: absolute;
-    transition: height 700ms cubic-bezier(0.4, 0.0, 0.2, 1);
-
-    img {
-      width: auto;
-      max-height: $image-height;
-    }
+    max-height: calc(100vh - 308px);
   }
 }
 
-.project-content {
-  margin-top: 16px;
-  flex-grow: 1;
+.trophy-empty {
+  position: absolute;
 }
 
 .divider {
@@ -53,4 +49,9 @@ $image-height: calc(100vh - 308px);
     margin: 0;
     border-top: 1px dashed gray;
   }
+}
+
+ion-card-content {
+  // Remove padding on ios (already not present on android)
+  padding-top: 0;
 }

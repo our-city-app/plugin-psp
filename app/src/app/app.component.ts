@@ -32,7 +32,12 @@ export class AppComponent {
   initializeApp() {
     this.translate.setDefaultLang('en');
     this.platform.ready().then(() => {
-      // this.statusBar.styleDefault();
+      setInterval(() => console.log(this.statusBar), 5000);
+      if (rogerthat.system.os === 'android') {
+        this.statusBar.styleBlackTranslucent();
+      } else {
+        this.statusBar.styleDefault();
+      }
       this.splashScreen.hide();
       rogerthat.callbacks.ready(() => {
         this.loaded = true;
