@@ -26,7 +26,7 @@ from plugins.psp.bizz.cities import get_city
 from plugins.psp.bizz.general import validate_city_request_auth
 from plugins.psp.bizz.places import get_opening_hours_info
 from plugins.psp.bizz.projects import create_project, update_project, get_project, list_projects, list_active_projects, \
-    qr_scanned, get_project_stats, list_merchants
+    qr_scanned, get_project_stats, list_merchants, get_merchant
 from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanTO, MerchantTO, \
     MerchantListResultTO
 
@@ -82,6 +82,16 @@ def api_get_merchants(city_id, lang=None, cursor=None):
     results = [MerchantTO.from_model(m, *get_opening_hours_info(m.opening_hours, city.timezone, lang))
                for m in merchants]
     return MerchantListResultTO(results=results, cursor=new_cursor, more=has_more)
+
+
+@rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'get', cors=True)
+@returns(MerchantTO)
+@arguments(city_id=unicode, merchant_id=(int, long), lang=unicode)
+def api_get_merchant(city_id, merchant_id, lang=None):
+    lang = get_supported_locale(lang) if lang else get_browser_language()
+    city = get_city(city_id)
+    merchant = get_merchant(merchant_id)
+    return MerchantTO.from_model(merchant, *get_opening_hours_info(merchant.opening_hours, city.timezone, lang))
 
 
 @rest('/scan', 'post', cors=True)

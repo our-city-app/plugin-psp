@@ -26,8 +26,10 @@ export class ActivateQrPageComponent implements OnInit, OnDestroy {
     qr_content: null,
     name: null,
     formatted_address: null,
+    formatted_phone_number: null,
     location: null,
     opening_hours: [],
+    website: null,
     place_id: null,
   };
   currentDevice: MediaDeviceInfo | null = null;
@@ -55,6 +57,8 @@ export class ActivateQrPageComponent implements OnInit, OnDestroy {
         this.data = {
           ...this.data,
           formatted_address: place.data.formatted_address || this.data.formatted_address,
+          formatted_phone_number: place.data.formatted_phone_number || null,
+          website: place.data.website || null,
           opening_hours: openingHours,
         };
         this.changeDetectorRef.markForCheck();

@@ -196,6 +196,11 @@ def list_merchants(city_id, cursor=None):
     return merchants, new_cursor, has_more
 
 
+def get_merchant(merchant_id):
+    # type: (long) -> Merchant
+    return Merchant.create_key(merchant_id).get()
+
+
 def schedule_invalidate_caches():
     now = datetime.now()
     deadline = now + timedelta(days=30)

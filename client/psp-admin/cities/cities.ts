@@ -30,12 +30,14 @@ export interface Project {
 }
 
 export interface ActivateMerchant {
+  formatted_address: string | null;
+  formatted_phone_number: string | null;
+  location: LatLngLiteral | null;
+  name: string | null;
+  opening_hours: OpeningHours[];
   place_id: string | null;
   qr_content: string | null;
-  name: string | null;
-  formatted_address: string | null;
-  location: LatLngLiteral | null;
-  opening_hours: OpeningHours[];
+  website: string | null;
 }
 
 export interface OpeningHours {

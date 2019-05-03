@@ -10,12 +10,18 @@
     "avatar_url": "Avatar url",
     "camera_device": "Camera device",
     "cancel": "Cancel",
-    "close_time": "Close time",
-    "opening_day": "Opening day",
     "close_day": "Close day",
+    "close_time": "Close time",
     "closed": "Closed",
     "details": "Details",
     "error": "Error",
+    "errors": {
+      "invalid_qr_code": "Invalid QR code",
+      "merchant_exists": "This merchant already exists",
+      "qr_already_linked": "This QR code has already been linked to a merchant: {{ name }}",
+      "qr_code_for_different_city": "This is not a QR code for {{ expected }}, but for {{ actual }}",
+      "qr_code_not_found": "QR code not found"
+    },
     "friday": "Friday",
     "generate_how_many_qr_codes": "How many QR codes should be generated?",
     "generate_qr_codes": "Generate QR codes",
@@ -24,10 +30,12 @@
     "monday": "Monday",
     "name": "Name",
     "ok": "Ok",
+    "open_24_hours": "Open 24 hours",
     "open_until": "Open until {{ time }}",
+    "opening_day": "Opening day",
     "opening_hours": "Opening hours",
     "opening_time": "Opening time",
-    "open_24_hours": "Open 24 hours",
+    "phone_number": "Phone number",
     "please_scan_a_qr_code": "Please scan a QR code",
     "project": "Project",
     "psp_admin": "Participation moneybox",
@@ -41,13 +49,7 @@
     "sunday": "Sunday",
     "thursday": "Thursday",
     "tuesday": "Tuesday",
-    "wednesday": "Wednesday",
-    "errors": {
-      "invalid_qr_code": "Invalid QR code",
-      "qr_code_for_different_city": "This is not a QR code for {{ expected }}, but for {{ actual }}",
-      "qr_already_linked": "This QR code has already been linked to a merchant: {{ name }}",
-      "merchant_exists": "This merchant already exists",
-      "qr_code_not_found": "QR code not found"
-    }
+    "website": "Website",
+    "wednesday": "Wednesday"
   }
 }

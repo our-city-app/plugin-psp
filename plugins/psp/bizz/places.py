@@ -68,7 +68,7 @@ def get_place_details(place_id):
     parameters = {
         'key': get_general_settings().google_maps_key,
         'placeid': place_id,
-        'fields': 'geometry,name,place_id,formatted_address,opening_hours',
+        'fields': 'geometry,name,place_id,formatted_address,opening_hours,formatted_phone_number,website',
     }
     url = 'https://maps.googleapis.com/maps/api/place/details/json?%s' % (urllib.urlencode(parameters))
     result = urlfetch.fetch(url)

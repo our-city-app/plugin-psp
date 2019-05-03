@@ -35,7 +35,7 @@ class AppCityTO(TO):
     info = unicode_property('info')
 
 
-class CityTO(TO):
+class CityTO(AppCityTO):
     secret = unicode_property('secret')
     api_key = unicode_property('api_key')
 
@@ -76,6 +76,8 @@ class MerchantTO(TO):
     opening_hours = typed_property('opening_hours', OpeningInfoTO)
     place_id = unicode_property('place_id')
     place_url = unicode_property('place_url')
+    formatted_phone_number = unicode_property('formatted_phone_number')
+    website = unicode_property('website')
 
     @classmethod
     def from_model(cls, model, open_now, open_until, weekday_text):
@@ -99,7 +101,9 @@ class MerchantTO(TO):
                        weekday_text=weekday_text),
                    city_id=model.city_id,
                    place_id=model.place_id,
-                   place_url=place_url)
+                   place_url=place_url,
+                   formatted_phone_number=model.formatted_phone_number,
+                   website=model.website)
 
 
 class MerchantListResultTO(ListResultTO):
@@ -174,6 +178,8 @@ class LinkQRTO(TO):
     location = typed_property('location', LocationTO)  # type: LocationTO
     opening_hours = typed_property('opening_hours', OpeningHoursTO, True)  # type: list[OpeningHoursTO]
     place_id = unicode_property('place_id')
+    formatted_phone_number = unicode_property('formatted_phone_number')
+    website = unicode_property('website')
 
 
 class UserInfoTO(TO):

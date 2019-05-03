@@ -101,7 +101,9 @@ def link_qr_code(city_id, data):
                         location=GeoPt(data.location.lat, data.location.lng),
                         opening_hours=[OpeningPeriod.from_to(period) for period in data.opening_hours],
                         city_id=city_id,
-                        place_id=place_id)
+                        place_id=place_id,
+                        formatted_phone_number=data.formatted_phone_number,
+                        website=data.website)
     merchant.put()
     qr.merchant_id = merchant.id
     qr.put()

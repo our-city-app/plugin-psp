@@ -210,6 +210,8 @@ class Merchant(NdbModel):
     city_id = ndb.StringProperty()
     qr_id = ndb.IntegerProperty()
     place_id = ndb.StringProperty()
+    formatted_phone_number = ndb.StringProperty(indexed=False)
+    website = ndb.StringProperty(indexed=False)
 
     @property
     def id(self):
