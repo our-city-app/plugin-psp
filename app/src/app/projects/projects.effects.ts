@@ -16,6 +16,9 @@ import {
   GetCityAction,
   GetCityCompleteAction,
   GetCityFailedAction,
+  GetMerchantAction,
+  GetMerchantCompleteAction,
+  GetMerchantFailedAction,
   GetMerchantsAction,
   GetMerchantsCompleteAction,
   GetMerchantsFailedAction,
@@ -100,6 +103,22 @@ export class ProjectsEffects {
           message: this.getErrorMessage(action.payload),
         },
       }),
+    ));
+
+  @Effect() getMerchant$ = this.actions$.pipe(
+    ofType<GetMerchantAction>(ProjectsActionTypes.GET_MERCHANT),
+    withLatestFrom(this.store.pipe(select(getMerchants))),
+    switchMap(([ action, merchants ]) => {
+        if (merchants.data) {
+          const merchant = merchants.data.results.find(m => m.id === action.payload.id);
+          if (merchant) {
+            return of(new GetMerchantCompleteAction(merchant));
+          }
+        }
+        return this.projectsService.getMerchant(rogerthat.system.appId, action.payload.id).pipe(
+          map(data => new GetMerchantCompleteAction(data)),
+          catchError(err => of(new GetMerchantFailedAction(err))));
+      },
     ));
 
   @Effect() getCityMerchants$ = this.actions$.pipe(

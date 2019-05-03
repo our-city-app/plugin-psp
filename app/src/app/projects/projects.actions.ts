@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertOptions, LoadingOptions } from '@ionic/core';
 import { Action } from '@ngrx/store';
-import { City, MerchantList, Project, ProjectDetails } from './projects';
+import { City, Merchant, MerchantList, Project, ProjectDetails } from './projects';
 
 export const enum ProjectsActionTypes {
   GET_CITY = '[projects] Get city',
@@ -16,6 +16,9 @@ export const enum ProjectsActionTypes {
   ADD_PARTICIPATION = '[projects] Add participation',
   ADD_PARTICIPATION_COMPLETE = '[projects] Add participation complete',
   ADD_PARTICIPATION_FAILED = '[projects] Add participation failed',
+  GET_MERCHANT = '[projects] Get merchant',
+  GET_MERCHANT_COMPLETE = '[projects] Get merchant complete',
+  GET_MERCHANT_FAILED = '[projects] Get merchant failed',
   GET_MERCHANTS = '[projects] Get merchants',
   GET_MERCHANTS_COMPLETE = '[projects] Get merchants complete',
   GET_MERCHANTS_FAILED = '[projects] Get merchants failed',
@@ -107,6 +110,27 @@ export class AddParticipationFailedAction implements Action {
   }
 }
 
+export class GetMerchantAction implements Action {
+  readonly type = ProjectsActionTypes.GET_MERCHANT;
+
+  constructor(public payload: { id: number }) {
+  }
+}
+
+export class GetMerchantCompleteAction implements Action {
+  readonly type = ProjectsActionTypes.GET_MERCHANT_COMPLETE;
+
+  constructor(public payload: Merchant) {
+  }
+}
+
+export class GetMerchantFailedAction implements Action {
+  readonly type = ProjectsActionTypes.GET_MERCHANT_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
+  }
+}
+
 export class GetMerchantsAction implements Action {
   readonly type = ProjectsActionTypes.GET_MERCHANTS;
 }
@@ -169,6 +193,9 @@ export type ProjectsActions = GetCityAction
   | AddParticipationAction
   | AddParticipationCompleteAction
   | AddParticipationFailedAction
+  | GetMerchantAction
+  | GetMerchantCompleteAction
+  | GetMerchantFailedAction
   | GetMerchantsAction
   | GetMerchantsCompleteAction
   | GetMerchantsFailedAction

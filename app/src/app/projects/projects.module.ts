@@ -11,6 +11,7 @@ import { MerchantListComponent } from './components/merchant-list/merchant-list.
 import { ProjectCardComponent } from './components/project-card/project-card.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { InfoPageComponent } from './pages/info-page/info-page.component';
+import { MerchantDetailPageComponent } from './pages/merchant-detail-page/merchant-detail-page.component';
 import { MerchantListPageComponent } from './pages/merchant-list-page/merchant-list-page.component';
 import { ProjectDetailsPageComponent } from './pages/project-details-page/project-details-page.component';
 import { ProjectsPageComponent } from './pages/projects-page/projects-page.component';
@@ -30,6 +31,7 @@ const routes: Routes = [
       { path: 'info', component: InfoPageComponent } ],
   },
   { path: 'psp/overview/:id', component: ProjectDetailsPageComponent },
+  { path: 'psp/merchants/:id', component: MerchantDetailPageComponent },
 ];
 
 @NgModule({
@@ -41,6 +43,7 @@ const routes: Routes = [
     HomePageComponent,
     ProjectDetailsPageComponent,
     InfoPageComponent,
+    MerchantDetailPageComponent,
     MarkdownPipe,
   ],
   imports: [

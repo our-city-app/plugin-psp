@@ -36,6 +36,12 @@ export function projectsReducer(state = initialProjectsState, action: ProjectsAc
       return { ...state, projects: onLoadableSuccess(action.payload) };
     case ProjectsActionTypes.GET_PROJECTS_FAILED:
       return { ...state, projects: onLoadableError(action.payload) };
+    case ProjectsActionTypes.GET_MERCHANT:
+      return { ...state, merchantDetails: onLoadableLoad() };
+    case ProjectsActionTypes.GET_MERCHANT_COMPLETE:
+      return { ...state, merchantDetails: onLoadableSuccess(action.payload) };
+    case ProjectsActionTypes.GET_MERCHANT_FAILED:
+      return { ...state, merchantDetails: onLoadableError(action.payload) };
     case ProjectsActionTypes.GET_MERCHANTS:
       return { ...state, merchants: onLoadableLoad() };
     case ProjectsActionTypes.GET_MERCHANTS_COMPLETE:

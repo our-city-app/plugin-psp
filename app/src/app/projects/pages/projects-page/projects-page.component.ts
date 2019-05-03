@@ -16,7 +16,7 @@ import { getCurrentProject, getCurrentProjectId, getProjects, ProjectsState } fr
   selector: 'app-projects-page',
   templateUrl: './projects-page.component.html',
   styleUrls: [ './projects-page.component.scss' ],
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectsPageComponent implements OnInit, OnDestroy {
   @ViewChild(IonSlides) slides: IonSlides;

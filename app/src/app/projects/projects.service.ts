@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AddParticipationData, City, MerchantList, Project, ProjectDetails } from './projects';
+import { AddParticipationData, City, Merchant, MerchantList, Project, ProjectDetails } from './projects';
 
 @Injectable({
   providedIn: 'root',
@@ -36,5 +36,9 @@ export class ProjectsService {
       params = params.set('cursor', cursor);
     }
     return this.http.get<MerchantList>(`${this.BASE_URL}/cities/${cityId}/merchants`, { params });
+  }
+
+  getMerchant(cityId: string, id: number) {
+    return this.http.get<Merchant>(`${this.BASE_URL}/cities/${cityId}/merchants/${id}`);
   }
 }

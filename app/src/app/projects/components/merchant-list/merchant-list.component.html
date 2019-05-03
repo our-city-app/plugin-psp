@@ -1,6 +1,6 @@
 <ion-list>
-  <ion-item *ngFor="let merchant of merchants.data?.results; trackBy: trackById" [href]="merchant.place_url"
-            target="_blank">
+  <ion-item *ngFor="let merchant of merchants.data?.results; trackBy: trackById" [routerLink]="merchant.id"
+            target="_blank" detail>
     <ion-label>
       <h3>{{ merchant.name }}</h3>
       <ng-container *ngIf="merchant.opening_hours">

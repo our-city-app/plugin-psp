@@ -73,12 +73,14 @@ export interface LatLng {
 export interface Merchant {
   city_id: string;
   formatted_address: string;
+  formatted_phone_number: string | null;
   id: number;
   location: LatLng;
   name: string;
   opening_hours: OpeningHours | null;
   place_id: string;
   place_url: string | null;
+  website: string | null;
 }
 
 export interface MerchantList {
