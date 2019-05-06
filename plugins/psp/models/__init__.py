@@ -97,8 +97,8 @@ class Project(CachedModelMixIn, NdbModel):
     @property
     def is_active(self):
         now = datetime.datetime.now()
-        has_started = self.start_date is None or self.start_date >= now
-        has_not_ended = self.end_date is None or self.end_date < now
+        has_started = self.start_date is None or self.start_date < now
+        has_not_ended = self.end_date is None or self.end_date > now
         return has_started and has_not_ended
 
     @classmethod

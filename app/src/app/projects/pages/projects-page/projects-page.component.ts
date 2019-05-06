@@ -35,11 +35,6 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.scannedQr = this.route.snapshot.queryParams.qr;
-    if (this.scannedQr) {
-      // Remove query params
-      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
-    }
     let hasRequested = false;
     this.projects$ = this.store.pipe(select(getProjects), tap(projects => {
       if (!hasRequested && projects.success && projects.data) {
@@ -50,6 +45,20 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
     this.projectList$ = this.projects$.pipe(map(p => p.data || []));
     this.project$ = this.store.pipe(select(getCurrentProject));
     this.currentProjectId$ = this.store.pipe(select(getCurrentProjectId), filterNull());
+    this.route.queryParams.subscribe(params => {
+      if (params.qr) {
+        this.scannedQr = params.qr;
+        // Remove query params
+        this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+        const subscription = this.projectList$.subscribe(list => {
+          if (list.length > 0) {
+            subscription.unsubscribe();
+            this.projectClicked(list[ 0 ]);
+            this.scannedQr = null;
+          }
+        });
+      }
+    });
   }
 
   projectClicked(project: Project) {
@@ -57,6 +66,7 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
       this.store.dispatch(new AddParticipationAction({ projectId: project.id, qrContent: this.scannedQr }));
     }
     this.router.navigate([ project.id ], { relativeTo: this.route });
+    this.scannedQr = null;
   }
 
   startScanning() {

@@ -32,7 +32,6 @@ export class AppComponent {
   initializeApp() {
     this.translate.setDefaultLang('en');
     this.platform.ready().then(() => {
-      setInterval(() => console.log(this.statusBar), 5000);
       if (rogerthat.system.os === 'android') {
         this.statusBar.styleBlackTranslucent();
       } else {
@@ -53,7 +52,7 @@ export class AppComponent {
     if (data.context && data.context.type) {
       switch (data.context.type) {
         case RogerthatContextType.QR_SCANNED:
-          this.router.navigate([ 'projects' ], { queryParams: { qr: data.context.content } });
+          this.router.navigate([ 'psp', 'overview' ], { queryParams: { qr: data.context.data.content } });
           break;
       }
     }

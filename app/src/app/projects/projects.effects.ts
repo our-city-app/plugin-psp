@@ -101,6 +101,7 @@ export class ProjectsEffects {
         options: {
           header: this.translate.instant('error'),
           message: this.getErrorMessage(action.payload),
+          buttons: [ this.translate.instant('ok') ],
         },
       }),
     ));
