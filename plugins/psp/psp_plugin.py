@@ -17,13 +17,14 @@
 
 from __future__ import unicode_literals
 
+from google.appengine.api import users
+
 from framework.plugin_loader import Plugin
 from framework.utils.plugins import Handler, Module
-from google.appengine.api import users
 from mcfw.consts import NOT_AUTHENTICATED
 from mcfw.restapi import rest_functions
 from plugins.psp.api import cities, qr_codes, projects, places
-from plugins.psp.handlers import ScheduleInvalidateCachesHandler
+from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler
 
 
 class PspPlugin(Plugin):
@@ -36,6 +37,7 @@ class PspPlugin(Plugin):
                     yield Handler(url=url, handler=handler)
         elif auth == Handler.AUTH_ADMIN:
             yield Handler(url='/admin/cron/psp/schedule_invalidate_caches', handler=ScheduleInvalidateCachesHandler)
+        yield Handler(url='/qr/<city_id:[^/]+>/<qr_id:\d+>', handler=QRHandler)
 
     def get_modules(self):
         if users.is_current_user_admin():

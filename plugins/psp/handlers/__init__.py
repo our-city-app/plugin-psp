@@ -15,11 +15,17 @@
 #
 # @@license_version:1.3@@
 
-from plugins.psp.bizz.projects import schedule_invalidate_caches
 import webapp2
+
+from plugins.psp.bizz.projects import schedule_invalidate_caches
 
 
 class ScheduleInvalidateCachesHandler(webapp2.RequestHandler):
 
     def get(self):
         schedule_invalidate_caches()
+
+
+class QRHandler(webapp2.RequestHandler):
+    def get(self, city_id, qr_id):
+        self.redirect('https:///rogerthat-server.appspot.com/install/%s' % city_id)

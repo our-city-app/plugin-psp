@@ -21,6 +21,7 @@ from google.appengine.api import users
 from framework.to import TO
 from mcfw.properties import unicode_property, long_property, typed_property, float_property, bool_property, \
     unicode_list_property
+from plugins.rogerthat_api.to import PaginatedResultTO
 
 
 class ListResultTO(TO):
@@ -196,3 +197,20 @@ class UserInfoTO(TO):
 class QRScanTO(UserInfoTO):
     qr_content = unicode_property('qr_content')
     project_id = long_property('project_id')
+
+
+class MerchantStatisticsTO(TO):
+    id = long_property('id')
+    name = unicode_property('name')
+    total = long_property('total')
+
+
+class MerchantStatisticsListTO(PaginatedResultTO):
+    project_id = long_property('project_id')
+    total = long_property('total')
+    results = typed_property('results', MerchantStatisticsTO, True)
+
+    def __init__(self, cursor, more, results, project_id, total):
+        super(MerchantStatisticsListTO, self).__init__(cursor, more, results)
+        self.project_id = project_id
+        self.total = total

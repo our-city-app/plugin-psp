@@ -15,15 +15,16 @@
 #
 # @@license_version:1.3@@
 
+import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
-import dateutil.parser
-import logging
 
-from framework.utils.cloud_tasks import run_tasks
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb, deferred
 from google.appengine.ext.ndb.query import Cursor
+
+import dateutil.parser
+from framework.utils.cloud_tasks import run_tasks
 from mcfw.cache import cached, invalidate_cache
 from mcfw.consts import MISSING
 from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, HttpConflictException
@@ -31,7 +32,7 @@ from mcfw.rpc import returns, arguments
 from plugins.psp.consts import SCHEDULED_QUEUE
 from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStatistics, \
     ProjectStatisticShard, ProjectStatisticShardConfig, Merchant, parent_key
-from plugins.psp.to import ProjectTO, QRScanTO  # @UnusedImport
+from plugins.psp.to import ProjectTO, QRScanTO, MerchantStatisticsListTO, MerchantStatisticsTO  # @UnusedImport
 
 
 def list_projects(city_id):
@@ -186,6 +187,22 @@ def get_project_stats(project_id, app_user=None):
     user_stats = app_user and models.pop(-1)
     total_count = sum(shard.total for shard in models if shard)
     return user_stats, total_count
+
+
+def get_merchant_statistics(city_id, project_id, cursor):
+    # type: (int, int, unicode) -> object
+    page_size = 50
+    cursor = Cursor.from_websafe_string(cursor) if cursor else None
+    merchant_future = Merchant.list_by_city_id(city_id).fetch_page_async(page_size, start_cursor=cursor)
+    shard_keys = ProjectStatisticShardConfig.get_all_keys(project_id)
+    stats_models = [s for s in ndb.get_multi(shard_keys) if s]  # type: list[ProjectStatisticShard]
+    total = sum(m.total for m in stats_models)
+    items, new_cursor, more = merchant_future.get_result()
+    results = [MerchantStatisticsTO(id=merchant.id,
+                                    name=merchant.name,
+                                    total=sum(m.merchants.get(str(merchant.id), 0) for m in stats_models))
+               for merchant in items]
+    return MerchantStatisticsListTO(new_cursor and new_cursor.to_websafe_string(), more, results, project_id, total)
 
 
 def list_merchants(city_id, cursor=None):

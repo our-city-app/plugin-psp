@@ -23,7 +23,7 @@ export class ProjectsService {
 
   getProjectDetails(cityId: string, projectId: number, app_user: string): Observable<ProjectDetails> {
     const params = new HttpParams({ fromObject: { app_user: encodeURIComponent(app_user) } });
-    return this.http.get<ProjectDetails>(`${this.BASE_URL}/cities/${cityId}/projects/${projectId}/statistics`, { params });
+    return this.http.get<ProjectDetails>(`${this.BASE_URL}/cities/${cityId}/projects/${projectId}/details`, { params });
   }
 
   addParticipation(data: AddParticipationData): Observable<ProjectDetails> {

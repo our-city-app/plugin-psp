@@ -203,7 +203,7 @@ class OpeningPeriod(NdbModel):
 
 class Merchant(NdbModel):
     NAMESPACE = NAMESPACE
-    name = ndb.StringProperty(indexed=False)
+    name = ndb.StringProperty()
     formatted_address = ndb.TextProperty()
     location = ndb.GeoPtProperty()
     opening_hours = ndb.LocalStructuredProperty(OpeningPeriod, repeated=True)
@@ -219,7 +219,7 @@ class Merchant(NdbModel):
 
     @classmethod
     def list_by_city_id(cls, city_id):
-        return cls.query().filter(cls.city_id == city_id)  # .order(cls.name)
+        return cls.query().filter(cls.city_id == city_id).order(cls.name)
 
     @classmethod
     def list_by_place_id(cls, place_id):

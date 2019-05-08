@@ -26,9 +26,9 @@ from plugins.psp.bizz.cities import get_city
 from plugins.psp.bizz.general import validate_city_request_auth
 from plugins.psp.bizz.places import get_opening_hours_info
 from plugins.psp.bizz.projects import create_project, update_project, get_project, list_projects, list_active_projects, \
-    qr_scanned, get_project_stats, list_merchants, get_merchant
+    qr_scanned, get_project_stats, list_merchants, get_merchant, get_merchant_statistics
 from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanTO, MerchantTO, \
-    MerchantListResultTO
+    MerchantListResultTO, MerchantStatisticsListTO
 
 
 @rest('/cities/<city_id:[^/]+>/projects', 'get', cors=True)
@@ -60,16 +60,24 @@ def api_save_project(city_id, project_id, data):
     return ProjectTO.from_model(update_project(city_id, project_id, data))
 
 
-@rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/statistics', 'get', cors=True)
+@rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/details', 'get', cors=True)
 @returns(ProjectDetailsTO)
 @arguments(city_id=unicode, project_id=long, app_user=unicode)
-def api_get_project_statistics(city_id, project_id, app_user=None):
+def api_get_project_details(city_id, project_id, app_user=None):
     project = get_project(city_id, project_id)
     user_stats, total_scan_count = get_project_stats(project_id, app_user and users.User(app_user))
     if DEBUG:
         from random import randint
         total_scan_count = randint(0, project.action_count * 1.5)
     return ProjectDetailsTO.from_model(project, user_stats, total_scan_count)
+
+
+@rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/statistics', 'get',
+      custom_auth_method=validate_city_request_auth)
+@returns(MerchantStatisticsListTO)
+@arguments(city_id=unicode, project_id=long, cursor=unicode)
+def api_get_project_statistics(city_id, project_id, cursor=None):
+    return get_merchant_statistics(city_id, project_id, cursor)
 
 
 @rest('/cities/<city_id:[^/]+>/merchants', 'get', cors=True)

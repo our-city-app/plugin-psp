@@ -58,6 +58,8 @@ def _populate_city(city, data):
     # type: (City, CityTO) -> None
     city.populate(
         avatar_url=data.avatar_url,
-        api_key=data.api_key,
         name=data.name,
+        info=data.info
     )
+    if isinstance(data, CityTO):
+        city.api_key = data.api_key

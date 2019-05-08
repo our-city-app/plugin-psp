@@ -14,11 +14,11 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
-
+from mcfw.exceptions import HttpForbiddenException
 from mcfw.restapi import rest, GenericRESTRequestHandler
 from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.cities import create_city, update_city, get_city, list_cities
-from plugins.psp.bizz.general import validate_admin_request_auth
+from plugins.psp.bizz.general import validate_admin_request_auth, validate_city_request_auth
 
 from plugins.psp.to import CityTO, AppCityTO
 
@@ -49,8 +49,16 @@ def api_get_city(city_id):
     return AppCityTO.from_model(city)
 
 
-@rest('/cities/<city_id:[^/]+>', 'put', custom_auth_method=validate_admin_request_auth)
-@returns(CityTO)
+@rest('/cities/<city_id:[^/]+>', 'put')
+@returns((CityTO, AppCityTO))
 @arguments(city_id=unicode, data=CityTO)
 def api_save_city(city_id, data):
-    return CityTO.from_model(update_city(city_id, data))
+    # type: (unicode, CityTO) -> CityTO
+    handler = GenericRESTRequestHandler()
+    handler.request = GenericRESTRequestHandler.get_current_request()
+    if validate_admin_request_auth(None, handler):
+        return CityTO.from_model(update_city(city_id, data))
+    elif validate_city_request_auth(None, handler):
+        return AppCityTO.from_model(update_city(city_id, AppCityTO.from_dict(data.to_dict())))
+    else:
+        raise HttpForbiddenException()
