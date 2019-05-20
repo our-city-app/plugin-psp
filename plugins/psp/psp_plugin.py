@@ -24,12 +24,13 @@ from framework.utils.plugins import Handler, Module
 from mcfw.consts import NOT_AUTHENTICATED
 from mcfw.restapi import rest_functions
 from plugins.psp.api import cities, qr_codes, projects, places
-from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler
+from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler, IndexPageHandler
 
 
 class PspPlugin(Plugin):
 
     def get_handlers(self, auth):
+        yield Handler(url='/', handler=IndexPageHandler)
         if auth == Handler.AUTH_UNAUTHENTICATED:
             modules = [cities, qr_codes, projects, places]
             for mod in modules:
