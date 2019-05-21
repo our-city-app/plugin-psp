@@ -23,6 +23,7 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
   project$: Observable<Loadable<ProjectDetails>>;
   projects$: Observable<Loadable<Project[]>>;
   projectList$: Observable<Project[]>;
+  hasNoProjects$: Observable<boolean>;
   currentProjectId$: Observable<number>;
   scannedQr: string | null;
   dummyLoadable = DEFAULT_LOADABLE;
@@ -39,10 +40,15 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
     this.projects$ = this.store.pipe(select(getProjects), tap(projects => {
       if (!hasRequested && projects.success && projects.data) {
         hasRequested = true;
-        this.store.dispatch(new GetProjectDetailsAction({ id: projects.data[ 0 ].id }));
+        if (projects.data.length > 0) {
+          this.store.dispatch(new GetProjectDetailsAction({ id: projects.data[ 0 ].id }));
+        }
       }
     }));
     this.projectList$ = this.projects$.pipe(map(p => p.data || []));
+    this.hasNoProjects$ = this.projects$.pipe(map(projects => {
+      return projects.success && (!projects.data || projects.data.length === 0);
+    }));
     this.project$ = this.store.pipe(select(getCurrentProject));
     this.currentProjectId$ = this.store.pipe(select(getCurrentProjectId), filterNull());
     this.route.queryParams.subscribe(params => {

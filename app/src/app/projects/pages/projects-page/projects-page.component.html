@@ -1,23 +1,28 @@
 <ion-content>
-  <div class="container">
-    <ion-spinner *ngIf="(projects$ | async)?.loading as loading"></ion-spinner>
-    <div class="project-content">
-      <ion-slides pager="false" [options]="{zoom:{enabled: false}}"
-                  (ionSlideDidChange)="loadProject()" #slider>
-        <ion-slide *ngFor="let project of projectList$ | async; let isFirst = first; let isLast = last;">
-          <div class="swiper-button-prev" (click)="slider.slidePrev()" *ngIf="!isFirst"></div>
-          <div class="swiper-button-next" (click)="slider.slideNext()" *ngIf="!isLast"></div>
-          <app-project-card [project]="project"
-                            [projectDetails]="(project$ | async)?.data?.id === project.id ? (project$ | async): dummyLoadable"
-                            (projectClicked)="projectClicked($event)"></app-project-card>
-        </ion-slide>
-      </ion-slides>
+  <ng-container *ngIf="hasNoProjects$ | async else tmpl">
+    <p>{{ 'no_active_projects' | translate }}</p>
+  </ng-container>
+  <ng-template #tmpl>
+    <div class="container">
+      <ion-spinner *ngIf="(projects$ | async)?.loading as loading"></ion-spinner>
+      <div class="project-content">
+        <ion-slides pager="false" [options]="{zoom:{enabled: false}}"
+                    (ionSlideDidChange)="loadProject()" #slider>
+          <ion-slide *ngFor="let project of projectList$ | async; let isFirst = first; let isLast = last;">
+            <div class="swiper-button-prev" (click)="slider.slidePrev()" *ngIf="!isFirst"></div>
+            <div class="swiper-button-next" (click)="slider.slideNext()" *ngIf="!isLast"></div>
+            <app-project-card [project]="project"
+                              [projectDetails]="(project$ | async)?.data?.id === project.id ? (project$ | async): dummyLoadable"
+                              (projectClicked)="projectClicked($event)"></app-project-card>
+          </ion-slide>
+        </ion-slides>
+      </div>
+      <div *ngIf="scannedQr" class="ion-text-center">
+        <b>{{ 'choose_project_for_scan' | translate }}</b>
+      </div>
+      <ion-button (click)="startScanning()" class="scan-button" *ngIf="!scannedQr">
+        <span>{{ 'scan' | translate }}</span>
+      </ion-button>
     </div>
-    <div *ngIf="scannedQr" class="ion-text-center">
-      <b>{{ 'choose_project_for_scan' | translate }}</b>
-    </div>
-    <ion-button (click)="startScanning()" class="scan-button" *ngIf="!scannedQr">
-      <span>{{ 'scan' | translate }}</span>
-    </ion-button>
-  </div>
+  </ng-template>
 </ion-content>

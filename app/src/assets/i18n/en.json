@@ -8,6 +8,7 @@
   "loading": "Loading",
   "me_x": "Me: {{ amount }}",
   "merchants": "Merchants",
+  "no_active_projects": "There aren't currently any active projects, come back later!",
   "now_x_from_y_scans": "Now: {{ current }} of {{ total }} scans",
   "ok": "Ok",
   "open_now": "Open now",
