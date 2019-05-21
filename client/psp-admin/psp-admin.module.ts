@@ -13,6 +13,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { EffectsModule } from '@ngrx/effects';
@@ -55,6 +56,7 @@ import { routes } from './psp-admin-routes';
     MatCheckboxModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
+    MatTabsModule,
   ],
   exports: [],
   declarations: [

@@ -13,8 +13,7 @@ import { CitiesState, getCity } from '../../cities.state';
 @Component({
   selector: 'psp-city-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <secondary-sidenav [sidebarItems]="items" [sidebarTitle]="title$ | async"></secondary-sidenav>`,
+  templateUrl: './city-page.component.html',
 })
 export class CityPageComponent implements OnInit {
   items: SecondarySidebarItem[] = [

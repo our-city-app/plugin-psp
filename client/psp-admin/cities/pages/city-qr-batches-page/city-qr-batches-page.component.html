@@ -1,9 +1,3 @@
-<mat-toolbar>
-  <a mat-icon-button routerLink="../..">
-    <mat-icon>arrow_back</mat-icon>
-  </a>
-  <h3>{{ 'psp.qr_codes' | translate }}</h3>
-</mat-toolbar>
 <mat-list>
   <mat-list-item *ngFor="let batch of qrBatches$ | async">
     <h4 matLine>{{ batch.date | date }}</h4>

@@ -56,11 +56,10 @@ def search_places(query, location):
                 return content['results']
             else:
                 return content['candidates']
-    else:
-        logging.error('Error while searching for places: %s', result.content)
-        err = HttpException(result.content)
-        err.http_code = result.status_code
-        raise err
+    logging.error('Error while searching for places: %s', result.content)
+    err = HttpException(result.content)
+    err.http_code = result.status_code
+    raise err
 
 
 def get_place_details(place_id):

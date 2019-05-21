@@ -22,7 +22,7 @@ from google.appengine.api import users
 from framework.bizz.authentication import get_current_session
 from framework.handlers import render_logged_in_page, render_page
 from plugins.psp.bizz.projects import schedule_invalidate_caches
-from plugins.psp.consts import NAMESPACE
+from plugins.psp.consts import PREFIX
 
 
 class ScheduleInvalidateCachesHandler(webapp2.RequestHandler):
@@ -32,14 +32,14 @@ class ScheduleInvalidateCachesHandler(webapp2.RequestHandler):
 
 
 class IndexPageHandler(webapp2.RequestHandler):
-    def get(self):
+    def get(self, *args, **kwargs):
         if get_current_session() or users.is_current_user_admin():
             render_logged_in_page(self)
         else:
             params = {
                 'login_url': users.create_login_url('/')
             }
-            render_page(self.response, path.join('unauthenticated', 'main_page.html'), plugin_name=NAMESPACE,
+            render_page(self.response, path.join('unauthenticated', 'main_page.html'), plugin_name=PREFIX,
                         template_parameters=params)
 
 

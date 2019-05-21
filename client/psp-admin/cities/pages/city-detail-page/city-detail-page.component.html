@@ -1,10 +1,4 @@
 <ng-container *ngIf="city$ | async as city">
-  <mat-toolbar>
-    <a mat-icon-button routerLink="../..">
-      <mat-icon>arrow_back</mat-icon>
-    </a>
-    <h3 *ngIf="city.data">{{ city.data.name }}</h3>
-  </mat-toolbar>
   <mat-progress-spinner diameter="50" *ngIf="city.loading"></mat-progress-spinner>
   <psp-city-detail [city]="city.data" (saved)="saveCity($event)" *ngIf="city.data"
                    [disabled]="city.loading"></psp-city-detail>

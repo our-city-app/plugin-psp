@@ -43,3 +43,6 @@ class PspPlugin(Plugin):
     def get_modules(self):
         if users.is_current_user_admin():
             yield Module('psp_admin', [], 1)
+
+    def get_client_routes(self):
+        return ['/psp<route:.*>']
