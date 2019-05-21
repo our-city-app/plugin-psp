@@ -1,6 +1,6 @@
 <ion-content>
   <ng-container *ngIf="hasNoProjects$ | async else tmpl">
-    <p>{{ 'no_active_projects' | translate }}</p>
+    <p padding>{{ 'no_active_projects' | translate }}</p>
   </ng-container>
   <ng-template #tmpl>
     <div class="container">
