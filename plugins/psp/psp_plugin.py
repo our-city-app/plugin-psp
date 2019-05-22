@@ -17,32 +17,37 @@
 
 from __future__ import unicode_literals
 
-from google.appengine.api import users
-
-from framework.plugin_loader import Plugin
+from framework.plugin_loader import Plugin, get_auth_plugin
 from framework.utils.plugins import Handler, Module
-from mcfw.consts import NOT_AUTHENTICATED
+from mcfw.consts import NOT_AUTHENTICATED, AUTHENTICATED
 from mcfw.restapi import rest_functions
-from plugins.psp.api import cities, qr_codes, projects, places
+from plugins.psp.api import cities, qr_codes, projects, places, app
+from plugins.psp.consts import ROLE_GROUPS, PspPermission
 from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler, IndexPageHandler
 
 
 class PspPlugin(Plugin):
 
+    def __init__(self, configuration=None):
+        super(PspPlugin, self).__init__(configuration)
+        get_auth_plugin().register_roles(ROLE_GROUPS)
+
     def get_handlers(self, auth):
         yield Handler(url='/', handler=IndexPageHandler)
-        if auth == Handler.AUTH_UNAUTHENTICATED:
+        if auth == Handler.AUTH_AUTHENTICATED:
             modules = [cities, qr_codes, projects, places]
             for mod in modules:
-                for url, handler in rest_functions(mod, authentication=NOT_AUTHENTICATED):
+                for url, handler in rest_functions(mod, authentication=AUTHENTICATED):
                     yield Handler(url=url, handler=handler)
+        elif auth == Handler.AUTH_UNAUTHENTICATED:
+            for url, handler in rest_functions(app, authentication=NOT_AUTHENTICATED):
+                yield Handler(url=url, handler=handler)
         elif auth == Handler.AUTH_ADMIN:
             yield Handler(url='/admin/cron/psp/schedule_invalidate_caches', handler=ScheduleInvalidateCachesHandler)
         yield Handler(url='/qr/<city_id:[^/]+>/<qr_id:\d+>', handler=QRHandler)
 
     def get_modules(self):
-        if users.is_current_user_admin():
-            yield Module('psp_admin', [], 1)
+        yield Module('psp_admin', [PspPermission.LIST_CITY], 1)
 
     def get_client_routes(self):
         return ['/psp<route:.*>']

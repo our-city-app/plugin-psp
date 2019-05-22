@@ -16,7 +16,7 @@ export const routes: Route[] = [
       meta: {},
     },
     children: [
-      { path: '', redirectTo: 'details', pathMatch: 'full' },
+      { path: '', redirectTo: 'activate-qr', pathMatch: 'full' },
       { path: 'details', component: CityDetailPageComponent },
       { path: 'qr-codes', component: CityQrBatchesPageComponent },
       { path: 'merchants', component: MerchantsListPageComponent },

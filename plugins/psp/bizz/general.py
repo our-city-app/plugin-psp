@@ -16,8 +16,9 @@
 # @@license_version:1.3@@
 from base64 import b64decode
 
-from google.appengine.api import users
-
+from framework.bizz.authentication import get_current_session
+from mcfw.restapi import GenericRESTRequestHandler
+from plugins.basic_auth.bizz.user import get_permissions_from_roles
 from plugins.psp.models import GeneralSettings
 
 
@@ -26,11 +27,18 @@ def get_general_settings():
     return GeneralSettings.create_key().get()
 
 
+def validate_session_auth(scopes):
+    session = get_current_session()
+    if session:
+        user_permissions = get_permissions_from_roles(session.scopes)
+        return any(permission in user_permissions for permission in scopes)
+    return False
+
+
 def validate_admin_request_auth(func, handler):
     # type: (function, GenericRESTRequestHandler) -> bool
-    if users.is_current_user_admin():
+    if validate_session_auth(func.meta['scopes']):
         return True
-
     auth = handler.request.headers.get('Authentication')
     if not auth:
         return False
@@ -48,9 +56,8 @@ def validate_admin_request_auth(func, handler):
 
 def validate_city_request_auth(func, handler):
     # type: (function, GenericRESTRequestHandler) -> bool
-    if users.is_current_user_admin():
+    if validate_session_auth(func.meta['scopes']):
         return True
-
     auth = handler.request.headers.get('Authentication')
     if not auth:
         return False

@@ -3,10 +3,12 @@ import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { MetaGuard } from '@ngx-meta/core';
 import { Route } from '../../framework/client/app.routes';
-import { IAppState } from '../../framework/client/ngrx';
 import { AddRoutesAction } from '../../framework/client/nav/sidebar/actions';
+import { IAppState } from '../../framework/client/ngrx';
 
-const routes: Route[] = [ {
+const routes: Route[] = [
+  { path: '', pathMatch: 'full', redirectTo: 'psp' },
+  {
   path: 'psp',
   loadChildren: './psp-admin/psp-admin.module#PspAdminModule',
   canActivate: [ MetaGuard ],

@@ -35,6 +35,11 @@
     "opening_day": "Opening day",
     "opening_hours": "Opening hours",
     "opening_time": "Opening time",
+    "perms": {
+      "merchants_admin": "Merchants admin",
+      "participation": "Participation",
+      "participation_admin": "Participation admin"
+    },
     "phone_number": "Phone number",
     "please_scan_a_qr_code": "Please scan a QR code",
     "project": "Project",

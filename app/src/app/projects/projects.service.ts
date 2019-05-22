@@ -8,7 +8,7 @@ import { AddParticipationData, City, Merchant, MerchantList, Project, ProjectDet
   providedIn: 'root',
 })
 export class ProjectsService {
-  BASE_URL = `${environment.baseUrl}/api/plugins/psp/v1.0`;
+  BASE_URL = `${environment.baseUrl}/api/plugins/psp/v1.0/app`;
   constructor(private http: HttpClient) {
   }
 
