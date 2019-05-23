@@ -38,7 +38,11 @@ def api_create_city(data):
     return CityTO.from_model(create_city(data))
 
 
-@rest('/cities/<city_id:[^/]+>', 'get', scopes=PspPermission.GET_CITY)
+def _city_auth(func, handler):
+    return validate_admin_request_auth(func, handler) or validate_city_request_auth(func, handler)
+
+
+@rest('/cities/<city_id:[^/]+>', 'get', custom_auth_method=_city_auth, scopes=PspPermission.GET_CITY)
 @returns((CityTO, AppCityTO))
 @arguments(city_id=unicode)
 def api_get_city(city_id):
@@ -52,7 +56,7 @@ def api_get_city(city_id):
     raise HttpForbiddenException()
 
 
-@rest('/cities/<city_id:[^/]+>', 'put', scopes=PspPermission.UPDATE_CITY)
+@rest('/cities/<city_id:[^/]+>', 'put', custom_auth_method=_city_auth, scopes=PspPermission.UPDATE_CITY)
 @returns((CityTO, AppCityTO))
 @arguments(city_id=unicode, data=CityTO)
 def api_save_city(city_id, data):
