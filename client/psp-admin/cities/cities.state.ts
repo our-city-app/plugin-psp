@@ -1,15 +1,15 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { DEFAULT_LIST_LOADABLE, DEFAULT_LOADABLE, Loadable } from '../../../app/src/app/loadable';
-import { MerchantList } from '../../../app/src/app/projects/projects';
-import { ActivateMerchant, City } from './cities';
+import { City, Merchant, MerchantList } from './cities';
 
 export interface CitiesState {
   places: Loadable<google.maps.places.PlaceResult[]>;
   placeDetails: Loadable<google.maps.places.PlaceResult>;
-  newMerchant: Loadable<ActivateMerchant>;
+  newMerchant: Loadable<Merchant>;
   currentCityId: string | null;
   currentCity: Loadable<City>;
   merchants: Loadable<MerchantList>;
+  merchant: Loadable<Merchant>;
 }
 
 const getFeatureState = createFeatureSelector<CitiesState>('cities');
@@ -21,6 +21,7 @@ export const initialCitiesState: CitiesState = {
   currentCityId: null,
   currentCity: DEFAULT_LOADABLE,
   merchants: DEFAULT_LOADABLE,
+  merchant: DEFAULT_LOADABLE,
 };
 
 export const getPlaces = createSelector(getFeatureState, s => s.places);
@@ -30,3 +31,4 @@ export const getCurrentCityId = createSelector(getFeatureState, s => s.currentCi
 export const getCity = createSelector(getFeatureState, s => s.currentCity);
 export const getMerchants = createSelector(getFeatureState, s => s.merchants);
 export const getMerchantsCursor = createSelector(getFeatureState, s => s.merchants.data && s.merchants.data.cursor);
+export const getMerchant = createSelector(getFeatureState, s => s.merchant);

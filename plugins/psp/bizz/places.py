@@ -37,6 +37,8 @@ _NAMES = {}
 
 def search_places(query, location):
     # type: (str, str) -> object
+    if not query and not location:
+        return []
     parameters = {
         'key': get_general_settings().google_maps_key,
         'fields': 'geometry,name,place_id,formatted_address',
@@ -49,6 +51,7 @@ def search_places(query, location):
         api = 'findplacefromtext'
     url = 'https://maps.googleapis.com/maps/api/place/%s/json?%s' % (api, urllib.urlencode(parameters))
     result = urlfetch.fetch(url)  # type: urlfetch._URLFetchResult
+    err = HttpException(result.content)
     if result.status_code == 200:
         content = json.loads(result.content)
         if content['status'] in ('OK', 'ZERO_RESULTS'):
@@ -56,9 +59,11 @@ def search_places(query, location):
                 return content['results']
             else:
                 return content['candidates']
+        else:
+            err.http_code = 400
+    else:
+        err.http_code = result.status_code
     logging.error('Error while searching for places: %s', result.content)
-    err = HttpException(result.content)
-    err.http_code = result.status_code
     raise err
 
 

@@ -19,7 +19,7 @@ export function citiesReducer(state = initialCitiesState, action: CitiesActions)
     case CitiesActionTypes.LINK_QR:
       return { ...state, newMerchant: onLoadableLoad(initialCitiesState.newMerchant.data) };
     case CitiesActionTypes.LINK_QR_COMPLETE:
-      return { ...state, newMerchant: onLoadableSuccess(action.payload) };
+      return { ...state, newMerchant: onLoadableSuccess(action.payload), merchants: initialCitiesState.merchants };
     case CitiesActionTypes.LINK_QR_FAILED:
       return { ...state, newMerchant: onLoadableError(action.payload) };
     case CitiesActionTypes.SET_CURRENT_CITY:
@@ -50,6 +50,18 @@ export function citiesReducer(state = initialCitiesState, action: CitiesActions)
       };
     case CitiesActionTypes.GET_MERCHANTS_FAILED:
       return { ...state, merchants: onLoadableError(action.payload) };
+    case CitiesActionTypes.GET_MERCHANT:
+      return { ...state, merchant: onLoadableLoad(initialCitiesState.merchant.data) };
+    case CitiesActionTypes.GET_MERCHANT_COMPLETE:
+      return { ...state, merchant: onLoadableSuccess(action.payload) };
+    case CitiesActionTypes.GET_MERCHANT_FAILED:
+      return { ...state, merchant: onLoadableError(action.payload) };
+    case CitiesActionTypes.SAVE_MERCHANT:
+      return { ...state, merchant: onLoadableLoad(action.payload) };
+    case CitiesActionTypes.SAVE_MERCHANT_COMPLETE:
+      return { ...state, merchant: onLoadableSuccess(action.payload) };
+    case CitiesActionTypes.SAVE_MERCHANT_FAILED:
+      return { ...state, merchant: onLoadableError(action.payload) };
   }
   return state;
 }

@@ -1,8 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { MerchantList } from '../../../app/src/app/projects/projects';
 import { PspConfig } from '../../psp-config';
-import { ActivateMerchant, City, Project, QRBatch } from './cities';
+import { ActivateMerchant, City, Merchant, MerchantList, Project, QRBatch } from './cities';
 
 @Injectable({ providedIn: 'root' })
 export class CitiesService {
@@ -40,7 +39,7 @@ export class CitiesService {
   }
 
   linkQR(cityId: string, data: ActivateMerchant) {
-    return this.http.post<ActivateMerchant>(`${PspConfig.API_URL}/cities/${cityId}/link`, data);
+    return this.http.post<Merchant>(`${PspConfig.API_URL}/cities/${cityId}/link`, data);
   }
 
   searchPlaces(query: string, location: string) {
@@ -58,5 +57,13 @@ export class CitiesService {
       params = new HttpParams({ fromObject: { cursor } });
     }
     return this.http.get<MerchantList>(`${PspConfig.API_URL}/cities/${cityId}/merchants`, { params });
+  }
+
+  getMerchant(id: number) {
+    return this.http.get<Merchant>(`${PspConfig.API_URL}/merchants/${id}`);
+  }
+
+  updateMerchant(merchant: Merchant) {
+    return this.http.put<Merchant>(`${PspConfig.API_URL}/merchants/${merchant.id}`, merchant);
   }
 }

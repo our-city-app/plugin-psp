@@ -1,10 +1,10 @@
 <ng-container *ngIf="(merchants$ | async).data as data">
-  <mat-list>
-    <mat-list-item *ngFor="let merchant of data.results">
+  <mat-nav-list>
+    <a mat-list-item *ngFor="let merchant of data.results" [routerLink]="[merchant.id]">
       <h4 matLine>{{ merchant.name }}</h4>
       <p matLine>{{ merchant.formatted_address }}</p>
-    </mat-list-item>
-  </mat-list>
+    </a>
+  </mat-nav-list>
   <button type="button" mat-raised-button (click)="loadMore()" *ngIf="data.more">
     {{ 'psp.load_more' | translate }}
   </button>

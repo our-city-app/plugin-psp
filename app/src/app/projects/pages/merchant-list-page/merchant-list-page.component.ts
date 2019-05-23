@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { Loadable } from '../../../loadable';
-import { MerchantList } from '../../projects';
+import { AppMerchantList } from '../../projects';
 import { GetMerchantsAction, GetMoreMerchantsAction } from '../../projects.actions';
 import { getMerchants, ProjectsState } from '../../projects.state';
 
@@ -13,7 +13,7 @@ import { getMerchants, ProjectsState } from '../../projects.state';
   encapsulation: ViewEncapsulation.None,
 })
 export class MerchantListPageComponent implements OnInit {
-  merchants$: Observable<Loadable<MerchantList>>;
+  merchants$: Observable<Loadable<AppMerchantList>>;
 
   constructor(private store: Store<ProjectsState>) {
   }

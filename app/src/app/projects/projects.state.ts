@@ -1,14 +1,14 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { DEFAULT_LIST_LOADABLE, DEFAULT_LOADABLE, Loadable } from '../loadable';
-import { City, Merchant, MerchantList, Project, ProjectDetails } from './projects';
+import { City, AppMerchant, AppMerchantList, Project, ProjectDetails } from './projects';
 
 export interface ProjectsState {
   currentProjectId: number | null;
   projects: Loadable<Project[]>;
   projectDetails: Loadable<ProjectDetails>;
-  merchants: Loadable<MerchantList>;
+  merchants: Loadable<AppMerchantList>;
   city: Loadable<City>;
-  merchantDetails: Loadable<Merchant>;
+  merchantDetails: Loadable<AppMerchant>;
 }
 
 const getFeatureState = createFeatureSelector<ProjectsState>('projects');

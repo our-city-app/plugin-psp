@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { Loadable } from '../../../../../app/src/app/loadable';
-import { MerchantList } from '../../../../../app/src/app/projects/projects';
+import { MerchantList } from '../../cities';
 import { GetMerchantsAction, GetMoreMerchantsAction } from '../../cities.actions';
 import { CitiesState, getMerchants } from '../../cities.state';
 

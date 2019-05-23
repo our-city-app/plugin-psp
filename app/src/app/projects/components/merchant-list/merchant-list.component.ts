@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { IonInfiniteScroll } from '@ionic/angular';
 import { Loadable } from '../../../loadable';
-import { Merchant, MerchantList } from '../../projects';
+import { AppMerchant, AppMerchantList } from '../../projects';
 
 @Component({
   selector: 'merchant-list',
@@ -11,7 +11,7 @@ import { Merchant, MerchantList } from '../../projects';
 })
 export class MerchantListComponent implements OnChanges {
   @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
-  @Input() merchants: Loadable<MerchantList>;
+  @Input() merchants: Loadable<AppMerchantList>;
   @Output() loadMore = new EventEmitter();
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -22,5 +22,5 @@ export class MerchantListComponent implements OnChanges {
     }
   }
 
-  trackById = (index: number, item: Merchant) => item.id;
+  trackById = (index: number, item: AppMerchant) => item.id;
 }

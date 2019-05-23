@@ -21,7 +21,7 @@ from framework.plugin_loader import Plugin, get_auth_plugin
 from framework.utils.plugins import Handler, Module
 from mcfw.consts import NOT_AUTHENTICATED, AUTHENTICATED
 from mcfw.restapi import rest_functions
-from plugins.psp.api import cities, qr_codes, projects, places, app
+from plugins.psp.api import cities, qr_codes, projects, places, app, merchants
 from plugins.psp.consts import ROLE_GROUPS, PspPermission
 from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler, IndexPageHandler
 
@@ -35,7 +35,7 @@ class PspPlugin(Plugin):
     def get_handlers(self, auth):
         yield Handler(url='/', handler=IndexPageHandler)
         if auth == Handler.AUTH_AUTHENTICATED:
-            modules = [cities, qr_codes, projects, places]
+            modules = [cities, qr_codes, projects, places, merchants]
             for mod in modules:
                 for url, handler in rest_functions(mod, authentication=AUTHENTICATED):
                     yield Handler(url=url, handler=handler)

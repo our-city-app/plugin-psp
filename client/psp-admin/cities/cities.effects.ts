@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { catchError, debounceTime, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { DialogService } from '../../../../framework/client/dialog';
 import { filterNull } from '../../../../framework/client/ngrx';
 import {
@@ -11,6 +13,9 @@ import {
   CitiesActionTypes,
   GetCityCompleteAction,
   GetCityFailedAction,
+  GetMerchantAction,
+  GetMerchantCompleteAction,
+  GetMerchantFailedAction,
   GetMerchantsAction,
   GetMerchantsCompleteAction,
   GetMerchantsFailedAction,
@@ -24,6 +29,9 @@ import {
   SaveCityAction,
   SaveCityCompleteAction,
   SaveCityFailedAction,
+  SaveMerchantAction,
+  SaveMerchantCompleteAction,
+  SaveMerchantFailedAction,
   SearchPlacesAction,
   SearchPlacesCompleteAction,
   SearchPlacesFailedAction,
@@ -36,6 +44,7 @@ export class CitiesEffects {
 
   @Effect() searchPlaces$ = this.actions$.pipe(
     ofType<SearchPlacesAction>(CitiesActionTypes.SEARCH_PLACES),
+    distinctUntilChanged(),
     debounceTime(700),
     switchMap(action => this.citiesService.searchPlaces(action.payload.query, action.payload.location).pipe(
       map(data => new SearchPlacesCompleteAction(data)),
@@ -59,11 +68,22 @@ export class CitiesEffects {
   @Effect({ dispatch: false }) afterFailed$ = this.actions$.pipe(
     ofType<LinkQRActionFailedAction>(CitiesActionTypes.LINK_QR_FAILED),
     tap(action => {
+      const message = action.payload.error && action.payload.error.error ?
+        this.translate.instant(action.payload.error.error, action.payload.error.data)
+        : this.translate.instant('errors.unknown');
       this.dialogService.openAlert({
         ok: this.translate.instant('psp.ok'),
-        message: this.translate.instant(action.payload.error.error, action.payload.error.data),
+        message,
         title: this.translate.instant('psp.error'),
       });
+    }),
+  );
+
+  @Effect({ dispatch: false }) afterQrLinked$ = this.actions$.pipe(
+    ofType<LinkQRActionCompleteAction>(CitiesActionTypes.LINK_QR_COMPLETE),
+    tap(action => {
+      this.router.navigate([ 'psp', action.payload.city_id, 'merchants', action.payload.id ]);
+      this.snackBar.open(this.translate.instant('psp.merchant_created'), this.translate.instant('psp.ok'), { duration: 5000 });
     }),
   );
 
@@ -100,10 +120,26 @@ export class CitiesEffects {
       catchError(err => of(new GetMerchantsFailedAction(err)))),
     ));
 
+  @Effect() getMerchant$ = this.actions$.pipe(
+    ofType<GetMerchantAction>(CitiesActionTypes.GET_MERCHANT),
+    switchMap(action => this.citiesService.getMerchant(action.payload.id).pipe(
+      map(data => new GetMerchantCompleteAction(data)),
+      catchError(err => of(new GetMerchantFailedAction(err)))),
+    ));
+
+  @Effect() saveMerchant$ = this.actions$.pipe(
+    ofType<SaveMerchantAction>(CitiesActionTypes.SAVE_MERCHANT),
+    switchMap(action => this.citiesService.updateMerchant(action.payload).pipe(
+      map(data => new SaveMerchantCompleteAction(data)),
+      catchError(err => of(new SaveMerchantFailedAction(err)))),
+    ));
+
   constructor(private actions$: Actions<CitiesActions>,
               private store: Store<CitiesState>,
               private citiesService: CitiesService,
               private dialogService: DialogService,
+              private snackBar: MatSnackBar,
+              private router: Router,
               private translate: TranslateService) {
   }
 }

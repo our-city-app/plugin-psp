@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb, deferred
+from google.appengine.ext.ndb import GeoPt
 from google.appengine.ext.ndb.query import Cursor
 
 import dateutil.parser
@@ -31,8 +32,9 @@ from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, Http
 from mcfw.rpc import returns, arguments
 from plugins.psp.consts import SCHEDULED_QUEUE
 from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, ProjectUserStatistics, \
-    ProjectStatisticShard, ProjectStatisticShardConfig, Merchant, parent_key
-from plugins.psp.to import ProjectTO, QRScanTO, MerchantStatisticsListTO, MerchantStatisticsTO  # @UnusedImport
+    ProjectStatisticShard, ProjectStatisticShardConfig, Merchant, parent_key, OpeningPeriod
+from plugins.psp.to import ProjectTO, QRScanTO, MerchantStatisticsListTO, MerchantStatisticsTO, \
+    MerchantTO  # @UnusedImport
 
 
 def list_projects(city_id):
@@ -216,6 +218,30 @@ def list_merchants(city_id, cursor=None):
 def get_merchant(merchant_id):
     # type: (long) -> Merchant
     return Merchant.create_key(merchant_id).get()
+
+
+def update_merchant(merchant_id, data):
+    # type: (int, MerchantTO) -> Merchant
+    merchant = get_merchant(merchant_id)
+    _update_merchant(merchant, data)
+    merchant.put()
+    return merchant
+
+
+def _update_merchant(merchant, data):
+    place_id = data.place_id if data.place_id is not MISSING and data.place_id else merchant.place_id
+    if place_id and place_id != merchant.place_id:
+        other_merchant = Merchant.list_by_place_id(data.place_id).get()
+        if other_merchant:
+            raise HttpConflictException('psp.errors.merchant_exists', {'id': other_merchant.id,
+                                                                       'name': other_merchant.name})
+    merchant.populate(name=data.name,
+                      formatted_address=data.formatted_address,
+                      location=GeoPt(data.location.lat, data.location.lon),
+                      opening_hours=[OpeningPeriod.from_to(period) for period in data.opening_hours],
+                      place_id=place_id,
+                      formatted_phone_number=data.formatted_phone_number,
+                      website=data.website)
 
 
 def schedule_invalidate_caches():

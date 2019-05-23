@@ -17,15 +17,17 @@
     "error": "Error",
     "errors": {
       "invalid_qr_code": "Invalid QR code",
-      "merchant_exists": "This merchant already exists",
+      "merchant_exists": "A merchant already exists for this place ({{ id }} - {{ name }})",
       "qr_already_linked": "This QR code has already been linked to a merchant: {{ name }}",
       "qr_code_for_different_city": "This is not a QR code for {{ expected }}, but for {{ actual }}",
-      "qr_code_not_found": "QR code not found"
+      "qr_code_not_found": "QR code not found",
+      "unknown": "An unknown error has occurred."
     },
     "friday": "Friday",
     "generate_how_many_qr_codes": "How many QR codes should be generated?",
     "generate_qr_codes": "Generate QR codes",
     "link_qr_code": "Link QR code",
+    "merchant_created": "Merchant created",
     "merchants": "Merchants",
     "monday": "Monday",
     "name": "Name",

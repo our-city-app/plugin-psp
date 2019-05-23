@@ -43,7 +43,7 @@ class CityTO(AppCityTO):
 
 class GeoPointTO(TO):
     lat = float_property('lat')
-    lng = float_property('lng')
+    lon = float_property('long')
 
 
 class OpeningHourTO(TO):
@@ -68,7 +68,7 @@ class OpeningInfoTO(TO):
     weekday_text = unicode_list_property('weekday_text')
 
 
-class MerchantTO(TO):
+class AppMerchantTO(TO):
     id = long_property('id')
     name = unicode_property('name')
     formatted_address = unicode_property('formatted_address')
@@ -108,7 +108,7 @@ class MerchantTO(TO):
 
 
 class MerchantListResultTO(ListResultTO):
-    results = typed_property('results', MerchantTO, True)
+    results = typed_property('results', AppMerchantTO, True)
 
 
 class QRBatchTO(TO):
@@ -157,11 +157,6 @@ class ProjectDetailsTO(ProjectTO):
         return details
 
 
-class LocationTO(TO):
-    lat = float_property('lat')
-    lng = float_property('lng')
-
-
 class DayTimeTO(TO):
     time = unicode_property('time')
     day = long_property('day')
@@ -172,15 +167,21 @@ class OpeningHoursTO(TO):
     open = typed_property('open', DayTimeTO)
 
 
-class LinkQRTO(TO):
-    qr_content = unicode_property('qr_content')
+class MerchantTO(TO):
+    id = long_property('id')
+    city_id = unicode_property('city_id')
     name = unicode_property('name')
     formatted_address = unicode_property('formatted_address')
-    location = typed_property('location', LocationTO)  # type: LocationTO
+    location = typed_property('location', GeoPointTO)  # type: LocationTO
     opening_hours = typed_property('opening_hours', OpeningHoursTO, True)  # type: list[OpeningHoursTO]
     place_id = unicode_property('place_id')
     formatted_phone_number = unicode_property('formatted_phone_number')
     website = unicode_property('website')
+
+
+class LinkQRTO(TO):
+    qr_content = unicode_property('qr_content')
+    merchant = typed_property('merchant', MerchantTO)  # type: MerchantTO
 
 
 class UserInfoTO(TO):

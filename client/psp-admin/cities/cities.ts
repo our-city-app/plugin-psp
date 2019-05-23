@@ -1,5 +1,4 @@
-import LatLngLiteral = google.maps.LatLngLiteral;
-import OpeningHoursTime = google.maps.places.OpeningHoursTime;
+import { GeoPoint, OpeningHourPeriod } from '../../../app/src/app/projects/projects';
 
 export interface City {
   id: string;
@@ -29,19 +28,29 @@ export interface Project {
   target_scan_count: number;
 }
 
+// TODO: remove when using TS 3.5+ (builtin)
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+
 export interface ActivateMerchant {
+  qr_content: string | null;
+  merchant: Omit<Merchant, 'id' | 'city_id'>;
+}
+
+export interface Merchant {
+  id: number;
+  city_id: string;
   formatted_address: string | null;
   formatted_phone_number: string | null;
-  location: LatLngLiteral | null;
+  location: GeoPoint | null;
   name: string | null;
-  opening_hours: OpeningHours[];
+  opening_hours: OpeningHourPeriod[];
   place_id: string | null;
-  qr_content: string | null;
   website: string | null;
 }
 
-export interface OpeningHours {
-  open: Pick<OpeningHoursTime, 'day' | 'time'>;
-  close?: Pick<OpeningHoursTime, 'day' | 'time'>;
+export interface MerchantList {
+  results: Merchant[];
+  cursor: string | null;
+  more: boolean;
 }
-

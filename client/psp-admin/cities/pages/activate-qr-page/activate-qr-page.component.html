@@ -1,4 +1,4 @@
-<form (ngSubmit)="linkQr(form)" class="psp-default-component-margin container" #form="ngForm">
+<form class="container" #form="ngForm">
   <div>
     <button type="button" mat-raised-button (click)="scanQR()">
       {{ 'psp.scan_qr_code' | translate }}
@@ -22,35 +22,7 @@
     <input matInput name="qr_content" [ngModel]="data.qr_content" readonly required>
     <mat-error>{{ 'psp.please_scan_a_qr_code' | translate }}</mat-error>
   </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{ 'psp.name' | translate }}</mat-label>
-    <input name="name" matInput [(ngModel)]="data.name" (ngModelChange)="nameChanged($event)" [matAutocomplete]="auto"
-           required>
-    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="setPlace($event)">
-      <mat-option *ngFor="let option of (places$ | async).data" [value]="option">
-        {{ option.name }}
-      </mat-option>
-    </mat-autocomplete>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{ 'psp.address' | translate }}</mat-label>
-    <input name="address" matInput [(ngModel)]="data.formatted_address" required>
-    <mat-hint *ngIf="positionDenied">{{ 'psp.allow_gps_location_for_better_results' | translate }}</mat-hint>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{ 'psp.phone_number' | translate }}</mat-label>
-    <input type="tel" name="formatted_phone_number" matInput [(ngModel)]="data.formatted_phone_number">
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>{{ 'psp.website' | translate }}</mat-label>
-    <input type="url" name="website" matInput [(ngModel)]="data.website">
-  </mat-form-field>
-  <h4>{{ 'psp.opening_hours' | translate }}</h4>
-  <psp-opening-hours [openingHours]="data.opening_hours" (changed)="setOpeningHours($event)"></psp-opening-hours>
-  <div class="submit-btn" *ngIf="activateStatus$ | async as status">
-    <mat-spinner [diameter]="40" *ngIf="status.loading"></mat-spinner>
-    <button mat-raised-button [disabled]="status.loading">
-      {{ 'psp.submit' | translate }}
-    </button>
-  </div>
+  <psp-edit-merchant [merchant]="data.merchant"
+                     [status]="activateStatus$ | async"
+                     (saved)="linkQr(form, $event)"></psp-edit-merchant>
 </form>

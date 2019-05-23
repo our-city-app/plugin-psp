@@ -26,9 +26,9 @@ from plugins.psp.bizz.cities import get_city
 from plugins.psp.bizz.general import validate_city_request_auth
 from plugins.psp.bizz.places import get_opening_hours_info
 from plugins.psp.bizz.projects import create_project, update_project, get_project, list_projects, get_project_stats, \
-    list_merchants, get_merchant, get_merchant_statistics
+    list_merchants, get_merchant_statistics
 from plugins.psp.consts import PspPermission
-from plugins.psp.to import ProjectTO, ProjectDetailsTO, MerchantTO, MerchantListResultTO, MerchantStatisticsListTO
+from plugins.psp.to import ProjectTO, ProjectDetailsTO, AppMerchantTO, MerchantListResultTO, MerchantStatisticsListTO
 
 
 @rest('/cities/<city_id:[^/]+>/projects', 'get', custom_auth_method=validate_city_request_auth,
@@ -92,7 +92,7 @@ def api_get_project_statistics(city_id, project_id, cursor=None):
       scopes=PspPermission.LIST_MERCHANTS)
 @returns(MerchantListResultTO)
 @arguments(city_id=unicode, lang=unicode, cursor=unicode)
-def api_get_merchants(city_id, lang=None, cursor=None):
+def api_get_city_merchants(city_id, lang=None, cursor=None):
     return get_merchants(city_id, lang, cursor)
 
 
@@ -100,17 +100,6 @@ def get_merchants(city_id, lang, cursor):
     lang = get_supported_locale(lang) if lang else get_browser_language()
     city = get_city(city_id)
     merchants, new_cursor, has_more = list_merchants(city_id, cursor)
-    results = [MerchantTO.from_model(m, *get_opening_hours_info(m.opening_hours, city.timezone, lang))
+    results = [AppMerchantTO.from_model(m, *get_opening_hours_info(m.opening_hours, city.timezone, lang))
                for m in merchants]
     return MerchantListResultTO(results=results, cursor=new_cursor, more=has_more)
-
-
-@rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'get', custom_auth_method=validate_city_request_auth,
-      scopes=PspPermission.GET_MERCHANT)
-@returns(MerchantTO)
-@arguments(city_id=unicode, merchant_id=(int, long), lang=unicode)
-def api_get_merchant(city_id, merchant_id, lang=None):
-    lang = get_supported_locale(lang) if lang else get_browser_language()
-    city = get_city(city_id)
-    merchant = get_merchant(merchant_id)
-    return MerchantTO.from_model(merchant, *get_opening_hours_info(merchant.opening_hours, city.timezone, lang))

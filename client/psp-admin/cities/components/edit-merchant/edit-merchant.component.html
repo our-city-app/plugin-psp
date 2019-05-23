@@ -1,0 +1,35 @@
+<div class="fields">
+  <mat-form-field>
+    <mat-label>{{ 'psp.name' | translate }}</mat-label>
+    <input name="name" matInput [(ngModel)]="merchant.name" (ngModelChange)="nameChanged($event)"
+           [matAutocomplete]="auto" required>
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="setPlace($event)">
+      <mat-option *ngFor="let option of (places$ | async).data" [value]="option">
+        {{ option.name }}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'psp.address' | translate }}</mat-label>
+    <input name="address" matInput [(ngModel)]="merchant.formatted_address" required>
+    <mat-hint *ngIf="positionDenied">{{ 'psp.allow_gps_location_for_better_results' | translate }}</mat-hint>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'psp.phone_number' | translate }}</mat-label>
+    <input type="tel" name="formatted_phone_number" matInput [(ngModel)]="merchant.formatted_phone_number">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'psp.website' | translate }}</mat-label>
+    <input type="url" name="website" matInput [(ngModel)]="merchant.website">
+  </mat-form-field>
+  <h4>{{ 'psp.opening_hours' | translate }}</h4>
+  <psp-opening-hours [openingHours]="merchant.opening_hours"
+                     (changed)="setOpeningHours($event)"></psp-opening-hours>
+
+</div>
+<div class="submit-btn">
+  <mat-spinner [diameter]="40" *ngIf="status.loading"></mat-spinner>
+  <button mat-raised-button [disabled]="status.loading" (click)="saved.emit(merchant)">
+    {{ 'psp.submit' | translate }}
+  </button>
+</div>

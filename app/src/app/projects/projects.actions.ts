@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertOptions, LoadingOptions } from '@ionic/core';
 import { Action } from '@ngrx/store';
-import { City, Merchant, MerchantList, Project, ProjectDetails } from './projects';
+import { City, AppMerchant, AppMerchantList, Project, ProjectDetails } from './projects';
 
 export const enum ProjectsActionTypes {
   GET_CITY = '[projects] Get city',
@@ -120,7 +120,7 @@ export class GetMerchantAction implements Action {
 export class GetMerchantCompleteAction implements Action {
   readonly type = ProjectsActionTypes.GET_MERCHANT_COMPLETE;
 
-  constructor(public payload: Merchant) {
+  constructor(public payload: AppMerchant) {
   }
 }
 
@@ -138,7 +138,7 @@ export class GetMerchantsAction implements Action {
 export class GetMerchantsCompleteAction implements Action {
   readonly type = ProjectsActionTypes.GET_MERCHANTS_COMPLETE;
 
-  constructor(public payload: MerchantList) {
+  constructor(public payload: AppMerchantList) {
   }
 }
 
@@ -156,7 +156,7 @@ export class GetMoreMerchantsAction implements Action {
 export class GetMoreMerchantsCompleteAction implements Action {
   readonly type = ProjectsActionTypes.GET_MORE_MERCHANTS_COMPLETE;
 
-  constructor(public payload: MerchantList) {
+  constructor(public payload: AppMerchantList) {
   }
 }
 

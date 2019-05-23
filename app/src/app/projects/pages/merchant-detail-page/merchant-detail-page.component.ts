@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Loadable } from '../../../loadable';
 import { encodeURIObject, filterNull } from '../../../util';
-import { Merchant } from '../../projects';
+import { AppMerchant } from '../../projects';
 import { GetMerchantAction } from '../../projects.actions';
 import { getMerchantDetails, ProjectsState } from '../../projects.state';
 
@@ -16,7 +16,7 @@ import { getMerchantDetails, ProjectsState } from '../../projects.state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MerchantDetailPageComponent implements OnInit {
-  merchant$: Observable<Loadable<Merchant>>;
+  merchant$: Observable<Loadable<AppMerchant>>;
   mapsUrl$: Observable<string>;
 
   constructor(private store: Store<ProjectsState>,

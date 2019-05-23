@@ -1,7 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Action } from '@ngrx/store';
-import { MerchantList } from '../../../app/src/app/projects/projects';
-import { ActivateMerchant, City } from './cities';
+import { ActivateMerchant, City, Merchant, MerchantList } from './cities';
 
 export const enum CitiesActionTypes {
   SEARCH_PLACES = '[cities] Search places',
@@ -24,6 +23,12 @@ export const enum CitiesActionTypes {
   GET_MORE_MERCHANTS = '[cities] Get more merchants',
   GET_MERCHANTS_COMPLETE = '[cities] Get merchants complete',
   GET_MERCHANTS_FAILED = '[cities] Get merchants failed',
+  GET_MERCHANT = '[cities] Get merchant',
+  GET_MERCHANT_COMPLETE = '[cities] Get merchant complete',
+  GET_MERCHANT_FAILED = '[cities] Get merchant failed',
+  SAVE_MERCHANT = '[cities] Save merchant',
+  SAVE_MERCHANT_COMPLETE = '[cities] Save merchant complete',
+  SAVE_MERCHANT_FAILED = '[cities] Save merchant failed',
 }
 
 export class SearchPlacesAction implements Action {
@@ -81,7 +86,7 @@ export class LinkQRActionAction implements Action {
 export class LinkQRActionCompleteAction implements Action {
   readonly type = CitiesActionTypes.LINK_QR_COMPLETE;
 
-  constructor(public payload: ActivateMerchant) {
+  constructor(public payload: Merchant) {
   }
 
 }
@@ -164,6 +169,50 @@ export class GetMerchantsFailedAction implements Action {
   }
 }
 
+export class GetMerchantAction implements Action {
+  readonly type = CitiesActionTypes.GET_MERCHANT;
+
+  constructor(public payload: { id: number }) {
+  }
+}
+
+export class GetMerchantCompleteAction implements Action {
+  readonly type = CitiesActionTypes.GET_MERCHANT_COMPLETE;
+
+  constructor(public payload: Merchant) {
+  }
+
+}
+
+export class GetMerchantFailedAction implements Action {
+  readonly type = CitiesActionTypes.GET_MERCHANT_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
+  }
+}
+
+export class SaveMerchantAction implements Action {
+  readonly type = CitiesActionTypes.SAVE_MERCHANT;
+
+  constructor(public payload: Merchant) {
+  }
+}
+
+export class SaveMerchantCompleteAction implements Action {
+  readonly type = CitiesActionTypes.SAVE_MERCHANT_COMPLETE;
+
+  constructor(public payload: Merchant) {
+  }
+
+}
+
+export class SaveMerchantFailedAction implements Action {
+  readonly type = CitiesActionTypes.SAVE_MERCHANT_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
+  }
+}
+
 export type CitiesActions = SearchPlacesAction
   | SearchPlacesCompleteAction
   | SearchPlacesFailedAction
@@ -183,6 +232,12 @@ export type CitiesActions = SearchPlacesAction
   | GetMerchantsAction
   | GetMoreMerchantsAction
   | GetMerchantsCompleteAction
-  | GetMerchantsFailedAction;
+  | GetMerchantsFailedAction
+  | GetMerchantAction
+  | GetMerchantCompleteAction
+  | GetMerchantFailedAction
+  | SaveMerchantAction
+  | SaveMerchantCompleteAction
+  | SaveMerchantFailedAction;
 
 

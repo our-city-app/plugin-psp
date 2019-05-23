@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { OpeningHours } from '../../cities';
+import { OpeningHourPeriod } from '../../../../../app/src/app/projects/projects';
 
 
 @Component({
@@ -28,8 +28,8 @@ export class OpeningHoursComponent implements OnChanges {
   ];
   HOUR_SLOTS = this.getHourSlots();
   checkedOptions: { [ key: number ]: boolean };
-  @Input() openingHours: OpeningHours[];
-  @Output() changed = new EventEmitter<OpeningHours[]>();
+  @Input() openingHours: OpeningHourPeriod[];
+  @Output() changed = new EventEmitter<OpeningHourPeriod[]>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.openingHours) {
@@ -52,7 +52,7 @@ export class OpeningHoursComponent implements OnChanges {
     return slots;
   }
 
-  setCloseTime(openingHour: OpeningHours) {
+  setCloseTime(openingHour: OpeningHourPeriod) {
     openingHour.close = { day: openingHour.open.day, time: '0000' };
     this.setChanged();
   }
@@ -66,7 +66,7 @@ export class OpeningHoursComponent implements OnChanges {
     this.setChanged();
   }
 
-  deleteOpeningHour(openingHour: OpeningHours) {
+  deleteOpeningHour(openingHour: OpeningHourPeriod) {
     this.openingHours = this.openingHours.filter(h => h !== openingHour);
     this.setChanged();
   }

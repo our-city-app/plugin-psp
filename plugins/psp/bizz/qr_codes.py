@@ -27,6 +27,7 @@ from mcfw.consts import DEBUG, MISSING
 from mcfw.exceptions import HttpBadRequestException, HttpNotFoundException, HttpConflictException
 from plugins.psp.bizz.cities import get_city
 from plugins.psp.bizz.general import get_general_settings
+from plugins.psp.bizz.projects import _update_merchant
 from plugins.psp.consts import NAMESPACE
 from plugins.psp.models import QRBatch, QRCode, Merchant, OpeningPeriod
 from plugins.psp.to import QRBatchTO, LinkQRTO
@@ -73,7 +74,7 @@ def get_serving_url(filename):
 def link_qr_code(city_id, data):
     # type: (unicode, LinkQRTO) -> Merchant
     get_city(city_id)
-    place_id = MISSING.default(data.place_id, None)
+    place_id = MISSING.default(data.merchant.place_id, None)
     url = urlparse(data.qr_content)
     split_path = url.path.strip('/').split('/')
     try:
@@ -93,17 +94,12 @@ def link_qr_code(city_id, data):
         name = Merchant.create_key(qr.merchant_id).get().name
         raise HttpConflictException('psp.errors.qr_already_linked', {'id': qr.merchant_id, 'name': name})
     if place_id:
-        merchant = Merchant.list_by_place_id(data.place_id).get()
+        merchant = Merchant.list_by_place_id(data.merchant.place_id).get()
         if merchant:
             raise HttpConflictException('psp.errors.merchant_exists', {'merchant_id': merchant.id})
-    merchant = Merchant(name=data.name,
-                        formatted_address=data.formatted_address,
-                        location=GeoPt(data.location.lat, data.location.lng),
-                        opening_hours=[OpeningPeriod.from_to(period) for period in data.opening_hours],
-                        city_id=city_id,
-                        place_id=place_id,
-                        formatted_phone_number=data.formatted_phone_number,
-                        website=data.website)
+    merchant = Merchant()
+    merchant.city_id = city_id
+    _update_merchant(merchant, data.merchant)
     merchant.put()
     qr.merchant_id = merchant.id
     qr.put()

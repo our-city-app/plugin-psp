@@ -65,17 +65,17 @@ export interface OpeningHours {
   weekday_text: string[];
 }
 
-export interface LatLng {
+export interface GeoPoint {
   lat: number;
-  lng: number;
+  lon: number;
 }
 
-export interface Merchant {
+export interface AppMerchant {
   city_id: string;
   formatted_address: string;
   formatted_phone_number: string | null;
   id: number;
-  location: LatLng;
+  location: GeoPoint;
   name: string;
   opening_hours: OpeningHours | null;
   place_id: string;
@@ -83,8 +83,8 @@ export interface Merchant {
   website: string | null;
 }
 
-export interface MerchantList {
-  results: Merchant[];
+export interface AppMerchantList {
+  results: AppMerchant[];
   cursor: string | null;
   more: boolean;
 }

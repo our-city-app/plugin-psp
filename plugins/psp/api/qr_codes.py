@@ -14,11 +14,8 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
-from framework.bizz.authentication import get_browser_language
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
-from plugins.psp.bizz.cities import get_city
-from plugins.psp.bizz.places import get_opening_hours_info
 from plugins.psp.bizz.qr_codes import list_qr_batches, download_qr_code_batch, create_qr_batch, link_qr_code
 from plugins.psp.consts import PspPermission
 from plugins.psp.to import QRBatchTO, LinkQRTO, MerchantTO
@@ -50,7 +47,4 @@ def api_download_qr_batch(batch_id):
 @returns(MerchantTO)
 @arguments(city_id=unicode, data=LinkQRTO)
 def api_link_qr(city_id, data):
-    lang = get_browser_language()
-    merchant = link_qr_code(city_id, data)
-    city = get_city(city_id)
-    return MerchantTO.from_model(merchant, *get_opening_hours_info(merchant.opening_hours, city.timezone, lang))
+    return MerchantTO.from_model(link_qr_code(city_id, data))
