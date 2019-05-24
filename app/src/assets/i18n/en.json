@@ -15,11 +15,12 @@
   "overview": "Overview",
   "participation_moneybox": "Participation moneybox",
   "psp.errors": {
-    "already_scanned_recently": "You have recently already participated for this merchant, try again later!",
+    "already_scanned_recently": "You have recently already scanned for this merchant, try again later! Your last scan was on {{ date }}.",
     "invalid_qr_code": "Invalid QR code",
-    "project_not_active": "This project is no longer active, you cannot add new actions.",
+    "project_not_active": "This project is no longer active, you currently cannot add any new scans.",
     "qr_code_not_found": "QR code not found",
-    "qr_code_not_linked": "This QR code has not been linked to a merchant yet"
+    "qr_code_not_linked": "This QR code has not been linked to a merchant yet",
+    "unknown": "An unknown error has occurred, please try again later."
   },
   "scan": "Scan",
   "select_a_project": "Select a project",

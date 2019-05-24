@@ -249,10 +249,10 @@ class Scan(NdbModel):
         return cls.query(ancestor=parent_key(app_user)).filter(Scan.project_id == project_id)
 
     @classmethod
-    def has_recent_scan(cls, app_user, merchant_id, max_date_time):
+    def get_recent_scan(cls, app_user, merchant_id, max_date_time):
         return cls.query(ancestor=parent_key(app_user)) \
             .filter(Scan.merchant_id == merchant_id) \
-            .filter(Scan.timestamp > max_date_time).get() is not None
+            .filter(Scan.timestamp > max_date_time).get()
 
 
 class ProjectStatisticShard(NdbModel):

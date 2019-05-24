@@ -156,8 +156,10 @@ def qr_scanned(data):
 @ndb.transactional(xg=True)
 def add_project_scan(project_shard_config, project_id, merchant_id, app_user, min_interval):
     # type: (ProjectStatisticShardConfig, long, long, users.User, long) -> ProjectUserStatistics
-    if Scan.has_recent_scan(app_user, merchant_id, datetime.now() - timedelta(seconds=min_interval)):
-        raise HttpConflictException('psp.errors.already_scanned_recently')
+    scan = Scan.get_recent_scan(app_user, merchant_id, datetime.now() - timedelta(seconds=min_interval))
+    if scan:
+        raise HttpConflictException('psp.errors.already_scanned_recently',
+                                    {'date': scan.timestamp.isoformat().decode('utf-8') + u'Z'})
 
     scan = Scan(parent=parent_key(app_user), merchant_id=merchant_id, project_id=project_id)
 

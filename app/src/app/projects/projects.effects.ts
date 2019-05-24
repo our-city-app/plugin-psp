@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
@@ -80,12 +81,8 @@ export class ProjectsEffects {
           email: rogerthat.user.account,
         }).pipe(
           map(data => new AddParticipationCompleteAction(data)),
-          tap(data => {
-            this.router.navigate([ '/projects', data.payload.id ]);
-          }),
-          catchError(err => {
-            return of(new AddParticipationFailedAction(err));
-          }));
+          tap(data => this.router.navigate([ '/projects', data.payload.id ])),
+          catchError(err => of(new AddParticipationFailedAction(err))));
       },
     ));
 
@@ -96,14 +93,16 @@ export class ProjectsEffects {
   @Effect() afterAddParticipationFailed$ = this.actions$.pipe(
     ofType<AddParticipationFailedAction>(ProjectsActionTypes.ADD_PARTICIPATION_FAILED),
     tap(() => this.store.dispatch(new DismissDialogAction('loading'))),
-    map(action => new ShowDialogAction({
-        type: 'dialog',
-        options: {
-          header: this.translate.instant('error'),
-          message: this.getErrorMessage(action.payload),
-          buttons: [ this.translate.instant('ok') ],
-        },
-      }),
+    map(action => {
+
+        return new ShowDialogAction({
+          type: 'dialog',
+          options: {
+            ...this.getErrorMessage(action.payload),
+            buttons: [ this.translate.instant('ok') ],
+          },
+        });
+      },
     ));
 
   @Effect() getMerchant$ = this.actions$.pipe(
@@ -155,11 +154,23 @@ export class ProjectsEffects {
     ofType<DismissDialogAction>(ProjectsActionTypes.DISMISS_DIALOG),
     switchMap(action => action.dialogType === 'loading' ? this.loadingController.dismiss() : this.alertController.dismiss()));
 
-  private getErrorMessage(response: HttpErrorResponse) {
+  private getErrorMessage(response: HttpErrorResponse): { header: string, message: string } {
+    const result = {
+      header: this.translate.instant('error'),
+      message: '',
+    };
     if (response.status.toString().startsWith('4') && response.error && response.error.error) {
-      return this.translate.instant(response.error.error, response.error.data);
+      if (response.error.error === 'psp.errors.already_scanned_recently') {
+        const date = this.datePipe.transform(response.error.data.date, 'medium');
+        result.message = this.translate.instant(response.error.error, { date });
+        result.header = this.translate.instant('info');
+      } else {
+        result.message = this.translate.instant(response.error.error, response.error.data);
+      }
+    } else {
+      result.message = this.translate.instant('unknown_error');
     }
-    return this.translate.instant('unknown_error');
+    return result;
   }
 
 
@@ -168,6 +179,7 @@ export class ProjectsEffects {
               private store: Store<ProjectsState>,
               private projectsService: ProjectsService,
               private translate: TranslateService,
+              private datePipe: DatePipe,
               private alertController: AlertController,
               private loadingController: LoadingController) {
   }
