@@ -17,8 +17,7 @@ export class ProjectsService {
   }
 
   getProjects(cityId: string): Observable<Project[]> {
-    const params = new HttpParams({ fromObject: { active: 'true' } });
-    return this.http.get<Project[]>(`${this.BASE_URL}/cities/${cityId}/projects`, { params });
+    return this.http.get<Project[]>(`${this.BASE_URL}/cities/${cityId}/projects`);
   }
 
   getProjectDetails(cityId: string, projectId: number, app_user: string): Observable<ProjectDetails> {
