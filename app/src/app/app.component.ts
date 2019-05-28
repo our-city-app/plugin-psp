@@ -52,6 +52,7 @@ export class AppComponent {
     if (data.context && data.context.type) {
       switch (data.context.type) {
         case RogerthatContextType.QR_SCANNED:
+        case RogerthatContextType.URL:
           this.router.navigate([ 'psp', 'overview' ], { queryParams: { qr: data.context.data.content } });
           break;
       }

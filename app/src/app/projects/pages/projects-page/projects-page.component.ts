@@ -53,14 +53,16 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
     this.currentProjectId$ = this.store.pipe(select(getCurrentProjectId), filterNull());
     this.route.queryParams.subscribe(params => {
       if (params.qr) {
-        this.scannedQr = params.qr;
         // Remove query params
         this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
         const subscription = this.projectList$.subscribe(list => {
           if (list.length > 0) {
             subscription.unsubscribe();
-            this.projectClicked(list[ 0 ]);
-            this.scannedQr = null;
+            this.scannedQr = params.qr;
+            // Only one project, just immediately add a scan without user interaction required
+            if (list.length === 1) {
+              this.projectClicked(list[ 0 ]);
+            }
           }
         });
       }
@@ -70,8 +72,9 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
   projectClicked(project: Project) {
     if (this.scannedQr) {
       this.store.dispatch(new AddParticipationAction({ projectId: project.id, qrContent: this.scannedQr }));
+    } else {
+      this.router.navigate([ 'psp', 'overview', project.id ]);
     }
-    this.router.navigate([ project.id ], { relativeTo: this.route });
     this.scannedQr = null;
   }
 

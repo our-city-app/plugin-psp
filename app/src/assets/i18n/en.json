@@ -23,6 +23,7 @@
     "unknown": "An unknown error has occurred, please try again later."
   },
   "scan": "Scan",
+  "scan_added": "Scan added!",
   "select_a_project": "Select a project",
   "unknown_error": "An error has occurred, please try again later."
 }

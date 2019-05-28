@@ -1,8 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -71,6 +70,7 @@ export class ProjectsEffects {
       options: {
         message: this.translate.instant('loading'),
         translucent: true,
+        backdropDismiss: true,
       },
     }))),
     switchMap(action => {
@@ -81,7 +81,14 @@ export class ProjectsEffects {
           email: rogerthat.user.account,
         }).pipe(
           map(data => new AddParticipationCompleteAction(data)),
-          tap(data => this.router.navigate([ '/projects', data.payload.id ])),
+          tap(a => {
+
+            this.toastController.create({
+              message: this.translate.instant('scan_added'),
+              duration: 5000,
+              buttons: [ { text: this.translate.instant('ok') } ],
+            }).then(toast => toast.present()).catch(e => console.error(e));
+          }),
           catchError(err => of(new AddParticipationFailedAction(err))));
       },
     ));
@@ -93,16 +100,13 @@ export class ProjectsEffects {
   @Effect() afterAddParticipationFailed$ = this.actions$.pipe(
     ofType<AddParticipationFailedAction>(ProjectsActionTypes.ADD_PARTICIPATION_FAILED),
     tap(() => this.store.dispatch(new DismissDialogAction('loading'))),
-    map(action => {
-
-        return new ShowDialogAction({
-          type: 'dialog',
-          options: {
-            ...this.getErrorMessage(action.payload),
-            buttons: [ this.translate.instant('ok') ],
-          },
-        });
-      },
+    map(action => new ShowDialogAction({
+        type: 'dialog',
+        options: {
+          ...this.getErrorMessage(action.payload),
+          buttons: [ this.translate.instant('ok') ],
+        },
+      }),
     ));
 
   @Effect() getMerchant$ = this.actions$.pipe(
@@ -142,17 +146,33 @@ export class ProjectsEffects {
 
   @Effect({ dispatch: false }) showDialog$ = this.actions$.pipe(
     ofType<ShowDialogAction>(ProjectsActionTypes.SHOW_DIALOG),
-    switchMap(action => {
+    map(async action => {
+      let dialog: HTMLIonLoadingElement | HTMLIonAlertElement;
       if (action.data.type === 'loading') {
-        return this.loadingController.create(action.data.options).then(dialog => dialog.present());
+        dialog = await this.loadingController.create(action.data.options);
       } else {
-        return this.alertController.create(action.data.options).then(dialog => dialog.present());
+        dialog = await this.alertController.create(action.data.options);
       }
+      // arbitrary delay to allow creating / hiding other dialogs that might have been shown just before
+      setTimeout(async () => {
+        try {
+          await this.loadingController.dismiss();
+          await this.alertController.dismiss();
+        } catch (ignored) {
+          // Throws error in case there was no dialog, but we don't actually care
+        }
+        await dialog.present();
+      }, 50);
     }));
 
   @Effect({ dispatch: false }) dismissDialog$ = this.actions$.pipe(
     ofType<DismissDialogAction>(ProjectsActionTypes.DISMISS_DIALOG),
-    switchMap(action => action.dialogType === 'loading' ? this.loadingController.dismiss() : this.alertController.dismiss()));
+    map(async action => {
+      try {
+        action.dialogType === 'loading' ? await this.loadingController.dismiss() : await this.alertController.dismiss();
+      } catch (ignored) {
+      }
+    }));
 
   private getErrorMessage(response: HttpErrorResponse): { header: string, message: string } {
     const result = {
@@ -175,12 +195,12 @@ export class ProjectsEffects {
 
 
   constructor(private actions$: Actions<ProjectsActions>,
-              private router: Router,
               private store: Store<ProjectsState>,
               private projectsService: ProjectsService,
               private translate: TranslateService,
               private datePipe: DatePipe,
               private alertController: AlertController,
-              private loadingController: LoadingController) {
+              private loadingController: LoadingController,
+              private toastController: ToastController) {
   }
 }
