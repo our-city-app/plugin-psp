@@ -70,6 +70,18 @@ export function projectsReducer(state = initialProjectsState, action: ProjectsAc
         },
         projectDetails: onLoadableSuccess(action.payload),
       };
+    case ProjectsActionTypes.GET_USER_SETTINGS:
+      return { ...state, userSettings: onLoadableLoad(initialProjectsState.userSettings.data) };
+    case ProjectsActionTypes.GET_USER_SETTINGS_COMPLETE:
+      return { ...state, userSettings: onLoadableSuccess(action.payload) };
+    case ProjectsActionTypes.GET_USER_SETTINGS_FAILED:
+      return { ...state, userSettings: onLoadableError(action.payload) };
+    case ProjectsActionTypes.SAVE_USER_SETTINGS:
+      return { ...state, userSettings: onLoadableLoad(action.payload) };
+    case ProjectsActionTypes.SAVE_USER_SETTINGS_COMPLETE:
+      return { ...state, userSettings: onLoadableSuccess(action.payload) };
+    case ProjectsActionTypes.SAVE_USER_SETTINGS_FAILED:
+      return { ...state, userSettings: onLoadableError(action.payload) };
   }
   return state;
 }

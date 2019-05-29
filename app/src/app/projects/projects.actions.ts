@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertOptions, LoadingOptions } from '@ionic/core';
 import { Action } from '@ngrx/store';
-import { City, AppMerchant, AppMerchantList, Project, ProjectDetails } from './projects';
+import { AppMerchant, AppMerchantList, City, Project, ProjectDetails, UserSettings } from './projects';
 
 export const enum ProjectsActionTypes {
   GET_CITY = '[projects] Get city',
@@ -27,6 +27,12 @@ export const enum ProjectsActionTypes {
   GET_MORE_MERCHANTS_FAILED = '[projects] Get more merchants failed',
   SHOW_DIALOG = '[projects] Show dialog',
   DISMISS_DIALOG = '[projects] Dismiss dialog',
+  GET_USER_SETTINGS = '[projects] Get user settings',
+  GET_USER_SETTINGS_COMPLETE = '[projects] Get user settings complete',
+  GET_USER_SETTINGS_FAILED = '[projects] Get user settings failed',
+  SAVE_USER_SETTINGS = '[projects] Save user settings',
+  SAVE_USER_SETTINGS_COMPLETE = '[projects] Save user settings complete',
+  SAVE_USER_SETTINGS_FAILED = '[projects] Save user settings failed',
 }
 
 export class GetCityAction implements Action {
@@ -181,6 +187,45 @@ export class DismissDialogAction implements Action {
   }
 }
 
+export class GetUserSettingsAction implements Action {
+  readonly type = ProjectsActionTypes.GET_USER_SETTINGS;
+}
+
+export class GetUserSettingsCompleteAction implements Action {
+  readonly type = ProjectsActionTypes.GET_USER_SETTINGS_COMPLETE;
+
+  constructor(public payload: UserSettings) {
+  }
+}
+
+export class GetUserSettingsFailedAction implements Action {
+  readonly type = ProjectsActionTypes.GET_USER_SETTINGS_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
+  }
+}
+
+export class SaveUserSettingsAction implements Action {
+  readonly type = ProjectsActionTypes.SAVE_USER_SETTINGS;
+
+  constructor(public payload: UserSettings) {
+  }
+}
+
+export class SaveUserSettingsCompleteAction implements Action {
+  readonly type = ProjectsActionTypes.SAVE_USER_SETTINGS_COMPLETE;
+
+  constructor(public payload: UserSettings) {
+  }
+}
+
+export class SaveUserSettingsFailedAction implements Action {
+  readonly type = ProjectsActionTypes.SAVE_USER_SETTINGS_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
+  }
+}
+
 export type ProjectsActions = GetCityAction
   | GetCityCompleteAction
   | GetCityFailedAction
@@ -203,5 +248,11 @@ export type ProjectsActions = GetCityAction
   | GetMoreMerchantsCompleteAction
   | GetMoreMerchantsFailedAction
   | ShowDialogAction
-  | DismissDialogAction;
+  | DismissDialogAction
+  | GetUserSettingsAction
+  | GetUserSettingsCompleteAction
+  | GetUserSettingsFailedAction
+  | SaveUserSettingsAction
+  | SaveUserSettingsCompleteAction
+  | SaveUserSettingsFailedAction;
 

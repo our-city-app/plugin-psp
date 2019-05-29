@@ -103,3 +103,8 @@ export interface City {
   info: string;
   avatar_url: string;
 }
+
+
+export interface UserSettings {
+  tour_date: Date | null;
+}

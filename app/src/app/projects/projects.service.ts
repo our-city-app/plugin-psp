@@ -1,8 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { AddParticipationData, City, AppMerchant, AppMerchantList, Project, ProjectDetails } from './projects';
+import { AddParticipationData, AppMerchant, AppMerchantList, City, Project, ProjectDetails, UserSettings } from './projects';
 
 @Injectable({
   providedIn: 'root',
@@ -20,8 +21,8 @@ export class ProjectsService {
     return this.http.get<Project[]>(`${this.BASE_URL}/cities/${cityId}/projects`);
   }
 
-  getProjectDetails(cityId: string, projectId: number, app_user: string): Observable<ProjectDetails> {
-    const params = new HttpParams({ fromObject: { app_user: encodeURIComponent(app_user) } });
+  getProjectDetails(cityId: string, projectId: number, appUser: string): Observable<ProjectDetails> {
+    const params = new HttpParams({ fromObject: { app_user: encodeURIComponent(appUser) } });
     return this.http.get<ProjectDetails>(`${this.BASE_URL}/cities/${cityId}/projects/${projectId}/details`, { params });
   }
 
@@ -40,4 +41,22 @@ export class ProjectsService {
   getMerchant(cityId: string, id: number) {
     return this.http.get<AppMerchant>(`${this.BASE_URL}/cities/${cityId}/merchants/${id}`);
   }
+
+  getUserSettings(appUser: string) {
+    return this.http.get<UserSettings>(`${this.BASE_URL}/users/${encodeURIComponent(appUser)}/settings`).pipe(map(transformSettings));
+  }
+
+  saveUserSettings(appUser: string, settings: UserSettings) {
+    return this.http.put<UserSettings>(`${this.BASE_URL}/users/${encodeURIComponent(appUser)}/settings`, settings).pipe
+    (map(transformSettings),
+    );
+  }
+
+}
+
+function transformSettings(t: any): UserSettings {
+  return {
+    ...t,
+    tour_date: t.tour_date ? new Date(t.tour_date) : null,
+  };
 }

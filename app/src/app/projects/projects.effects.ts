@@ -31,8 +31,14 @@ import {
   GetProjectsAction,
   GetProjectsCompleteAction,
   GetProjectsFailedAction,
+  GetUserSettingsAction,
+  GetUserSettingsCompleteAction,
+  GetUserSettingsFailedAction,
   ProjectsActions,
   ProjectsActionTypes,
+  SaveUserSettingsAction,
+  SaveUserSettingsCompleteAction,
+  SaveUserSettingsFailedAction,
   ShowDialogAction,
 } from './projects.actions';
 import { ProjectsService } from './projects.service';
@@ -192,6 +198,20 @@ export class ProjectsEffects {
     }
     return result;
   }
+
+  @Effect() getUserSettings$ = this.actions$.pipe(
+    ofType<GetUserSettingsAction>(ProjectsActionTypes.GET_USER_SETTINGS),
+    switchMap(() => this.projectsService.getUserSettings(createAppUser(rogerthat.user.account, rogerthat.system.appId)).pipe(
+      map(data => new GetUserSettingsCompleteAction(data)),
+      catchError(err => of(new GetUserSettingsFailedAction(err)))),
+    ));
+
+  @Effect() saveUserSettings$ = this.actions$.pipe(
+    ofType<SaveUserSettingsAction>(ProjectsActionTypes.SAVE_USER_SETTINGS),
+    switchMap(a => this.projectsService.saveUserSettings(createAppUser(rogerthat.user.account, rogerthat.system.appId), a.payload).pipe(
+      map(data => new SaveUserSettingsCompleteAction(data)),
+      catchError(err => of(new SaveUserSettingsFailedAction(err)))),
+    ));
 
 
   constructor(private actions$: Actions<ProjectsActions>,

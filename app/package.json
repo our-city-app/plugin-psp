@@ -31,7 +31,8 @@
     "@ngx-translate/http-loader": "^4.0.0",
     "core-js": "^2.5.4",
     "marked": "^0.6.2",
-    "rogerthat-plugin": "git+https://github.com/our-city-app/cordova-mobicage-plugin.git#psp",
+    "ngx-joyride": "^2.2.10",
+    "rogerthat-plugin": "git+https://github.com/our-city-app/cordova-mobicage-plugin.git#master",
     "rxjs": "^6.5.2",
     "zone.js": "~0.8.29"
   },

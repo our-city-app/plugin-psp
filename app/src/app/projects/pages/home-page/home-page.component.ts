@@ -1,22 +1,63 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { GetProjectsAction } from '../../projects.actions';
-import { ProjectsState } from '../../projects.state';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { select, Store } from '@ngrx/store';
+import { JoyrideService } from 'ngx-joyride';
+import { Observable, Subject } from 'rxjs';
+import { delay, map, take, takeUntil } from 'rxjs/operators';
+import { filterNull } from '../../../util';
+import { UserSettings } from '../../projects';
+import { GetProjectsAction, GetUserSettingsAction, SaveUserSettingsAction } from '../../projects.actions';
+import { ProjectsService } from '../../projects.service';
+import { getUserSettings, ProjectsState } from '../../projects.state';
 
 @Component({
   templateUrl: './home-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class HomePageComponent implements OnInit {
-  constructor(private store: Store<ProjectsState>) {
+export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
+  userSettings$ = new Observable<UserSettings>();
+  private destroyed$ = new Subject();
+
+  constructor(private store: Store<ProjectsState>,
+              private service: ProjectsService,
+              private joyrideService: JoyrideService) {
   }
 
   ngOnInit() {
     this.store.dispatch(new GetProjectsAction());
+    this.store.dispatch(new GetUserSettingsAction());
+    this.userSettings$ = this.store.pipe(select(getUserSettings), takeUntil(this.destroyed$), map(s => s.data), filterNull());
+  }
+
+  ngAfterViewInit(): void {
+    // Delay is needed to allow for the elements to be in their correct place.
+    // Else the tour is shown at the wrong position.
+    this.userSettings$.pipe(take(1), delay(500)).subscribe(result => {
+      if (result.hasOwnProperty('tour_date') && !result.tour_date) {
+        this.joyrideService.startTour({ showCounter: false, stepDefaultPosition: 'top', steps: [ 'infoStep' ] }).subscribe(
+          step => {
+          }, err => {
+            console.error(err);
+          }, () => {
+            this.tourDone();
+          });
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed$.next();
+    this.destroyed$.complete();
   }
 
   exit() {
     rogerthat.app.exit();
+  }
+
+  tourDone() {
+    this.userSettings$.pipe(take(1)).subscribe(settings => {
+      settings = { ...settings, tour_date: new Date() };
+      this.store.dispatch(new SaveUserSettingsAction(settings));
+    });
   }
 }

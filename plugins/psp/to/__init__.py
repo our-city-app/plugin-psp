@@ -215,3 +215,7 @@ class MerchantStatisticsListTO(PaginatedResultTO):
         super(MerchantStatisticsListTO, self).__init__(cursor, more, results)
         self.project_id = project_id
         self.total = total
+
+
+class UserSettingsTO(TO):
+    tour_date = unicode_property('tour_date')

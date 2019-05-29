@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { TranslateModule } from '@ngx-translate/core';
+import { JoyrideModule } from 'ngx-joyride';
 import { MerchantListComponent } from './components/merchant-list/merchant-list.component';
 import { ProjectCardComponent } from './components/project-card/project-card.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
@@ -55,6 +56,7 @@ const routes: Routes = [
     EffectsModule.forFeature([ ProjectsEffects ]),
     StoreModule.forFeature('projects', projectsReducer),
     TranslateModule,
+    JoyrideModule.forRoot(),
   ],
   providers: [
     DatePipe,

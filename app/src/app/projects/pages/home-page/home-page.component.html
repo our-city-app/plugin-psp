@@ -18,9 +18,13 @@
       <ion-label>{{ 'merchants' | translate }}</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="info">
+    <ion-tab-button tab="info" joyrideStep="infoStep" [text]="'click_for_general_information' | translate"
+                    [doneTemplate]="doneTemplate">
       <ion-icon name="information-circle-outline"></ion-icon>
       <ion-label>{{ 'info' | translate }}</ion-label>
     </ion-tab-button>
   </ion-tab-bar>
+  <ng-template #doneTemplate>
+    <ion-button size="small">{{ 'ok' | translate }}</ion-button>
+  </ng-template>
 </ion-tabs>

@@ -23,7 +23,9 @@ from plugins.psp.api.projects import get_merchants, get_project_details
 from plugins.psp.bizz.cities import get_city
 from plugins.psp.bizz.places import get_opening_hours_info
 from plugins.psp.bizz.projects import list_active_projects, qr_scanned, get_merchant
-from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanTO, AppMerchantTO, MerchantListResultTO, AppCityTO
+from plugins.psp.bizz.user import get_user_settings, save_user_settings
+from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanTO, AppMerchantTO, MerchantListResultTO, AppCityTO, \
+    UserSettingsTO
 
 
 @rest('/app/cities/<city_id:[^/]+>/projects', 'get', cors=True)
@@ -77,3 +79,24 @@ def api_scanned_options():
 @arguments(city_id=unicode)
 def api_get_city(city_id):
     return AppCityTO.from_model(get_city(city_id))
+
+
+@rest('/app/users/<app_user:[^/]+>/settings', 'get', cors=True)
+@returns(UserSettingsTO)
+@arguments(app_user=unicode)
+def api_get_user_settings(app_user):
+    return UserSettingsTO.from_model(get_user_settings(app_user))
+
+
+@rest('/app/users/<app_user:[^/]+>/settings', 'options', cors=True)
+@returns(dict)
+@arguments(app_user=unicode)
+def api_save_user_settings_options(app_user):
+    return {}
+
+
+@rest('/app/users/<app_user:[^/]+>/settings', 'put', cors=True)
+@returns(UserSettingsTO)
+@arguments(app_user=unicode, data=UserSettingsTO)
+def api_save_user_settings(app_user, data):
+    return UserSettingsTO.from_model(save_user_settings(app_user, data))

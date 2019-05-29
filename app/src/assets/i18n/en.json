@@ -1,6 +1,7 @@
 {
   "choose_project_for_scan": "Choose the project you want to add a scan for",
   "closed": "Closed",
+  "click_for_general_information": "Click here for more information about the participation moneybox",
   "details": "Details",
   "ends_on_x": "Ends on {{ date }}",
   "error": "Error",

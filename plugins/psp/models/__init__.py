@@ -303,5 +303,13 @@ class ProjectUserStatistics(NdbModel):
         return ndb.Key(cls, project_id, parent=parent_key(app_user), namespace=NAMESPACE)
 
 
+class UserSettings(NdbModel):
+    tour_date = ndb.DateTimeProperty(indexed=False)
+
+    @classmethod
+    def create_key(cls, app_user_email):
+        return ndb.Key(cls, app_user_email, namespace=NAMESPACE)
+
+
 register(List(ndb.Key), s_any, ds_any)
 register(List(Merchant), s_any, ds_any)
