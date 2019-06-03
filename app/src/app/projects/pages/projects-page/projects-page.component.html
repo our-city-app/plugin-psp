@@ -5,7 +5,7 @@
   <ng-template #tmpl>
     <div class="container">
       <ion-spinner *ngIf="(projects$ | async)?.loading as loading"></ion-spinner>
-      <div class="project-content">
+      <div>
         <ion-slides pager="false" [options]="{zoom:{enabled: false}}"
                     (ionSlideDidChange)="loadProject()" #slider>
           <ion-slide *ngFor="let project of projectList$ | async; let isFirst = first; let isLast = last;">

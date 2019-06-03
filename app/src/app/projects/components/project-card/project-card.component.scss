@@ -1,3 +1,10 @@
+.project-card {
+  margin-inline-end: 0;
+  margin-inline-start: 0;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
 .project-title {
   text-transform: uppercase;
 }
@@ -12,7 +19,7 @@
   position: relative;
   display: flex;
   justify-content: center;
-  width: calc(100vw - 130px);
+  width: calc(100vw - 90px);
 }
 
 .split-image {
@@ -23,7 +30,7 @@
 
   img {
     width: auto;
-    max-height: calc(100vh - 340px);
+    max-height: calc(100vh - 360px);
   }
 }
 
