@@ -313,3 +313,11 @@ class UserSettings(NdbModel):
 
 register(List(ndb.Key), s_any, ds_any)
 register(List(Merchant), s_any, ds_any)
+
+
+class AppleAppAssociation(NdbModel):
+    config = ndb.JsonProperty()
+
+    @classmethod
+    def create_key(cls):
+        return ndb.Key(cls, 'config', namespace=NAMESPACE)

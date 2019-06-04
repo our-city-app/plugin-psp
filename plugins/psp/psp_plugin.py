@@ -23,7 +23,8 @@ from mcfw.consts import NOT_AUTHENTICATED, AUTHENTICATED
 from mcfw.restapi import rest_functions
 from plugins.psp.api import cities, qr_codes, projects, places, app, merchants
 from plugins.psp.consts import ROLE_GROUPS, PspPermission
-from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler, IndexPageHandler
+from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler, IndexPageHandler, \
+    AppleAppSiteAssociationHandler, TestHandler
 
 
 class PspPlugin(Plugin):
@@ -45,6 +46,8 @@ class PspPlugin(Plugin):
         elif auth == Handler.AUTH_ADMIN:
             yield Handler(url='/admin/cron/psp/schedule_invalidate_caches', handler=ScheduleInvalidateCachesHandler)
         yield Handler(url='/qr/<city_id:[^/]+>/<qr_id:\d+>', handler=QRHandler)
+        yield Handler(url='/apple-app-site-association', handler=AppleAppSiteAssociationHandler)
+        yield Handler(url='/test', handler=TestHandler)
 
     def get_modules(self):
         yield Module('psp_admin', [PspPermission.LIST_CITY], 1)

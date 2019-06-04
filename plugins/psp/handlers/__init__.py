@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
+import json
 
 import webapp2
 
@@ -21,6 +22,7 @@ from framework.bizz.authentication import get_current_session
 from framework.handlers import render_logged_in_page
 from framework.plugin_loader import get_auth_plugin
 from plugins.psp.bizz.projects import schedule_invalidate_caches
+from plugins.psp.models import AppleAppAssociation
 
 
 class ScheduleInvalidateCachesHandler(webapp2.RequestHandler):
@@ -39,4 +41,19 @@ class IndexPageHandler(webapp2.RequestHandler):
 
 class QRHandler(webapp2.RequestHandler):
     def get(self, city_id, qr_id):
-        self.redirect('https:///rogerthat-server.appspot.com/install/%s' % city_id)
+        url = 'https:///rogerthat-server.appspot.com/install/%s' % city_id
+        html = '<html><body><p><a href="%s">Click here to install the app</a></p></body></html>' % url
+        self.response.write(html)
+
+
+class TestHandler(webapp2.RequestHandler):
+    def get(self):
+        self.response.write('<a style="font-size:48px" href="/qr/osa-demo2/2000001">Click here</a>')
+
+
+class AppleAppSiteAssociationHandler(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.headers['Cache-Control'] = 'max-age=3600, public'
+        model = AppleAppAssociation.create_key().get()
+        json.dump(model.config, self.response.out)
