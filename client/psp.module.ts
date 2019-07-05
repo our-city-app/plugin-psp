@@ -10,7 +10,7 @@ const routes: Route[] = [
   { path: '', pathMatch: 'full', redirectTo: 'psp' },
   {
   path: 'psp',
-  loadChildren: './psp-admin/psp-admin.module#PspAdminModule',
+  loadChildren: () => import('./psp-admin/psp-admin.module').then(m => m.PspAdminModule),
   canActivate: [ MetaGuard ],
   data: {
     id: 'psp_admin',

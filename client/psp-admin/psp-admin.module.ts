@@ -45,7 +45,7 @@ import { routes } from './psp-admin-routes';
     HttpClientModule,
     RouterModule.forChild(routes),
     MultilingualModule,
-    ZXingScannerModule.forRoot(),
+    ZXingScannerModule,
     EffectsModule.forFeature([ CitiesEffects ]),
     StoreModule.forFeature('cities', citiesReducer),
     FlexLayoutModule,

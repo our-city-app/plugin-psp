@@ -20,7 +20,7 @@ import { EditMerchantComponent } from '../../components/edit-merchant/edit-merch
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActivateQrPageComponent implements OnInit {
-  @ViewChild(EditMerchantComponent) editMerchantComponent: EditMerchantComponent;
+  @ViewChild(EditMerchantComponent, { static: true }) editMerchantComponent: EditMerchantComponent;
   showScanner = false;
   data: ActivateMerchant = {
     qr_content: null,
