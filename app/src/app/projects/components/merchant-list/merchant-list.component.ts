@@ -10,7 +10,7 @@ import { AppMerchant, AppMerchantList } from '../../projects';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MerchantListComponent implements OnChanges {
-  @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
+  @ViewChild(IonInfiniteScroll, { static: true }) infiniteScroll: IonInfiniteScroll;
   @Input() merchants: Loadable<AppMerchantList>;
   @Output() loadMore = new EventEmitter();
 

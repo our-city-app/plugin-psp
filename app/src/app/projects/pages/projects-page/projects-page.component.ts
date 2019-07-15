@@ -19,7 +19,7 @@ import { getCurrentProject, getCurrentProjectId, getProjects, ProjectsState } fr
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectsPageComponent implements OnInit, OnDestroy {
-  @ViewChild(IonSlides) slides: IonSlides;
+  @ViewChild(IonSlides, {static: false}) slides: IonSlides;
   project$: Observable<Loadable<ProjectDetails>>;
   projects$: Observable<Loadable<Project[]>>;
   projectList$: Observable<Project[]>;

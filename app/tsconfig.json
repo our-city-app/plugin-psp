@@ -2,15 +2,16 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
+    "downlevelIteration": true,
+    "strict": true,
+    "strictNullChecks": false,  // disabled until https://github.com/tnicola/ngx-joyride/issues/49 is fixed
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": false,
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "module": "es2015",
+    "module": "esnext",
     "moduleResolution": "node",
-    "strict": true,
-    "strictNullChecks": false, // disabled until https://github.com/tnicola/ngx-joyride/issues/49 is fixed
-    "strictFunctionTypes": false,
-    "strictPropertyInitialization": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
@@ -19,7 +20,7 @@
       "node_modules/@types"
     ],
     "lib": [
-      "es2018",
+      "es2017",
       "dom"
     ]
   }
