@@ -30,7 +30,8 @@ export class AppComponent {
   }
 
   initializeApp() {
-    this.translate.setDefaultLang('en');
+    const defaultLanguage = 'en';
+    this.translate.setDefaultLang(defaultLanguage);
     this.platform.ready().then(() => {
       if (rogerthat.system.os === 'android') {
         this.statusBar.styleBlackTranslucent();
@@ -42,10 +43,19 @@ export class AppComponent {
         this.loaded = true;
         this.rogerthatService.initialize();
         this.rogerthatService.getContext().subscribe(context => this.processContext(context));
+        const supportedLangs = [ 'en', 'nl' ];
+        let lang;
+        for (const supportedLang of supportedLangs) {
+          if (rogerthat.user.language.startsWith(supportedLang)) {
+            lang = supportedLang;
+            break;
+          }
+        }
+        this.translate.use(lang || defaultLanguage);
         this.changeDetectorRef.markForCheck();
       });
     });
-    this.actions.subscribe(action => console.log(action));
+    this.actions.subscribe(action => console.log(JSON.stringify(action)));
   }
 
   private processContext(data: { context: RogerthatContext | null }) {
