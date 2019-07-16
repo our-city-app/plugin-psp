@@ -94,7 +94,7 @@ class AppMerchantTO(TO):
         return cls(id=model.id,
                    name=model.name,
                    formatted_address=model.formatted_address,
-                   location=GeoPointTO(lat=model.location.lat, lng=model.location.lon) if model.location else None,
+                   location=GeoPointTO(lat=model.location.lat, lon=model.location.lon) if model.location else None,
                    opening_hours=OpeningInfoTO(
                        periods=[OpeningPeriodTO.from_model(period) for period in model.opening_hours],
                        open_now=open_now,

@@ -31,7 +31,7 @@ export class ProjectsService {
   }
 
   getCityMerchants(cityId: string, cursor?: string | null): Observable<AppMerchantList> {
-    let params = new HttpParams();
+    let params = new HttpParams({ fromObject: { lang: rogerthat.user.language } });
     if (cursor) {
       params = params.set('cursor', cursor);
     }
@@ -39,7 +39,8 @@ export class ProjectsService {
   }
 
   getMerchant(cityId: string, id: number) {
-    return this.http.get<AppMerchant>(`${this.BASE_URL}/cities/${cityId}/merchants/${id}`);
+    const params = new HttpParams({ fromObject: { lang: rogerthat.user.language } });
+    return this.http.get<AppMerchant>(`${this.BASE_URL}/cities/${cityId}/merchants/${id}`, { params });
   }
 
   getUserSettings(appUser: string) {

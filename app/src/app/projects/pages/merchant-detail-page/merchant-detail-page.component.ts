@@ -18,6 +18,8 @@ import { getMerchantDetails, ProjectsState } from '../../projects.state';
 export class MerchantDetailPageComponent implements OnInit {
   merchant$: Observable<Loadable<AppMerchant>>;
   mapsUrl$: Observable<string>;
+  openingHoursExpanded = false;
+  expandIcon = 'arrow-dropdown';
 
   constructor(private store: Store<ProjectsState>,
               private route: ActivatedRoute) {
@@ -37,6 +39,11 @@ export class MerchantDetailPageComponent implements OnInit {
       }
       return `https://www.google.com/maps/dir/?${encodeURIObject(params)}`;
     }));
+  }
+
+  toggleOpeningHours() {
+      this.openingHoursExpanded = !this.openingHoursExpanded;
+      this.expandIcon = this.openingHoursExpanded ? 'arrow-dropup' : 'arrow-dropdown';
   }
 
 }
