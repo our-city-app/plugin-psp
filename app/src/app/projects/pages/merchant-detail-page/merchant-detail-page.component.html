@@ -21,13 +21,13 @@
       <ion-label text-wrap>{{ merchant.website}}</ion-label>
     </ion-item>
     <ng-container *ngIf="merchant.opening_hours">
-      <ion-item (click)="toggleOpeningHours()">
+      <ion-item button (click)="toggleOpeningHours()" [detail]="false">
         <ion-icon name="time" slot="start"></ion-icon>
         <ion-label>
-            <h2>{{ merchant.opening_hours.open_until }}</h2>
-            <ng-container *ngIf="openingHoursExpanded">
-                <p *ngFor="let period of merchant.opening_hours.weekday_text">{{ period }}</p>
-            </ng-container>
+          <h2>{{ merchant.opening_hours.open_until }}</h2>
+          <ion-text color="dark" *ngIf="openingHoursExpanded">
+            <p *ngFor="let period of merchant.opening_hours.weekday_text">{{ period }}</p>
+          </ion-text>
         </ion-label>
         <ion-icon [name]="expandIcon" slot="end"></ion-icon>
       </ion-item>

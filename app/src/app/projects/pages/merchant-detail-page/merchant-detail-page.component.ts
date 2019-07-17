@@ -26,7 +26,7 @@ export class MerchantDetailPageComponent implements OnInit {
   }
 
   ngOnInit() {
-    const merchantId = parseInt(this.route.snapshot.params.id);
+    const merchantId = parseInt(this.route.snapshot.params.id, 10);
     this.store.dispatch(new GetMerchantAction({ id: merchantId }));
     this.merchant$ = this.store.pipe(select(getMerchantDetails));
     this.mapsUrl$ = this.merchant$.pipe(map(m => m.data), filterNull(), map(m => {
@@ -42,8 +42,8 @@ export class MerchantDetailPageComponent implements OnInit {
   }
 
   toggleOpeningHours() {
-      this.openingHoursExpanded = !this.openingHoursExpanded;
-      this.expandIcon = this.openingHoursExpanded ? 'arrow-dropup' : 'arrow-dropdown';
+    this.openingHoursExpanded = !this.openingHoursExpanded;
+    this.expandIcon = this.openingHoursExpanded ? 'arrow-dropup' : 'arrow-dropdown';
   }
 
 }
