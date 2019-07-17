@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
-import { Platform } from '@ionic/angular';
+import { Config, Platform } from '@ionic/angular';
 import { Actions } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -25,7 +25,8 @@ export class AppComponent {
               private router: Router,
               private actions: Actions,
               private rogerthatService: RogerthatService,
-              private changeDetectorRef: ChangeDetectorRef) {
+              private changeDetectorRef: ChangeDetectorRef,
+              private config: Config) {
     this.initializeApp();
   }
 
@@ -52,6 +53,9 @@ export class AppComponent {
           }
         }
         this.translate.use(lang || defaultLanguage);
+        this.translate.get('back').subscribe(back => {
+          this.config.set('backButtonText', back);
+        });
         this.changeDetectorRef.markForCheck();
       });
     });
