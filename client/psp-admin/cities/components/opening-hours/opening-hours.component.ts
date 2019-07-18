@@ -18,13 +18,13 @@ import { OpeningHourPeriod } from '../../../../../app/src/app/projects/projects'
 
 export class OpeningHoursComponent implements OnChanges {
   DAYS = [
-    { label: 'psp.monday', value: 0 },
-    { label: 'psp.tuesday', value: 1 },
-    { label: 'psp.wednesday', value: 2 },
-    { label: 'psp.thursday', value: 3 },
-    { label: 'psp.friday', value: 4 },
-    { label: 'psp.saturday', value: 5 },
-    { label: 'psp.sunday', value: 6 },
+    { label: 'psp.monday', value: 1 },
+    { label: 'psp.tuesday', value: 2 },
+    { label: 'psp.wednesday', value: 3 },
+    { label: 'psp.thursday', value: 4 },
+    { label: 'psp.friday', value: 5 },
+    { label: 'psp.saturday', value: 6 },
+    { label: 'psp.sunday', value: 0 },
   ];
   HOUR_SLOTS = this.getHourSlots();
   checkedOptions: { [ key: number ]: boolean };
