@@ -19,7 +19,7 @@ export class MerchantDetailPageComponent implements OnInit {
   merchant$: Observable<Loadable<AppMerchant>>;
   mapsUrl$: Observable<string>;
   openingHoursExpanded = false;
-  expandIcon = 'arrow-dropdown';
+  expandIcon = 'md-arrow-dropdown';
 
   constructor(private store: Store<ProjectsState>,
               private route: ActivatedRoute) {
@@ -43,7 +43,7 @@ export class MerchantDetailPageComponent implements OnInit {
 
   toggleOpeningHours() {
     this.openingHoursExpanded = !this.openingHoursExpanded;
-    this.expandIcon = this.openingHoursExpanded ? 'arrow-dropup' : 'arrow-dropdown';
+    this.expandIcon = this.openingHoursExpanded ? 'md-arrow-dropup' : 'md-arrow-dropdown';
   }
 
 }
