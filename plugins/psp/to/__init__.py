@@ -203,6 +203,7 @@ class QRScanTO(UserInfoTO):
 class MerchantStatisticsTO(TO):
     id = long_property('id')
     name = unicode_property('name')
+    location = typed_property('location', GeoPointTO)
     total = long_property('total')
 
 
