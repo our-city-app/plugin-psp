@@ -6,11 +6,13 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { IonicConfig } from '@ionic/core';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { MissingTranslationHandler, MissingTranslationHandlerParams, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
 import { RogerthatModule } from './rogerthat/rogerthat.module';
@@ -33,6 +35,7 @@ export class MissingTranslationWarnHandler implements MissingTranslationHandler 
   }
 }
 
+const ionConfig: undefined | IonicConfig = environment.production ? undefined : { mode: Math.random() > .5 ? 'ios' : 'md' };
 
 @NgModule({
   declarations: [ AppComponent ],
@@ -41,7 +44,7 @@ export class MissingTranslationWarnHandler implements MissingTranslationHandler 
     BrowserModule,
     RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),
     HttpClientModule,
-    IonicModule.forRoot(),
+    IonicModule.forRoot(ionConfig),
     StoreModule.forRoot({}),
     StoreDevtoolsModule.instrument(),
     EffectsModule.forRoot([]),

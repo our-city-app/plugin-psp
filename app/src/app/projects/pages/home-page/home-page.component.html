@@ -3,7 +3,7 @@
     <ion-toolbar>
       <ion-title>{{(tabs.getSelected() || '') | translate }}</ion-title>
       <ion-buttons slot="start">
-        <ion-back-button defaultHref="" (click)="exit()"></ion-back-button>
+        <ion-back-button [icon]="backButtonIcon" defaultHref="" (click)="exit()"></ion-back-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>

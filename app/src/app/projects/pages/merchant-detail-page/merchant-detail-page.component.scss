@@ -1,0 +1,9 @@
+.opening-hours-table {
+  border-collapse: separate;
+  border-spacing: 0 8px;
+
+  tr > td:first-of-type {
+    display: block;
+    margin-right: 16px;
+  }
+}

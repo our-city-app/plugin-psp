@@ -28,10 +28,6 @@ export interface Project {
   target_scan_count: number;
 }
 
-// TODO: remove when using TS 3.5+ (builtin)
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-
-
 export interface ActivateMerchant {
   qr_content: string | null;
   merchant: Omit<Merchant, 'id' | 'city_id'>;

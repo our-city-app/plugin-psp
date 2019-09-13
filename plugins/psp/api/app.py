@@ -17,7 +17,7 @@
 
 from framework.bizz.authentication import get_browser_language
 from framework.i18n_utils import get_supported_locale
-from mcfw.restapi import rest
+from mcfw.restapi import rest, GenericRESTRequestHandler
 from mcfw.rpc import returns, arguments
 from plugins.psp.api.projects import get_merchants, get_project_details
 from plugins.psp.bizz.cities import get_city
@@ -71,7 +71,7 @@ def api_scanned(data):
 @returns(dict)
 @arguments()
 def api_scanned_options():
-    return {}
+    return _default_cors_headers()
 
 
 @rest('/app/cities/<city_id:[^/]+>', 'get', cors=True)
@@ -92,7 +92,7 @@ def api_get_user_settings(app_user):
 @returns(dict)
 @arguments(app_user=unicode)
 def api_save_user_settings_options(app_user):
-    return {}
+    return _default_cors_headers()
 
 
 @rest('/app/users/<app_user:[^/]+>/settings', 'put', cors=True)
@@ -100,3 +100,17 @@ def api_save_user_settings_options(app_user):
 @arguments(app_user=unicode, data=UserSettingsTO)
 def api_save_user_settings(app_user, data):
     return UserSettingsTO.from_model(save_user_settings(app_user, data))
+
+
+def _default_cors_headers():
+    request = GenericRESTRequestHandler.getCurrentRequest()
+    requested_headers = request.headers.get('Access-Control-Request-Headers')
+    if requested_headers:
+        return {
+            'Access-Control-Allow-Headers': requested_headers,
+            'Access-Control-Max-Age': 300
+        }
+    return {
+        # The value of this header allows the preflight response to be cached for a specified number of seconds.
+        'Access-Control-Max-Age': 300
+    }

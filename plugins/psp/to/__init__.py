@@ -61,11 +61,16 @@ class OpeningPeriodTO(TO):
                    close=OpeningHourTO(day=model.close.day, time=model.close.time) if model.close else None)
 
 
+class WeekDayTextTO(TO):
+    day = unicode_property('day')
+    hours = unicode_list_property('hours')
+
+
 class OpeningInfoTO(TO):
     open_now = bool_property('open_now')
     open_until = unicode_property('open_until')
     periods = typed_property('periods', OpeningPeriodTO, True)
-    weekday_text = unicode_list_property('weekday_text')
+    weekday_text = typed_property('weekday_text', WeekDayTextTO, True)
 
 
 class AppMerchantTO(TO):

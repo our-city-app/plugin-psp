@@ -30,6 +30,7 @@ from mcfw.exceptions import HttpException
 from plugins.psp.bizz.general import get_general_settings
 from plugins.psp.consts import PREFIX
 from plugins.psp.models import OpeningHour, OpeningPeriod
+from plugins.psp.to import WeekDayTextTO
 
 MIDNIGHT = datetime.time(hour=0, minute=0)
 _NAMES = {}
@@ -100,7 +101,7 @@ def is_always_open(opening_hours):
 
 
 def get_opening_hours_info(opening_hours, timezone, lang):
-    # type: (list[OpeningPeriod], unicode, unicode) -> [bool, unicode, [unicode]]
+    # type: (list[OpeningPeriod], unicode, unicode) -> [bool, unicode, list[WeekDayTextTO]]
     now_open, open_until = is_now_open(opening_hours, timezone, lang)
     weekday_text = get_weekday_text(opening_hours, lang)
     return now_open, open_until, weekday_text
@@ -176,7 +177,7 @@ def _format_opening_hour(opening_hour, lang):
 
 
 def get_weekday_text(opening_hours, lang):
-    # type: (list[OpeningPeriod], unicode) -> list[unicode]
+    # type: (list[OpeningPeriod], unicode) -> list[WeekDayTextTO]
     if is_always_open(opening_hours):
         open_24_h = translate(lang, PREFIX, 'open_24_hours')
         periods = {x: [open_24_h] for x in xrange(7)}
@@ -200,10 +201,7 @@ def get_weekday_text(opening_hours, lang):
                     periods[weekday].append('%s - %s' % (_format_opening_hour(start, lang),
                                                          _format_opening_hour(stop, lang)))
 
-    result = []
     closed = [translate(lang, PREFIX, 'closed')]
     day_names = _get_weekday_names(lang)
-    for day in [1, 2, 3, 4, 5, 6, 0]:  # Monday, Tuesday, ..., Sunday
-        result.append('%s: %s' % (day_names[day], ', '.join(periods.get(day, closed))))
-
-    return result
+    days = [1, 2, 3, 4, 5, 6, 0]  # Monday, Tuesday, ..., Sunday
+    return [WeekDayTextTO(day=day_names[day], hours=periods.get(day, closed)) for day in days]

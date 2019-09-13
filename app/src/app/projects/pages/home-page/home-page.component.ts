@@ -1,5 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Platform } from '@ionic/angular';
 import { select, Store } from '@ngrx/store';
+import { TranslateService } from '@ngx-translate/core';
 import { JoyrideService } from 'ngx-joyride';
 import { Observable, Subject } from 'rxjs';
 import { delay, map, take, takeUntil } from 'rxjs/operators';
@@ -16,14 +18,19 @@ import { getUserSettings, ProjectsState } from '../../projects.state';
 })
 export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   userSettings$ = new Observable<UserSettings>();
+  backButtonIcon = 'arrow-left';
   private destroyed$ = new Subject();
 
   constructor(private store: Store<ProjectsState>,
               private service: ProjectsService,
-              private joyrideService: JoyrideService) {
+              private joyrideService: JoyrideService,
+              private translate: TranslateService,
+              private platform: Platform) {
   }
 
   ngOnInit() {
+    const isIOS = this.platform.is('ios');
+    this.backButtonIcon = isIOS ? 'menu' : 'arrow-back';
     this.store.dispatch(new GetProjectsAction());
     this.store.dispatch(new GetUserSettingsAction());
     this.userSettings$ = this.store.pipe(select(getUserSettings), takeUntil(this.destroyed$), map(s => s.data), filterNull());

@@ -1,6 +1,9 @@
 <ion-card (click)="projectClicked.emit(project)" class="project-card">
   <ion-card-header>
-    <ion-card-subtitle class="project-title">{{ project.title }}</ion-card-subtitle>
+    <ion-card-subtitle class="project-title">
+      {{ project.title }}
+      &nbsp;<ion-icon name="information-circle"></ion-icon>
+    </ion-card-subtitle>
     <ion-card-title>
       <b>{{ project.budget.amount | currency : project.budget.currency : 'symbol': '1.0' }}</b>
     </ion-card-title>
