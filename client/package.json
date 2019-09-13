@@ -1,8 +1,8 @@
 {
   "name": "psp",
   "dependencies": {
-    "@zxing/ngx-scanner": "^1.7.1",
-    "@zxing/library": "^0.14.2",
+    "@zxing/ngx-scanner": "^2.0.1",
+    "@zxing/library": "^0.15.1",
     "@types/googlemaps": "latest"
   }
 }

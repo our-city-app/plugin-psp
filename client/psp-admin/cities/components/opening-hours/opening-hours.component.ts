@@ -1,6 +1,16 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { OpeningHourPeriod } from '../../../../../app/src/app/projects/projects';
 
+
+const enum DAY {
+  SUNDAY,
+  MONDAY,
+  TUESDAY,
+  WEDNESDAY,
+  THURSDAY,
+  FRIDAY,
+  SATURDAY
+}
 
 @Component({
   selector: 'psp-opening-hours',
@@ -15,30 +25,19 @@ import { OpeningHourPeriod } from '../../../../../app/src/app/projects/projects'
     margin: 0 16px;
   }` ],
 })
-
-export class OpeningHoursComponent implements OnChanges {
+export class OpeningHoursComponent {
   DAYS = [
-    { label: 'psp.monday', value: 1 },
-    { label: 'psp.tuesday', value: 2 },
-    { label: 'psp.wednesday', value: 3 },
-    { label: 'psp.thursday', value: 4 },
-    { label: 'psp.friday', value: 5 },
-    { label: 'psp.saturday', value: 6 },
-    { label: 'psp.sunday', value: 0 },
+    { label: 'psp.monday', value: DAY.MONDAY },
+    { label: 'psp.tuesday', value: DAY.TUESDAY },
+    { label: 'psp.wednesday', value: DAY.WEDNESDAY },
+    { label: 'psp.thursday', value: DAY.THURSDAY },
+    { label: 'psp.friday', value: DAY.FRIDAY },
+    { label: 'psp.saturday', value: DAY.SATURDAY },
+    { label: 'psp.sunday', value: DAY.SUNDAY },
   ];
   HOUR_SLOTS = this.getHourSlots();
-  checkedOptions: { [ key: number ]: boolean };
   @Input() openingHours: OpeningHourPeriod[];
   @Output() changed = new EventEmitter<OpeningHourPeriod[]>();
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.openingHours) {
-      this.checkedOptions = { 0: false, 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
-      for (const day of this.openingHours) {
-        this.checkedOptions[ day.open.day ] = true;
-      }
-    }
-  }
 
   private getHourSlots() {
     const slots: { label: string, value: string }[] = [];
@@ -62,7 +61,7 @@ export class OpeningHoursComponent implements OnChanges {
   }
 
   addHours() {
-    this.openingHours.push({ open: { day: 0, time: '0000' }, close: { day: 0, time: '0000' } });
+    this.openingHours.push({ open: { day: DAY.MONDAY, time: '0000' }, close: { day: DAY.MONDAY, time: '0000' } });
     this.setChanged();
   }
 
