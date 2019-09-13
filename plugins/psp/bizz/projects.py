@@ -212,6 +212,7 @@ def get_merchant_statistics(city_id, project_id, cursor):
     items, new_cursor, more = merchant_future.get_result()  # type: list[Merchant], ndb.Cursor, bool
     results = [MerchantStatisticsTO(id=merchant.id,
                                     name=merchant.name,
+                                    formatted_address=merchant.formatted_address,
                                     location=GeoPointTO(lat=merchant.location.lat, lon=merchant.location.lon),
                                     total=_get_total_from_merchant(stats_models, merchant.id))
                for merchant in items]
