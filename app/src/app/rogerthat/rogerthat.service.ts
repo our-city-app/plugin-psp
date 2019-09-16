@@ -25,7 +25,7 @@ export class RogerthatService {
     this.store.dispatch(new SetUserDataAction(rogerthat.user.data));
     this.store.dispatch(new SetServiceDataAction(rogerthat.service.data));
     this.useLanguage(rogerthat.user.language);
-    const cb = rogerthat.callbacks;
+    const cb = rogerthat.callbacks as RogerthatCallbacks;
     cb.qrCodeScanned(result => this.ngZone.run(() => this.store.dispatch(new ScanQrCodeUpdateAction(result))));
     cb.userDataUpdated(() => this.ngZone.run(() => this.store.dispatch(new SetUserDataAction(rogerthat.user.data))));
     cb.serviceDataUpdated(() => this.ngZone.run(() => this.store.dispatch(new SetServiceDataAction(rogerthat.service.data))));
