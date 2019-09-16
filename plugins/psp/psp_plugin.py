@@ -17,26 +17,31 @@
 
 from __future__ import unicode_literals
 
-from framework.plugin_loader import Plugin, get_auth_plugin
+from framework.plugin_loader import Plugin
 from framework.utils.plugins import Handler, Module
 from mcfw.consts import NOT_AUTHENTICATED, AUTHENTICATED
 from mcfw.restapi import rest_functions
-from plugins.psp.api import cities, qr_codes, projects, places, app, merchants
-from plugins.psp.consts import ROLE_GROUPS, PspPermission
+from plugins.basic_auth.permissions import APP_ADMIN_GROUP_ID, BARole
+from plugins.psp.api import cities, qr_codes, projects, places, app
 from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler, IndexPageHandler, \
     AppleAppSiteAssociationHandler, TestHandler
+from plugins.psp.permissions import ROLE_GROUPS, PspPermission
 
 
 class PspPlugin(Plugin):
 
     def __init__(self, configuration=None):
+        from plugins.basic_auth.basic_auth_plugin import get_basic_auth_plugin
         super(PspPlugin, self).__init__(configuration)
-        get_auth_plugin().register_roles(ROLE_GROUPS)
+        plugin = get_basic_auth_plugin()
+        plugin.register_groups(ROLE_GROUPS)
+        # Add all this plugin its permissions to the 'admin' role of the basic authentication plugin
+        plugin.add_permissions_to_role(APP_ADMIN_GROUP_ID, BARole.ADMIN, PspPermission.all())
 
     def get_handlers(self, auth):
         yield Handler(url='/', handler=IndexPageHandler)
         if auth == Handler.AUTH_AUTHENTICATED:
-            modules = [cities, qr_codes, projects, places, merchants]
+            modules = [cities, qr_codes, projects, places]
             for mod in modules:
                 for url, handler in rest_functions(mod, authentication=AUTHENTICATED):
                     yield Handler(url=url, handler=handler)
@@ -50,7 +55,7 @@ class PspPlugin(Plugin):
         yield Handler(url='/test', handler=TestHandler)
 
     def get_modules(self):
-        yield Module('psp_admin', [PspPermission.LIST_CITY], 1)
+        yield Module('psp_admin', [], 1)
 
     def get_client_routes(self):
         return ['/psp<route:.*>']

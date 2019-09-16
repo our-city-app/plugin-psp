@@ -17,7 +17,7 @@
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.places import search_places, get_place_details
-from plugins.psp.consts import PspPermission
+from plugins.psp.permissions import PspPermission
 
 
 @rest('/places', 'get', silent_result=True, scopes=PspPermission.CREATE_MERCHANT)

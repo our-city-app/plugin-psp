@@ -27,7 +27,7 @@ from plugins.psp.bizz.general import validate_city_request_auth
 from plugins.psp.bizz.places import get_opening_hours_info
 from plugins.psp.bizz.projects import create_project, update_project, get_project, list_projects, get_project_stats, \
     list_merchants, get_merchant_statistics
-from plugins.psp.consts import PspPermission
+from plugins.psp.permissions import PspPermission, CityPermission
 from plugins.psp.to import ProjectTO, ProjectDetailsTO, AppMerchantTO, MerchantListResultTO, MerchantStatisticsListTO
 
 
@@ -40,7 +40,7 @@ def api_list_projects(city_id):
 
 
 @rest('/cities/<city_id:[^/]+>/projects', 'post', custom_auth_method=validate_city_request_auth,
-      scopes=PspPermission.UPDATE_CITY)
+      scopes=[CityPermission.UPDATE_CITY, PspPermission.UPDATE_CITY])
 @returns(ProjectTO)
 @arguments(city_id=unicode, data=ProjectTO)
 def api_create_project(city_id, data):
@@ -48,7 +48,7 @@ def api_create_project(city_id, data):
 
 
 @rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>', 'get', custom_auth_method=validate_city_request_auth,
-      scopes=PspPermission.GET_CITY)
+      scopes=[CityPermission.GET_CITY, PspPermission.GET_CITY])
 @returns(ProjectTO)
 @arguments(city_id=unicode, project_id=long)
 def api_get_project(city_id, project_id):
@@ -56,7 +56,7 @@ def api_get_project(city_id, project_id):
 
 
 @rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>', 'put', custom_auth_method=validate_city_request_auth,
-      scopes=PspPermission.UPDATE_CITY)
+      scopes=[CityPermission.UPDATE_CITY, PspPermission.UPDATE_CITY])
 @returns(ProjectTO)
 @arguments(city_id=unicode, project_id=long, data=ProjectTO)
 def api_save_project(city_id, project_id, data):
@@ -64,7 +64,7 @@ def api_save_project(city_id, project_id, data):
 
 
 @rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/details', 'get',
-      custom_auth_method=validate_city_request_auth, scopes=PspPermission.GET_CITY)
+      custom_auth_method=validate_city_request_auth, scopes=[CityPermission.GET_CITY, PspPermission.GET_CITY])
 @returns(ProjectDetailsTO)
 @arguments(city_id=unicode, project_id=long)
 def api_get_project_details(city_id, project_id):
@@ -81,7 +81,7 @@ def get_project_details(city_id, project_id, app_user=None):
 
 
 @rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/statistics', 'get',
-      custom_auth_method=validate_city_request_auth, scopes=PspPermission.GET_CITY)
+      custom_auth_method=validate_city_request_auth, scopes=[CityPermission.GET_CITY, PspPermission.GET_CITY])
 @returns(MerchantStatisticsListTO)
 @arguments(city_id=unicode, project_id=long, cursor=unicode)
 def api_get_project_statistics(city_id, project_id, cursor=None):
@@ -89,7 +89,7 @@ def api_get_project_statistics(city_id, project_id, cursor=None):
 
 
 @rest('/cities/<city_id:[^/]+>/merchants', 'get', custom_auth_method=validate_city_request_auth,
-      scopes=PspPermission.LIST_MERCHANTS)
+      scopes=[CityPermission.LIST_MERCHANTS, PspPermission.LIST_MERCHANTS])
 @returns(MerchantListResultTO)
 @arguments(city_id=unicode, lang=unicode, cursor=unicode)
 def api_get_city_merchants(city_id, lang=None, cursor=None):

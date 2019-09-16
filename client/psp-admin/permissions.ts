@@ -11,3 +11,15 @@ export const enum PSPPermission {
     UPDATE_MERCHANT = 'psp.merchants.update',
     CREATE_MERCHANT = 'psp.merchants.create',
 }
+
+export const enum CityPermission {
+  GET_CITY = 'psp.cities.%(city_id)s.get',
+  UPDATE_CITY = 'psp.cities.%(city_id)s.update',
+  LIST_MERCHANTS = 'psp.cities.%(city_id)s.merchants.list',
+  GET_MERCHANT = 'psp.cities.%(city_id)s.merchants.get',
+  UPDATE_MERCHANT = 'psp.cities.%(city_id)s.merchants.update',
+  CREATE_MERCHANT = 'psp.cities.%(city_id)s.merchants.create',
+  LIST_QR_BATCHES = 'psp.cities.%(city_id)s.qr.list',
+  CREATE_QR_BATCH = 'psp.cities.%(city_id)s.qr.create',
+  GET_QR_BATCH = 'psp.cities.%(city_id)s.qr.get',
+}

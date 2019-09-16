@@ -17,33 +17,36 @@
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
 from plugins.psp.bizz.qr_codes import list_qr_batches, download_qr_code_batch, create_qr_batch, link_qr_code
-from plugins.psp.consts import PspPermission
+from plugins.psp.permissions import PspPermission, CityPermission
 from plugins.psp.to import QRBatchTO, LinkQRTO, MerchantTO
 
 
-@rest('/qr-batches', 'get', scopes=PspPermission.LIST_QR_BATCHES)
+@rest('/cities/<city_id:[^/]+>/qr-batches', 'get',
+      scopes=[PspPermission.LIST_QR_BATCHES, CityPermission.LIST_QR_BATCHES])
 @returns([dict])
 @arguments(city_id=unicode)
 def api_list_qr_batches(city_id):
     return [b.to_dict() for b in list_qr_batches(city_id)]
 
 
-@rest('/qr-batches', 'post', scopes=PspPermission.CREATE_QR_BATCH)
+@rest('/cities/<city_id:[^/]+>/qr-batches', 'post',
+      scopes=[PspPermission.CREATE_QR_BATCH, CityPermission.CREATE_QR_BATCH])
 @returns(QRBatchTO)
-@arguments(data=QRBatchTO)
-def api_create_qr_batch(data):
-    # type: (QRBatchTO) -> QRBatchTO
-    return QRBatchTO.from_model(create_qr_batch(data))
+@arguments(city_id=unicode, data=QRBatchTO)
+def api_create_qr_batch(city_id, data):
+    # type: (unicode, QRBatchTO) -> QRBatchTO
+    return QRBatchTO.from_model(create_qr_batch(city_id, data.amount))
 
 
-@rest('/qr-batches/<batch_id:[^/]+>/download', 'get', scopes=PspPermission.GET_QR_BATCH)
+@rest('/cities/<city_id:[^/]+>/qr-batches/<batch_id:[^/]+>/download', 'get',
+      scopes=[PspPermission.GET_QR_BATCH, CityPermission.GET_QR_BATCH])
 @returns(dict)
-@arguments(batch_id=(int, long))
-def api_download_qr_batch(batch_id):
+@arguments(city_id=unicode, batch_id=(int, long))
+def api_download_qr_batch(city_id, batch_id):
     return {'download_url': download_qr_code_batch(batch_id)}
 
 
-@rest('/cities/<city_id:[^/]+>/link', 'post', scopes=PspPermission.CREATE_MERCHANT)
+@rest('/cities/<city_id:[^/]+>/link', 'post', scopes=[PspPermission.CREATE_MERCHANT, CityPermission.CREATE_MERCHANT])
 @returns(MerchantTO)
 @arguments(city_id=unicode, data=LinkQRTO)
 def api_link_qr(city_id, data):

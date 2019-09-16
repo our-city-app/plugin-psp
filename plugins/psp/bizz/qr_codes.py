@@ -38,18 +38,18 @@ def list_qr_batches(city_id):
     return sorted(QRBatch.list_by_city(city_id), key=lambda q: q.date, reverse=True)
 
 
-def create_qr_batch(data):
-    # type: (QRBatchTO) -> QRBatch
+def create_qr_batch(city_id, amount):
+    # type: (unicode, long) -> QRBatch
     settings = get_general_settings()
-    get_city(data.city_id)
-    batch = QRBatch(city_id=data.city_id, amount=data.amount, namespace=NAMESPACE)
+    get_city(city_id)
+    batch = QRBatch(city_id=city_id, amount=amount, namespace=NAMESPACE)
     batch.put()
-    min_id, max_id = QRCode.allocate_ids(data.amount)
+    min_id, max_id = QRCode.allocate_ids(amount)
     iterable = xrange(min_id, max_id + 1)
     to_put = [QRCode(key=QRCode.create_key(id_),
-                     city_id=data.city_id,
+                     city_id=city_id,
                      batch_id=batch.id,
-                     content='%s/qr/%s/%s' % (settings.qr_domain, data.city_id, id_)) for id_ in iterable]
+                     content='%s/qr/%s/%s' % (settings.qr_domain, city_id, id_)) for id_ in iterable]
     ndb.put_multi(to_put)
     return batch
 

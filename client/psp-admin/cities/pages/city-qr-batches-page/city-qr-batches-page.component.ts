@@ -31,7 +31,7 @@ export class CityQrBatchesPageComponent implements OnInit {
   }
 
   downloadBatch(batch: QRBatch) {
-    this.citiesService.downloadQrBatch(batch.id).subscribe(result => {
+    this.citiesService.downloadQrBatch(batch.city_id, batch.id).subscribe(result => {
       window.open(result.download_url, '_blank');
     });
   }

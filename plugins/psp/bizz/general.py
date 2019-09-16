@@ -15,6 +15,7 @@
 #
 # @@license_version:1.3@@
 from base64 import b64decode
+from types import FunctionType
 
 from framework.bizz.authentication import get_current_session
 from mcfw.restapi import GenericRESTRequestHandler
@@ -27,17 +28,21 @@ def get_general_settings():
     return GeneralSettings.create_key().get()
 
 
-def validate_session_auth(scopes):
+def validate_session_auth(args, scopes):
     session = get_current_session()
     if session:
         user_permissions = get_permissions_from_roles(session.scopes)
-        return any(permission in user_permissions for permission in scopes)
+        for permission in scopes:
+            permission_with_arg = permission % args if args else permission
+            if permission_with_arg in user_permissions:
+                return True
     return False
 
 
 def validate_admin_request_auth(func, handler):
-    # type: (function, GenericRESTRequestHandler) -> bool
-    if validate_session_auth(func.meta['scopes']):
+    # type: (FunctionType, GenericRESTRequestHandler) -> bool
+    route_kwargs = handler.request.route.match(handler.request)[-1]
+    if validate_session_auth(route_kwargs, func.meta['scopes']):
         return True
     auth = handler.request.headers.get('Authentication')
     if not auth:
@@ -56,7 +61,8 @@ def validate_admin_request_auth(func, handler):
 
 def validate_city_request_auth(func, handler):
     # type: (function, GenericRESTRequestHandler) -> bool
-    if validate_session_auth(func.meta['scopes']):
+    route_kwargs = handler.request.route.match(handler.request)[-1]
+    if validate_session_auth(route_kwargs, func.meta['scopes']):
         return True
     auth = handler.request.headers.get('Authentication')
     if not auth:
@@ -67,9 +73,7 @@ def validate_city_request_auth(func, handler):
         type_, encoded = auth.split(' ')
         if type_ != 'Basic':
             return False
-
-        kwargs = handler.request.route.match(handler.request)[-1]
-        city = get_city(kwargs['city_id'])
+        city = get_city(route_kwargs['city_id'])
         return city.secret == b64decode(encoded)
     except TypeError:
         return False

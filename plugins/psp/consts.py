@@ -16,42 +16,6 @@
 # @@license_version:1.3@@
 from __future__ import unicode_literals
 
-from plugins.basic_auth.to import RoleGroup, Role
-
 NAMESPACE = 'PSP'
 PREFIX = 'psp'
 SCHEDULED_QUEUE = "scheduled-queue"
-
-
-class PspPermission(object):
-    LIST_CITY = 'psp.cities.list'
-    GET_CITY = 'psp.cities.get'
-    CREATE_CITY = 'psp.cities.create'
-    UPDATE_CITY = 'psp.cities.update'
-    LIST_QR_BATCHES = 'psp.qr.list'
-    CREATE_QR_BATCH = 'psp.qr.create'
-    GET_QR_BATCH = 'psp.qr.get'
-    LIST_MERCHANTS = 'psp.merchants.list'
-    GET_MERCHANT = 'psp.merchants.get'
-    UPDATE_MERCHANT = 'psp.merchants.update'
-    CREATE_MERCHANT = 'psp.merchants.create'
-
-    @classmethod
-    def all(cls):
-        return [getattr(cls, a) for a in dir(cls) if not a.startswith('_') and not a == 'all']
-
-
-ROLE_GROUPS = (
-    RoleGroup(name='psp.perms.participation', roles=[
-        Role(id='role/psp.admin',
-             name='psp.perms.participation_admin',
-             permissions=PspPermission.all()),
-        Role(id='role/psp.merchantAdmin',
-             name='psp.perms.merchants_admin',
-             permissions=[PspPermission.LIST_CITY,
-                          PspPermission.LIST_MERCHANTS,
-                          PspPermission.GET_MERCHANT,
-                          PspPermission.UPDATE_MERCHANT,
-                          PspPermission.CREATE_MERCHANT])
-    ]),
-)

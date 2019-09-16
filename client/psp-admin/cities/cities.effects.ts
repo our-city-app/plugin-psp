@@ -122,14 +122,16 @@ export class CitiesEffects {
 
   @Effect() getMerchant$ = this.actions$.pipe(
     ofType<GetMerchantAction>(CitiesActionTypes.GET_MERCHANT),
-    switchMap(action => this.citiesService.getMerchant(action.payload.id).pipe(
+    withLatestFrom(this.store.pipe(select(getCurrentCityId), filterNull())),
+    switchMap(([ action, cityId ]) => this.citiesService.getMerchant(cityId, action.payload.id).pipe(
       map(data => new GetMerchantCompleteAction(data)),
       catchError(err => of(new GetMerchantFailedAction(err)))),
     ));
 
   @Effect() saveMerchant$ = this.actions$.pipe(
     ofType<SaveMerchantAction>(CitiesActionTypes.SAVE_MERCHANT),
-    switchMap(action => this.citiesService.updateMerchant(action.payload).pipe(
+    withLatestFrom(this.store.pipe(select(getCurrentCityId), filterNull())),
+    switchMap(([ action, cityId ]) => this.citiesService.updateMerchant(cityId, action.payload).pipe(
       map(data => new SaveMerchantCompleteAction(data)),
       catchError(err => of(new SaveMerchantFailedAction(err)))),
     ));

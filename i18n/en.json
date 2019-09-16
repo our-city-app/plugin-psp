@@ -38,6 +38,7 @@
     "opening_hours": "Opening hours",
     "opening_time": "Opening time",
     "perms": {
+      "cities": "Cities",
       "merchants_admin": "Merchants admin",
       "participation": "Participation",
       "participation_admin": "Participation admin"

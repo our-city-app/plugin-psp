@@ -14,21 +14,42 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
+
+from framework.bizz.authentication import get_current_session
 from mcfw.exceptions import HttpForbiddenException
 from mcfw.restapi import rest, GenericRESTRequestHandler
 from mcfw.rpc import returns, arguments
-from plugins.psp.bizz.cities import create_city, update_city, get_city, list_cities
+from plugins.basic_auth.bizz.user import get_permissions_from_roles
+from plugins.psp.bizz.cities import create_city, update_city, get_city, list_cities, get_cities_by_ids
 from plugins.psp.bizz.general import validate_admin_request_auth, validate_city_request_auth
-from plugins.psp.consts import PspPermission
+from plugins.psp.bizz.projects import get_merchant, update_merchant
+from plugins.psp.permissions import PspPermission, CityPermission
+from plugins.psp.to import CityTO, AppCityTO, MerchantTO
 
-from plugins.psp.to import CityTO, AppCityTO
+
+def _get_city_ids_from_scopes(scopes):
+    # type: (list[str]) -> list[str]
+    city_ids = []
+    for permission in scopes:
+        if permission.startswith('role/psp.cities.'):
+            city_id = permission.replace('role/psp.cities.', '').rsplit('.', 1)[0]
+            city_ids.append(city_id)
+    return city_ids
 
 
-@rest('/cities', 'get', custom_auth_method=validate_admin_request_auth, scopes=PspPermission.LIST_CITY)
+@rest('/cities', 'get')
 @returns([CityTO])
 @arguments()
 def api_list_cities():
-    return [CityTO.from_model(model) for model in list_cities()]
+    session = get_current_session()
+    if not session:
+        raise HttpForbiddenException()
+    permissions = get_permissions_from_roles(session.scopes)
+    if PspPermission.LIST_CITY in permissions:
+        cities = list_cities()
+    else:
+        cities = get_cities_by_ids(_get_city_ids_from_scopes(session.scopes))
+    return [CityTO.from_model(model) for model in cities]
 
 
 @rest('/cities', 'post', custom_auth_method=validate_admin_request_auth, scopes=PspPermission.CREATE_CITY)
@@ -42,7 +63,8 @@ def _city_auth(func, handler):
     return validate_admin_request_auth(func, handler) or validate_city_request_auth(func, handler)
 
 
-@rest('/cities/<city_id:[^/]+>', 'get', custom_auth_method=_city_auth, scopes=PspPermission.GET_CITY)
+@rest('/cities/<city_id:[^/]+>', 'get', custom_auth_method=_city_auth,
+      scopes=[CityPermission.GET_CITY, PspPermission.GET_CITY])
 @returns((CityTO, AppCityTO))
 @arguments(city_id=unicode)
 def api_get_city(city_id):
@@ -56,7 +78,8 @@ def api_get_city(city_id):
     raise HttpForbiddenException()
 
 
-@rest('/cities/<city_id:[^/]+>', 'put', custom_auth_method=_city_auth, scopes=PspPermission.UPDATE_CITY)
+@rest('/cities/<city_id:[^/]+>', 'put', custom_auth_method=_city_auth,
+      scopes=[CityPermission.UPDATE_CITY, PspPermission.UPDATE_CITY])
 @returns((CityTO, AppCityTO))
 @arguments(city_id=unicode, data=CityTO)
 def api_save_city(city_id, data):
@@ -69,3 +92,19 @@ def api_save_city(city_id, data):
         return AppCityTO.from_model(update_city(city_id, AppCityTO.from_dict(data.to_dict())))
     else:
         raise HttpForbiddenException()
+
+
+@rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'get',
+      scopes=[PspPermission.GET_MERCHANT, CityPermission.GET_MERCHANT])
+@returns(MerchantTO)
+@arguments(city_id=unicode, merchant_id=(int, long))
+def api_get_merchant(city_id, merchant_id):
+    return MerchantTO.from_model(get_merchant(merchant_id))
+
+
+@rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'put',
+      scopes=[PspPermission.UPDATE_MERCHANT, CityPermission.UPDATE_MERCHANT])
+@returns(MerchantTO)
+@arguments(city_id=unicode, merchant_id=(int, long), data=MerchantTO)
+def api_update_merchant(city_id, merchant_id, data):
+    return MerchantTO.from_model(update_merchant(merchant_id, data))

@@ -6,12 +6,12 @@ import { map } from 'rxjs/operators';
 import { getIdentity } from '../../../../../../framework/client/identity';
 import { SecondarySidebarItem } from '../../../../../../framework/client/nav/sidebar/interfaces';
 import { filterNull } from '../../../../../../framework/client/ngrx';
-import { PSPPermission } from '../../../permissions';
+import { CityPermission, PSPPermission } from '../../../permissions';
 import { SetCurrentCityAction } from '../../cities.actions';
 import { CitiesState } from '../../cities.state';
 
 interface Tab extends SecondarySidebarItem {
-  permission: PSPPermission;
+  permissions: (PSPPermission | CityPermission)[];
 }
 
 @Component({
@@ -26,25 +26,25 @@ export class CityPageComponent implements OnInit {
       label: 'psp.details',
       icon: 'dashboard',
       route: 'details',
-      permission: PSPPermission.GET_CITY,
+      permissions: [ PSPPermission.GET_CITY, CityPermission.GET_CITY ],
     },
     {
       label: 'psp.qr_codes',
       icon: 'photo',
       route: 'qr-codes',
-      permission: PSPPermission.LIST_QR_BATCHES,
+      permissions: [ PSPPermission.LIST_QR_BATCHES, CityPermission.LIST_QR_BATCHES ],
     },
     {
       label: 'psp.merchants',
       icon: 'business',
       route: 'merchants',
-      permission: PSPPermission.LIST_MERCHANTS,
+      permissions: [ PSPPermission.LIST_MERCHANTS, CityPermission.LIST_MERCHANTS ],
     },
     {
       label: 'psp.activate_qr',
       icon: 'add_location',
       route: 'activate-qr',
-      permission: PSPPermission.CREATE_MERCHANT,
+      permissions: [ PSPPermission.CREATE_MERCHANT, CityPermission.CREATE_MERCHANT ],
     },
   ];
   tabs$: Observable<Tab[]>;
@@ -58,6 +58,13 @@ export class CityPageComponent implements OnInit {
     this.store.dispatch(new SetCurrentCityAction({ id: cityId }));
     this.tabs$ = this.store.pipe(select(getIdentity),
       filterNull(),
-      map(identity => this.items.filter(i => identity.permissions.includes(i.permission))));
+      map(identity => this.items.filter(i => {
+        for (const permission of i.permissions) {
+          if (identity.permissions.includes(permission.replace('%(city_id)s', cityId))) {
+            return true;
+          }
+        }
+        return false;
+      })));
   }
 }

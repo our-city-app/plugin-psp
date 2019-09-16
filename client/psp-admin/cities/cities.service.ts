@@ -21,16 +21,15 @@ export class CitiesService {
   }
 
   getQrBatches(cityId: string) {
-    const params = new HttpParams({ fromObject: { city_id: cityId } });
-    return this.http.get<QRBatch[]>(`${PspConfig.API_URL}/qr-batches`, { params });
+    return this.http.get<QRBatch[]>(`${PspConfig.API_URL}/cities/${cityId}/qr-batches`);
   }
 
-  downloadQrBatch(id: number) {
-    return this.http.get<{ download_url: string }>(`${PspConfig.API_URL}/qr-batches/${id}/download`);
+  downloadQrBatch(cityId: string, id: number) {
+    return this.http.get<{ download_url: string }>(`${PspConfig.API_URL}/cities/${cityId}/qr-batches/${id}/download`);
   }
 
   createQrCodes(cityId: string, amount: number) {
-    return this.http.post<QRBatch>(`${PspConfig.API_URL}/qr-batches`, { city_id: cityId, amount });
+    return this.http.post<QRBatch>(`${PspConfig.API_URL}/cities/${cityId}/qr-batches`, { amount });
   }
 
   listProjects(cityId: string, active = true) {
@@ -59,11 +58,11 @@ export class CitiesService {
     return this.http.get<MerchantList>(`${PspConfig.API_URL}/cities/${cityId}/merchants`, { params });
   }
 
-  getMerchant(id: number) {
-    return this.http.get<Merchant>(`${PspConfig.API_URL}/merchants/${id}`);
+  getMerchant(cityId: string, id: number) {
+    return this.http.get<Merchant>(`${PspConfig.API_URL}/cities/${cityId}/merchants/${id}`);
   }
 
-  updateMerchant(merchant: Merchant) {
-    return this.http.put<Merchant>(`${PspConfig.API_URL}/merchants/${merchant.id}`, merchant);
+  updateMerchant(cityId: string, merchant: Merchant) {
+    return this.http.put<Merchant>(`${PspConfig.API_URL}/cities/${cityId}/merchants/${merchant.id}`, merchant);
   }
 }
