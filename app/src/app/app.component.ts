@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/
 import { Router } from '@angular/router';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
-
 import { Config, Platform } from '@ionic/angular';
 import { Actions } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { RogerthatContext, RogerthatContextType } from 'rogerthat-plugin';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locale';
 import { RogerthatService } from './rogerthat/rogerthat.service';
 
 @Component({
@@ -17,6 +17,7 @@ import { RogerthatService } from './rogerthat/rogerthat.service';
 })
 export class AppComponent {
   loaded = false;
+
   constructor(private platform: Platform,
               private splashScreen: SplashScreen,
               private statusBar: StatusBar,
@@ -31,8 +32,7 @@ export class AppComponent {
   }
 
   initializeApp() {
-    const defaultLanguage = 'en';
-    this.translate.setDefaultLang(defaultLanguage);
+    this.translate.setDefaultLang(DEFAULT_LOCALE);
     this.platform.ready().then(() => {
       if (rogerthat.system.os === 'android') {
         this.statusBar.styleBlackTranslucent();
@@ -44,15 +44,14 @@ export class AppComponent {
         this.loaded = true;
         this.rogerthatService.initialize();
         this.rogerthatService.getContext().subscribe(context => this.processContext(context));
-        const supportedLangs = [ 'en', 'nl' ];
         let lang;
-        for (const supportedLang of supportedLangs) {
+        for (const supportedLang of SUPPORTED_LOCALES) {
           if (rogerthat.user.language.startsWith(supportedLang)) {
             lang = supportedLang;
             break;
           }
         }
-        this.translate.use(lang || defaultLanguage);
+        this.translate.use(lang || DEFAULT_LOCALE);
         this.translate.get('back').subscribe(back => {
           this.config.set('backButtonText', back);
         });

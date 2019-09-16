@@ -187,7 +187,12 @@ export class ProjectsEffects {
     };
     if (response.status.toString().startsWith('4') && response.error && response.error.error) {
       if (response.error.error === 'psp.errors.already_scanned_recently') {
-        const date = this.datePipe.transform(response.error.data.date, 'medium');
+        const now = new Date();
+        const scanDate = new Date(response.error.data.date);
+        const diffTime = Math.abs(now.getTime() - scanDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const format = diffDays > 1 ? 'medium' : 'shortTime';
+        const date = this.datePipe.transform(response.error.data.date, format);
         result.message = this.translate.instant(response.error.error, { date });
         result.header = this.translate.instant('info');
       } else {

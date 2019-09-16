@@ -25,11 +25,11 @@ export class RogerthatService {
     this.store.dispatch(new SetUserDataAction(rogerthat.user.data));
     this.store.dispatch(new SetServiceDataAction(rogerthat.service.data));
     this.useLanguage(rogerthat.user.language);
-    const cb = <RogerthatCallbacks>rogerthat.callbacks;
+    const cb = rogerthat.callbacks;
     cb.qrCodeScanned(result => this.ngZone.run(() => this.store.dispatch(new ScanQrCodeUpdateAction(result))));
     cb.userDataUpdated(() => this.ngZone.run(() => this.store.dispatch(new SetUserDataAction(rogerthat.user.data))));
     cb.serviceDataUpdated(() => this.ngZone.run(() => this.store.dispatch(new SetServiceDataAction(rogerthat.service.data))));
-    const [ major, minor, patch ] = rogerthat.system.appVersion.split('.').slice(0, 3).map(s => parseInt(s));
+    const [ major, minor, patch ] = rogerthat.system.appVersion.split('.').slice(0, 3).map(s => parseInt(s, 10));
     this._version = { major, minor, patch };
   }
 

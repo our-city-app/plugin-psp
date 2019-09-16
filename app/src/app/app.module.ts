@@ -15,6 +15,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { environment } from '../environments/environment';
 
 import { AppComponent } from './app.component';
+import { CUSTOM_LOCALE_PROVIDER } from './locale';
 import { RogerthatModule } from './rogerthat/rogerthat.module';
 
 const routes: Routes = [
@@ -65,6 +66,7 @@ const ionConfig: undefined | IonicConfig = environment.production ? undefined : 
     StatusBar,
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    CUSTOM_LOCALE_PROVIDER,
   ],
   bootstrap: [ AppComponent ],
 })
