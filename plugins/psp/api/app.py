@@ -108,9 +108,9 @@ def _default_cors_headers():
     if requested_headers:
         return {
             'Access-Control-Allow-Headers': requested_headers,
-            'Access-Control-Max-Age': 300
+            'Access-Control-Max-Age': '300'
         }
     return {
         # The value of this header allows the preflight response to be cached for a specified number of seconds.
-        'Access-Control-Max-Age': 300
+        'Access-Control-Max-Age': '300'
     }
