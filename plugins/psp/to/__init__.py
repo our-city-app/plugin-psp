@@ -226,3 +226,7 @@ class MerchantStatisticsListTO(PaginatedResultTO):
 
 class UserSettingsTO(TO):
     tour_date = unicode_property('tour_date')
+
+
+class RegisterAppleIdTO(TO):
+    ios_dev_team = unicode_property('ios_dev_team')

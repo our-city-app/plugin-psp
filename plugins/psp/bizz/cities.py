@@ -19,10 +19,10 @@ from string import ascii_lowercase
 
 from google.appengine.ext import ndb
 
-from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException
+from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, HttpConflictException
 from plugins.basic_auth.basic_auth_plugin import get_basic_auth_plugin
 from plugins.basic_auth.models import Role, PermissionName, RoleGroup
-from plugins.psp.models import City
+from plugins.psp.models import City, AppleAppAssociation
 from plugins.psp.permissions import CityPermission, CITY_ADMIN_ROLE, CITY_GROUP_ID, CITY_MERCHANT_ROLE
 from plugins.psp.to import CityTO
 
@@ -102,3 +102,19 @@ def _populate_city(city, data):
     )
     if isinstance(data, CityTO):
         city.api_key = data.api_key
+
+
+def add_app_to_apple_association(app_id, ios_dev_team):
+    get_city(app_id)
+    model = AppleAppAssociation.create_key().get()  # type: AppleAppAssociation
+    existing_ids = [detail['appID'] for detail in model.config['applinks']['details']]
+    new_id = '%s.com.mobicage.rogerthat.%s' % (ios_dev_team, app_id)
+    if any(app_id in id_ for id_ in existing_ids):
+        raise HttpConflictException('App %s is already registered' % app_id)
+    new_details = {
+        'appID': new_id,
+        'paths': ['/qr/%s/*' % app_id]
+    }
+    model.config['applinks']['details'].append(new_details)
+    model.put()
+    return model

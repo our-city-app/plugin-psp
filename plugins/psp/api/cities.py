@@ -20,11 +20,12 @@ from mcfw.exceptions import HttpForbiddenException
 from mcfw.restapi import rest, GenericRESTRequestHandler
 from mcfw.rpc import returns, arguments
 from plugins.basic_auth.bizz.user import get_permissions_from_roles
-from plugins.psp.bizz.cities import create_city, update_city, get_city, list_cities, get_cities_by_ids
+from plugins.psp.bizz.cities import create_city, update_city, get_city, list_cities, get_cities_by_ids, \
+    add_app_to_apple_association
 from plugins.psp.bizz.general import validate_admin_request_auth, validate_city_request_auth
 from plugins.psp.bizz.projects import get_merchant, update_merchant
 from plugins.psp.permissions import PspPermission, CityPermission
-from plugins.psp.to import CityTO, AppCityTO, MerchantTO
+from plugins.psp.to import CityTO, AppCityTO, MerchantTO, RegisterAppleIdTO
 
 
 def _get_city_ids_from_scopes(scopes):
@@ -92,6 +93,15 @@ def api_save_city(city_id, data):
         return AppCityTO.from_model(update_city(city_id, AppCityTO.from_dict(data.to_dict())))
     else:
         raise HttpForbiddenException()
+
+
+@rest('/cities/<city_id:[^/]+>/register', 'post', custom_auth_method=validate_admin_request_auth,
+      scopes=PspPermission.CREATE_CITY)
+@returns()
+@arguments(city_id=unicode, data=RegisterAppleIdTO)
+def api_register_app(city_id, data):
+    # type: (unicode, RegisterAppleIdTO) -> None
+    add_app_to_apple_association(city_id, data.ios_dev_team)
 
 
 @rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'get',
