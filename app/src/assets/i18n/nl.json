@@ -17,7 +17,7 @@
   "overview": "Overzicht",
   "participation_moneybox": "Participatie spaarpot",
   "psp.errors": {
-    "already_scanned_recently": "U hebt onlangs al de QR code van deze handelaar gescand, probeer het later opnieuw! Uw laatste scan was op {{ date }}.",
+    "already_scanned_recently": "U kunt maar 1 keer per 2 uur scannen bij dezelfde handelaar, probeer het later opnieuw! Uw laatste scan was op {{ date }}.",
     "invalid_qr_code": "Ongeldige QR code",
     "project_not_active": "Dit project is niet langer actief, je kunt momenteel geen nieuwe scans ervoor toevoegen.",
     "qr_code_not_found": "QR code niet gevonden",

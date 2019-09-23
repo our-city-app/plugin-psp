@@ -28,7 +28,7 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
   scannedQr: string | null;
   dummyLoadable = DEFAULT_LOADABLE;
 
-  private _destroyed$ = new Subject();
+  private destroyed$ = new Subject();
 
   constructor(private store: Store<ProjectsState>,
               private router: Router,
@@ -69,6 +69,14 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  chooseCurrentProject() {
+    this.slides.getActiveIndex().then(slideIndex => {
+      this.projectList$.pipe(take(1)).subscribe(projects => {
+        this.projectClicked(projects[ slideIndex ]);
+      });
+    });
+  }
+
   projectClicked(project: Project) {
     if (this.scannedQr) {
       this.store.dispatch(new AddParticipationAction({ projectId: project.id, qrContent: this.scannedQr }));
@@ -82,7 +90,7 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(new ScanQrCodeAction('back'));
     const subscription = this.store.pipe(
       select(getScannedQr),
-      takeUntil(this._destroyed$),
+      takeUntil(this.destroyed$),
       withLatestFrom(this.currentProjectId$),
     ).subscribe(([ scan, projectId ]) => {
       if (scan.success && scan.data) {
@@ -93,13 +101,13 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this._destroyed$.next();
-    this._destroyed$.complete();
+    this.destroyed$.next();
+    this.destroyed$.complete();
   }
 
   loadProject() {
     this.slides.getActiveIndex().then(slideIndex => {
-      this.projects$.pipe(map(p => p.data), filterNull(), take(1)).subscribe(projects => {
+      this.projectList$.pipe(take(1)).subscribe(projects => {
         this.store.dispatch(new GetProjectDetailsAction({ id: projects[ slideIndex ].id }));
       });
     });

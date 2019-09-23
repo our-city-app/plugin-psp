@@ -17,7 +17,7 @@
   "overview": "Overview",
   "participation_moneybox": "Participation moneybox",
   "psp.errors": {
-    "already_scanned_recently": "You have recently already scanned for this merchant, try again later! Your last scan was on {{ date }}.",
+    "already_scanned_recently": "You can only scan once every 2 hours at the same merchant, try again later! Your last scan was on {{ date }}.",
     "invalid_qr_code": "Invalid QR code",
     "project_not_active": "This project is no longer active, you currently cannot add any new scans.",
     "qr_code_not_found": "QR code not found",

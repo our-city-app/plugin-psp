@@ -17,8 +17,11 @@
           </ion-slide>
         </ion-slides>
       </div>
-      <div *ngIf="scannedQr" class="ion-text-center">
+      <div *ngIf="scannedQr" class="choose-project-text">
         <b>{{ 'choose_project_for_scan' | translate }}</b>
+        <ion-button (click)="chooseCurrentProject()">
+          {{ 'choose' | translate }}
+        </ion-button>
       </div>
       <ion-button (click)="startScanning()" class="scan-button" *ngIf="!scannedQr">
         <span>{{ 'scan' | translate }}</span>

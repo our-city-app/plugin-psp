@@ -146,6 +146,12 @@ def get_open_until(opening_hours, now, lang):
             if period.close.day == weekday and now_time < period.close.datetime:
                 return True, _format_open_until(period, lang)
 
+    # Closed, check if this store will open today
+    for period in opening_hours:
+        if period.open and period.open.day == weekday:
+            hour_str = _format_opening_hour(period.open, lang)
+            return False, translate(lang, PREFIX, 'opens_on_time', time='%s' % hour_str)
+
     return False, translate(lang, PREFIX, 'closed')
 
 

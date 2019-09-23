@@ -40,6 +40,11 @@ export class AppComponent {
         this.statusBar.styleDefault();
       }
       this.splashScreen.hide();
+      this.platform.backButton.subscribe(() => {
+        if (this.shouldExitApp()) {
+          (navigator as any).app.exitApp();
+        }
+      });
       rogerthat.callbacks.ready(() => {
         this.loaded = true;
         this.rogerthatService.initialize();
@@ -59,6 +64,11 @@ export class AppComponent {
       });
     });
     this.actions.subscribe(action => console.log(JSON.stringify(action)));
+  }
+
+  private shouldExitApp(): boolean {
+    const whitelist = [ '/psp/overview', '/psp/merchants', '/psp/info' ];
+    return whitelist.includes(this.router.url);
   }
 
   private processContext(data: { context: RogerthatContext | null }) {

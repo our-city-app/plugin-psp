@@ -190,9 +190,9 @@ class OpeningHour(ndb.Model):
 
 class OpeningPeriod(NdbModel):
     # open contains a pair of day and time objects describing when the place opens:
-    open = ndb.LocalStructuredProperty(OpeningHour)
+    open = ndb.LocalStructuredProperty(OpeningHour)  # type: OpeningHour
     # close may contain a pair of day and time objects describing when the place closes.
-    close = ndb.LocalStructuredProperty(OpeningHour)
+    close = ndb.LocalStructuredProperty(OpeningHour)  # type: OpeningHour
     # Note: If a place is always open, close will be None.
     # Always-open is represented as an open period containing day with value 0 and time with value 0000, and no close.
 

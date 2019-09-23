@@ -3,6 +3,7 @@
   "psp": {
     "closed": "Gesloten",
     "open_24_hours": "24 uur geopend",
-    "open_until": "Open tot {{ time }}"
+    "open_until": "Open tot {{ time }}",
+    "opens_on_time": "Opent om {{ time }}"
   }
 }
