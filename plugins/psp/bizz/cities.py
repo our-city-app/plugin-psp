@@ -23,7 +23,8 @@ from mcfw.exceptions import HttpNotFoundException, HttpBadRequestException, Http
 from plugins.basic_auth.basic_auth_plugin import get_basic_auth_plugin
 from plugins.basic_auth.models import Role, PermissionName, RoleGroup
 from plugins.psp.models import City, AppleAppAssociation
-from plugins.psp.permissions import CityPermission, CITY_ADMIN_ROLE, CITY_GROUP_ID, CITY_MERCHANT_ROLE
+from plugins.psp.permissions import CityPermission, CITY_ADMIN_ROLE, CITY_GROUP_ID, CITY_MERCHANT_ROLE, \
+    PARTICIPATION_CITIES_GROUP_ID
 from plugins.psp.to import CityTO
 
 
@@ -54,7 +55,7 @@ def create_city(data):
                 secret=''.join(random.choice(ascii_lowercase) for _ in range(40)))
     _populate_city(city, data)
     city.put()
-    get_basic_auth_plugin().register_groups([_get_group_for_city(city)])
+    get_basic_auth_plugin().register_groups([_get_group_for_city(city)], PARTICIPATION_CITIES_GROUP_ID)
     return city
 
 
@@ -87,7 +88,6 @@ def update_city(city_id, data):
     # type: (unicode, CityTO) -> City
     city = get_city(city_id)
     _populate_city(city, data)
-    group_id = CITY_GROUP_ID % {'city_id': city_id}
     get_basic_auth_plugin().update_group(_get_group_for_city(city))
     city.put()
     return city
