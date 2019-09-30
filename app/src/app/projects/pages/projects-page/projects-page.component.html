@@ -12,8 +12,8 @@
             <div class="swiper-button-prev" (click)="slider.slidePrev()" *ngIf="!isFirst"></div>
             <div class="swiper-button-next" (click)="slider.slideNext()" *ngIf="!isLast"></div>
             <app-project-card [project]="project"
-                              [projectDetails]="(project$ | async)?.data?.id === project.id ? (project$ | async): dummyLoadable"
-                              (projectClicked)="projectClicked($event)"></app-project-card>
+                              [routerLink]="[ '/psp', 'overview', project.id ]"
+                              [projectDetails]="(project$ | async)?.data?.id === project.id ? (project$ | async): dummyLoadable"></app-project-card>
           </ion-slide>
         </ion-slides>
       </div>

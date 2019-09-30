@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonSlides } from '@ionic/angular';
+import { AlertController, IonSlides } from '@ionic/angular';
 import { select, Store } from '@ngrx/store';
+import { TranslateService } from '@ngx-translate/core';
 import { Observable, Subject } from 'rxjs';
 import { map, take, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import { DEFAULT_LOADABLE, Loadable } from '../../../loadable';
@@ -27,12 +28,16 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
   currentProjectId$: Observable<number>;
   scannedQr: string | null;
   dummyLoadable = DEFAULT_LOADABLE;
+  selectedProjectId: number | null;
 
   private destroyed$ = new Subject();
 
   constructor(private store: Store<ProjectsState>,
               private router: Router,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private changeDetectorRef: ChangeDetectorRef,
+              private alertController: AlertController,
+              private translate: TranslateService) {
   }
 
   ngOnInit() {
@@ -49,7 +54,9 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
     this.hasNoProjects$ = this.projects$.pipe(map(projects => {
       return projects.success && (!projects.data || projects.data.length === 0);
     }));
-    this.project$ = this.store.pipe(select(getCurrentProject));
+    this.project$ = this.store.pipe(select(getCurrentProject), tap(p => {
+      this.selectedProjectId = p.data ? p.data.id : null;
+    }));
     this.currentProjectId$ = this.store.pipe(select(getCurrentProjectId), filterNull());
     this.route.queryParams.subscribe(params => {
       if (params.qr) {
@@ -58,10 +65,11 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
         const subscription = this.projectList$.subscribe(list => {
           if (list.length > 0) {
             subscription.unsubscribe();
-            this.scannedQr = params.qr;
-            // Only one project, just immediately add a scan without user interaction required
             if (list.length === 1) {
-              this.projectClicked(list[ 0 ]);
+              // Only one project, immediately add a scan without user interaction required
+              this.onProjectSelected(list[ 0 ].id, params.qr);
+            } else {
+              this.scannedQr = params.qr;
             }
           }
         });
@@ -72,18 +80,9 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
   chooseCurrentProject() {
     this.slides.getActiveIndex().then(slideIndex => {
       this.projectList$.pipe(take(1)).subscribe(projects => {
-        this.projectClicked(projects[ slideIndex ]);
+        this.onProjectSelected(projects[ slideIndex ].id, this.scannedQr);
       });
     });
-  }
-
-  projectClicked(project: Project) {
-    if (this.scannedQr) {
-      this.store.dispatch(new AddParticipationAction({ projectId: project.id, qrContent: this.scannedQr }));
-    } else {
-      this.router.navigate([ 'psp', 'overview', project.id ]);
-    }
-    this.scannedQr = null;
   }
 
   startScanning() {
@@ -91,13 +90,51 @@ export class ProjectsPageComponent implements OnInit, OnDestroy {
     const subscription = this.store.pipe(
       select(getScannedQr),
       takeUntil(this.destroyed$),
-      withLatestFrom(this.currentProjectId$),
-    ).subscribe(([ scan, projectId ]) => {
+      withLatestFrom(this.currentProjectId$, this.projects$),
+    ).subscribe(async ([ scan, projectId, allProjects ]) => {
       if (scan.success && scan.data) {
-        this.store.dispatch(new AddParticipationAction({ projectId, qrContent: scan.data.content }));
         subscription.unsubscribe();
+        if (allProjects.data && allProjects.data.length > 1) {
+          await this.showProjectChoiceDialog(allProjects.data, scan.data.content);
+        } else {
+          this.store.dispatch(new AddParticipationAction({ projectId, qrContent: scan.data.content }));
+        }
       }
     });
+  }
+
+  private async showProjectChoiceDialog(allProjects: Project  [], qrUrl: string) {
+    const dialog = await this.alertController.create({
+      message: this.translate.instant('choose_project_for_scan'),
+      inputs: allProjects.map(p => ({
+        name: 'project',
+        id: `project-radio-${p.id}`,
+        label: p.title,
+        checked: this.selectedProjectId === p.id,
+        value: p.id,
+        type: 'radio',
+      })),
+      buttons: [
+        {
+          text: this.translate.instant('cancel'),
+          role: 'cancel',
+        },
+        {
+          text: this.translate.instant('ok'),
+          handler: (selectedValue: number) => {
+            this.onProjectSelected(selectedValue, qrUrl);
+            return true;
+          },
+        },
+      ],
+    });
+    await dialog.present();
+  }
+
+  onProjectSelected(projectId: number, qrContent: string) {
+    this.store.dispatch(new AddParticipationAction({ projectId, qrContent }));
+    this.scannedQr = null;
+    this.changeDetectorRef.markForCheck();
   }
 
   ngOnDestroy(): void {
