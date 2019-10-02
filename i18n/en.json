@@ -3,6 +3,7 @@
   "psp": {
     "activate_qr": "Activate QR code",
     "add_hours": "Add hours",
+    "add_photo": "Add photo",
     "address": "Address",
     "allow_gps_location_for_better_results": "Allow GPS location for better results",
     "amount": "Amount",
@@ -45,6 +46,7 @@
       "participation_admin": "Participation admin"
     },
     "phone_number": "Phone number",
+    "pictures": "Pictures",
     "please_scan_a_qr_code": "Please scan a QR code",
     "project": "Project",
     "psp_admin": "Participation moneybox",

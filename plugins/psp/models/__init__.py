@@ -17,19 +17,71 @@
 
 import datetime
 import random
+from urllib import urlencode
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
+from framework.consts import get_base_url
 from framework.models.common import NdbModel
 from mcfw.cache import CachedModelMixIn, invalidate_cache
 from mcfw.consts import DEBUG
 from mcfw.serialization import register, List, s_any, ds_any
+from plugins.psp.bizz.gcs_util import get_gcs_url
 from plugins.psp.consts import NAMESPACE
 
 
 def parent_key(user):
     return ndb.Key(NAMESPACE, user.email(), namespace=NAMESPACE)
+
+
+class UploadedFileOrigin(object):
+    CLOUDSTORAGE = 1
+    GOOGLE_PLACES = 2
+
+    @classmethod
+    def all(cls):
+        return [cls.CLOUDSTORAGE, cls.GOOGLE_PLACES]
+
+
+class UploadedFile(NdbModel):
+    NAMESPACE = NAMESPACE
+    reference = ndb.StringProperty(indexed=False)
+    origin = ndb.IntegerProperty(indexed=False, choices=UploadedFileOrigin.all())
+    uploaded_by = ndb.IntegerProperty()
+    content_type = ndb.StringProperty(indexed=False)
+    created_on = ndb.DateTimeProperty(auto_now_add=True)
+    size = ndb.IntegerProperty(indexed=False)  # in bytes
+    copyright = ndb.TextProperty()
+
+    @property
+    def id(self):
+        return self.key.id()
+
+    @classmethod
+    def create_key(cls, file_id):
+        return ndb.Key(cls, file_id, namespace=NAMESPACE)
+
+    @classmethod
+    def file_url(cls, general_settings, origin, reference):
+        # type: (GeneralSettings, int, str) -> str
+        if origin == UploadedFileOrigin.CLOUDSTORAGE:
+            return get_gcs_url(reference)
+        elif origin == UploadedFileOrigin.GOOGLE_PLACES:
+            if not general_settings.google_maps_client_key:
+                raise Exception('google_maps_client_key is not set on GeneralSettings')
+            parameters = {
+                'key': general_settings.google_maps_client_key,
+                'photoreference': reference,
+                'maxheight': 600,
+            }
+            return 'https://maps.googleapis.com/maps/api/place/photo?%s' % (urlencode(parameters))
+        else:
+            raise Exception('Invalid origin %s, reference %s' % (origin, reference))
+
+    @classmethod
+    def url(cls, file_id):
+        return '%s/files/%s' % (get_base_url(), file_id)
 
 
 class GeneralSettings(NdbModel):
@@ -38,6 +90,7 @@ class GeneralSettings(NdbModel):
     secret = ndb.StringProperty(indexed=False)
     qr_domain = ndb.StringProperty(indexed=False)
     google_maps_key = ndb.StringProperty(indexed=False)
+    google_maps_client_key = ndb.StringProperty(indexed=False)
 
     @classmethod
     def create_key(cls):
@@ -212,6 +265,7 @@ class Merchant(NdbModel):
     place_id = ndb.StringProperty()
     formatted_phone_number = ndb.StringProperty(indexed=False)
     website = ndb.StringProperty(indexed=False)
+    photos = ndb.KeyProperty(kind=UploadedFile, repeated=True)
 
     @property
     def id(self):

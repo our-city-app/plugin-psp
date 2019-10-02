@@ -33,6 +33,11 @@ export interface ActivateMerchant {
   merchant: Omit<Merchant, 'id' | 'city_id'>;
 }
 
+export interface UploadedFile {
+  id: number;
+  url: string;
+}
+
 export interface Merchant {
   id: number;
   city_id: string;
@@ -43,6 +48,7 @@ export interface Merchant {
   opening_hours: OpeningHourPeriod[];
   place_id: string | null;
   website: string | null;
+  photos: UploadedFile[];
 }
 
 export interface MerchantList {

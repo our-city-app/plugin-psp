@@ -24,15 +24,16 @@ from mcfw.restapi import rest_functions
 from plugins.basic_auth.permissions import APP_ADMIN_GROUP_ID, BARole
 from plugins.psp.api import cities, qr_codes, projects, places, app
 from plugins.psp.handlers import ScheduleInvalidateCachesHandler, QRHandler, IndexPageHandler, \
-    AppleAppSiteAssociationHandler, TestHandler
+    AppleAppSiteAssociationHandler, FilesHandler, MerchantSyncHandler
 from plugins.psp.permissions import ROLE_GROUPS, PspPermission
+from plugins.psp.to.config import PspConfig
 
 
 class PspPlugin(Plugin):
 
     def __init__(self, configuration=None):
         from plugins.basic_auth.basic_auth_plugin import get_basic_auth_plugin
-        super(PspPlugin, self).__init__(configuration)
+        super(PspPlugin, self).__init__(PspConfig.from_dict(configuration))
         plugin = get_basic_auth_plugin()
         plugin.register_groups(ROLE_GROUPS)
         # Add all this plugin its permissions to the 'admin' role of the basic authentication plugin
@@ -50,9 +51,10 @@ class PspPlugin(Plugin):
                 yield Handler(url=url, handler=handler)
         elif auth == Handler.AUTH_ADMIN:
             yield Handler(url='/admin/cron/psp/schedule_invalidate_caches', handler=ScheduleInvalidateCachesHandler)
+            yield Handler(url='/admin/cron/psp/sync_merchants', handler=MerchantSyncHandler)
         yield Handler(url='/qr/<city_id:[^/]+>/<qr_id:\d+>', handler=QRHandler)
         yield Handler(url='/apple-app-site-association', handler=AppleAppSiteAssociationHandler)
-        yield Handler(url='/test', handler=TestHandler)
+        yield Handler(url='/files/<file_id:\d+>', handler=FilesHandler)
 
     def get_modules(self):
         yield Module('psp_admin', [], 1)

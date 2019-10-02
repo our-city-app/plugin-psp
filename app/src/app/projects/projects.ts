@@ -78,6 +78,7 @@ export interface AppMerchant {
   place_id: string;
   place_url: string | null;
   website: string | null;
+  photos: { url: string }[];
 }
 
 export interface AppMerchantList {

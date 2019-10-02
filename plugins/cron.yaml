@@ -2,3 +2,6 @@ cron:
 - description: Refresh projects
   url: /admin/cron/psp/schedule_invalidate_caches
   schedule: 1 of month 8:00
+- description: Sync merchants from google places
+  url: /admin/cron/psp/sync_merchants
+  schedule: 1 of month 9:00

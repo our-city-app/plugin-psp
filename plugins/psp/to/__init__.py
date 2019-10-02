@@ -21,7 +21,7 @@ from google.appengine.api import users
 from framework.to import TO
 from mcfw.properties import unicode_property, long_property, typed_property, float_property, bool_property, \
     unicode_list_property
-from plugins.rogerthat_api.to import PaginatedResultTO
+from plugins.psp.models import UploadedFile
 
 
 class ListResultTO(TO):
@@ -73,6 +73,10 @@ class OpeningInfoTO(TO):
     weekday_text = typed_property('weekday_text', WeekDayTextTO, True)
 
 
+class AppPhotoTO(TO):
+    url = unicode_property('url')
+
+
 class AppMerchantTO(TO):
     id = long_property('id')
     name = unicode_property('name')
@@ -84,6 +88,7 @@ class AppMerchantTO(TO):
     place_url = unicode_property('place_url')
     formatted_phone_number = unicode_property('formatted_phone_number')
     website = unicode_property('website')
+    photos = typed_property('photos', AppPhotoTO, True)
 
     @classmethod
     def from_model(cls, model, open_now, open_until, weekday_text):
@@ -109,7 +114,8 @@ class AppMerchantTO(TO):
                    place_id=model.place_id,
                    place_url=place_url,
                    formatted_phone_number=model.formatted_phone_number,
-                   website=model.website)
+                   website=model.website,
+                   photos=[AppPhotoTO(url=UploadedFile.url(photo_key.id())) for photo_key in model.photos])
 
 
 class MerchantListResultTO(ListResultTO):
@@ -172,6 +178,15 @@ class OpeningHoursTO(TO):
     open = typed_property('open', DayTimeTO)
 
 
+class UploadedFileTO(TO):
+    id = long_property('id')
+    url = unicode_property('url')
+
+    @classmethod
+    def from_model(cls, model, general_settings):
+        return cls(id=model.id, url=model.file_url(general_settings, model.origin, model.reference))
+
+
 class MerchantTO(TO):
     id = long_property('id')
     city_id = unicode_property('city_id')
@@ -182,6 +197,17 @@ class MerchantTO(TO):
     place_id = unicode_property('place_id')
     formatted_phone_number = unicode_property('formatted_phone_number')
     website = unicode_property('website')
+    photos = typed_property('photos', UploadedFileTO, True)
+
+    @classmethod
+    def from_model(cls, model, photos, general_settings):
+        to = super(MerchantTO, cls).from_dict(model.to_dict(exclude=['photos']))
+        to.photos = [UploadedFileTO.from_model(p, general_settings) for p in photos]
+        return to
+
+
+class UploadPhotoTO(TO):
+    photo = unicode_property('photo')  # base64
 
 
 class LinkQRTO(TO):
@@ -213,13 +239,17 @@ class MerchantStatisticsTO(TO):
     total = long_property('total')
 
 
-class MerchantStatisticsListTO(PaginatedResultTO):
+class MerchantStatisticsListTO(TO):
+    cursor = unicode_property('cursor')
+    more = bool_property('more')
     project_id = long_property('project_id')
     total = long_property('total')
     results = typed_property('results', MerchantStatisticsTO, True)
 
     def __init__(self, cursor, more, results, project_id, total):
-        super(MerchantStatisticsListTO, self).__init__(cursor, more, results)
+        self.cursor = cursor
+        self.more = more
+        self.results = results
         self.project_id = project_id
         self.total = total
 

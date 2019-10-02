@@ -16,6 +16,7 @@
 # @@license_version:1.3@@
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
+from plugins.psp.bizz.general import get_general_settings
 from plugins.psp.bizz.qr_codes import list_qr_batches, download_qr_code_batch, create_qr_batch, link_qr_code
 from plugins.psp.permissions import PspPermission, CityPermission
 from plugins.psp.to import QRBatchTO, LinkQRTO, MerchantTO
@@ -50,4 +51,5 @@ def api_download_qr_batch(city_id, batch_id):
 @returns(MerchantTO)
 @arguments(city_id=unicode, data=LinkQRTO)
 def api_link_qr(city_id, data):
-    return MerchantTO.from_model(link_qr_code(city_id, data))
+    merchant = link_qr_code(city_id, data)
+    return MerchantTO.from_model(merchant, [], get_general_settings())

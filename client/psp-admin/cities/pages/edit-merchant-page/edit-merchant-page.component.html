@@ -8,5 +8,8 @@
   <psp-edit-merchant [merchant]="merchant"
                      [status]="merchantStatus$ | async"
                      (saved)="save($event)"
+                     [uploadPictureStatus]="pictureStatus$ | async"
+                     (deletePicture)="deletePicture($event)"
+                     (fileChosen)="uploadFile($event)"
                      *ngIf="merchant$ | async as merchant"></psp-edit-merchant>
 </div>

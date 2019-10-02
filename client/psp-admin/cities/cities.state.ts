@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { DEFAULT_LIST_LOADABLE, DEFAULT_LOADABLE, Loadable } from '../../../app/src/app/loadable';
-import { City, Merchant, MerchantList } from './cities';
+import { City, Merchant, MerchantList, UploadedFile } from './cities';
 
 export interface CitiesState {
   places: Loadable<google.maps.places.PlaceResult[]>;
@@ -10,6 +10,7 @@ export interface CitiesState {
   currentCity: Loadable<City>;
   merchants: Loadable<MerchantList>;
   merchant: Loadable<Merchant>;
+  uploadPictureStatus: Loadable<UploadedFile>;
 }
 
 const getFeatureState = createFeatureSelector<CitiesState>('cities');
@@ -22,6 +23,7 @@ export const initialCitiesState: CitiesState = {
   currentCity: DEFAULT_LOADABLE,
   merchants: DEFAULT_LOADABLE,
   merchant: DEFAULT_LOADABLE,
+  uploadPictureStatus: DEFAULT_LOADABLE,
 };
 
 export const getPlaces = createSelector(getFeatureState, s => s.places);
@@ -32,3 +34,4 @@ export const getCity = createSelector(getFeatureState, s => s.currentCity);
 export const getMerchants = createSelector(getFeatureState, s => s.merchants);
 export const getMerchantsCursor = createSelector(getFeatureState, s => s.merchants.data && s.merchants.data.cursor);
 export const getMerchant = createSelector(getFeatureState, s => s.merchant);
+export const getPictureStatus = createSelector(getFeatureState, s => s.uploadPictureStatus);

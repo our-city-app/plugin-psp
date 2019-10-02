@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
+from google.appengine.ext import ndb
 
 from framework.bizz.authentication import get_current_session
 from mcfw.exceptions import HttpForbiddenException
@@ -22,10 +23,11 @@ from mcfw.rpc import returns, arguments
 from plugins.basic_auth.bizz.user import get_permissions_from_roles
 from plugins.psp.bizz.cities import create_city, update_city, get_city, list_cities, get_cities_by_ids, \
     add_app_to_apple_association
-from plugins.psp.bizz.general import validate_admin_request_auth, validate_city_request_auth
+from plugins.psp.bizz.general import validate_admin_request_auth, validate_city_request_auth, get_general_settings
+from plugins.psp.bizz.photos import upload_merchant_photo, remove_merchant_photo
 from plugins.psp.bizz.projects import get_merchant, update_merchant
 from plugins.psp.permissions import PspPermission, CityPermission
-from plugins.psp.to import CityTO, AppCityTO, MerchantTO, RegisterAppleIdTO
+from plugins.psp.to import CityTO, AppCityTO, MerchantTO, RegisterAppleIdTO, UploadPhotoTO, UploadedFileTO
 
 
 def _get_city_ids_from_scopes(scopes):
@@ -109,7 +111,9 @@ def api_register_app(city_id, data):
 @returns(MerchantTO)
 @arguments(city_id=unicode, merchant_id=(int, long))
 def api_get_merchant(city_id, merchant_id):
-    return MerchantTO.from_model(get_merchant(merchant_id))
+    merchant = get_merchant(merchant_id)
+    photos = ndb.get_multi(merchant.photos) if merchant.photos else []
+    return MerchantTO.from_model(merchant, photos, get_general_settings())
 
 
 @rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'put',
@@ -117,4 +121,26 @@ def api_get_merchant(city_id, merchant_id):
 @returns(MerchantTO)
 @arguments(city_id=unicode, merchant_id=(int, long), data=MerchantTO)
 def api_update_merchant(city_id, merchant_id, data):
-    return MerchantTO.from_model(update_merchant(merchant_id, data))
+    merchant = update_merchant(merchant_id, data)
+    photos = ndb.get_multi(merchant.photos) if merchant.photos else []
+    return MerchantTO.from_model(merchant, photos, get_general_settings())
+
+
+@rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>/photos', 'post',
+      scopes=[PspPermission.UPDATE_MERCHANT, CityPermission.UPDATE_MERCHANT], silent=True)
+@returns(UploadedFileTO)
+@arguments(city_id=unicode, merchant_id=(int, long), data=UploadPhotoTO)
+def api_upload_merchant_photo(city_id, merchant_id, data):
+    # type: (str, str, UploadPhotoTO) -> UploadedFileTO
+    user_id = int(get_current_session().user_id)
+    uploaded_file = upload_merchant_photo(user_id, merchant_id, data.photo)
+    return UploadedFileTO.from_model(uploaded_file, get_general_settings())
+
+
+@rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>/photos/<photo_id:[^/]+>', 'delete',
+      scopes=[PspPermission.UPDATE_MERCHANT, CityPermission.UPDATE_MERCHANT], silent=True)
+@returns()
+@arguments(city_id=unicode, merchant_id=(int, long), photo_id=(int, long))
+def api_delete_merchant_photo(city_id, merchant_id, photo_id):
+    # type: (str, str, int) -> None
+    remove_merchant_photo(merchant_id, photo_id)

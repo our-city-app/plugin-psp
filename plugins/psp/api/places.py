@@ -16,6 +16,7 @@
 # @@license_version:1.3@@
 from mcfw.restapi import rest
 from mcfw.rpc import returns, arguments
+from plugins.psp.bizz.general import get_general_settings
 from plugins.psp.bizz.places import search_places, get_place_details
 from plugins.psp.permissions import PspPermission
 
@@ -31,4 +32,5 @@ def api_search_places(query, location=None):
 @returns(dict)
 @arguments(place_id=unicode)
 def api_place_details(place_id):
-    return get_place_details(place_id)
+    fields = ['geometry', 'name', 'place_id', 'formatted_address', 'opening_hours', 'formatted_phone_number', 'website']
+    return get_place_details(get_general_settings(), place_id, fields)

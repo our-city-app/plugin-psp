@@ -20,6 +20,8 @@ export class MerchantDetailPageComponent implements OnInit {
   mapsUrl$: Observable<string>;
   openingHoursExpanded = false;
   expandIcon = 'md-arrow-dropdown';
+  fullscreenActive = false;
+  fullscreenImage: string | null = null;
 
   constructor(private store: Store<ProjectsState>,
               private route: ActivatedRoute) {
@@ -46,4 +48,15 @@ export class MerchantDetailPageComponent implements OnInit {
     this.expandIcon = this.openingHoursExpanded ? 'md-arrow-dropup' : 'md-arrow-dropdown';
   }
 
+  showFullScreen(image: string) {
+    this.fullscreenImage = image;
+    this.fullscreenActive = true;
+  }
+
+  closeOverlay() {
+    this.fullscreenActive = false;
+    setTimeout(() => {
+      this.fullscreenImage = null;
+    }, 700);
+  }
 }

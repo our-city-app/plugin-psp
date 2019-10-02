@@ -11,6 +11,9 @@ import { filterNull } from '../../../../framework/client/ngrx';
 import {
   CitiesActions,
   CitiesActionTypes,
+  DeleteFileAction,
+  DeleteFileCompleteAction,
+  DeleteFileFailedAction,
   GetCityCompleteAction,
   GetCityFailedAction,
   GetMerchantAction,
@@ -35,6 +38,9 @@ import {
   SearchPlacesAction,
   SearchPlacesCompleteAction,
   SearchPlacesFailedAction,
+  UploadFileAction,
+  UploadFileCompleteAction,
+  UploadFileFailedAction,
 } from './cities.actions';
 import { CitiesService } from './cities.service';
 import { CitiesState, getCurrentCityId, getMerchantsCursor } from './cities.state';
@@ -134,6 +140,22 @@ export class CitiesEffects {
     switchMap(([ action, cityId ]) => this.citiesService.updateMerchant(cityId, action.payload).pipe(
       map(data => new SaveMerchantCompleteAction(data)),
       catchError(err => of(new SaveMerchantFailedAction(err)))),
+    ));
+
+  @Effect() uploadFile$ = this.actions$.pipe(
+    ofType<UploadFileAction>(CitiesActionTypes.UPLOAD_FILE),
+    withLatestFrom(this.store.pipe(select(getCurrentCityId), filterNull())),
+    switchMap(([ action, cityId ]) => this.citiesService.uploadPhoto(cityId, action.payload.merchantId, action.payload.file).pipe(
+      map(data => new UploadFileCompleteAction(data)),
+      catchError(err => of(new UploadFileFailedAction(err)))),
+    ));
+
+  @Effect() deleteFile$ = this.actions$.pipe(
+    ofType<DeleteFileAction>(CitiesActionTypes.DELETE_FILE),
+    withLatestFrom(this.store.pipe(select(getCurrentCityId), filterNull())),
+    switchMap(([ action, cityId ]) => this.citiesService.deletePhoto(cityId, action.payload.merchantId, action.payload.id).pipe(
+      map(() => new DeleteFileCompleteAction({ id: action.payload.id })),
+      catchError(err => of(new DeleteFileFailedAction(err)))),
     ));
 
   constructor(private actions$: Actions<CitiesActions>,

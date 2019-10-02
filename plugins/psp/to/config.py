@@ -14,9 +14,22 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
-from __future__ import unicode_literals
 
-NAMESPACE = 'PSP'
-PREFIX = 'psp'
-PLUGIN_NAME = 'psp'
-SCHEDULED_QUEUE = "scheduled-queue"
+from framework.plugin_loader import get_config
+from framework.to import TO
+from mcfw.properties import unicode_property
+from plugins.psp.consts import PLUGIN_NAME
+
+
+class PspConfig(TO):
+    cloudstorage_bucket = unicode_property('cloudstorage_bucket')
+
+
+def get_psp_config():
+    # type: () -> PspConfig
+    return get_config(PLUGIN_NAME)
+
+
+def get_photo_gcs_path(config, photo_id):
+    # type: (PspConfig, int) -> str
+    return '/%s/merchants/photos/%d' % (config.cloudstorage_bucket, photo_id)

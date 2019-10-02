@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2019 Green Valley Belgium NV
+# Copyright 2019 Green Valley NV
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,4 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# @@license_version:1.3@@
+# @@license_version:1.5@@
+from cloudstorage.common import LOCAL_GCS_ENDPOINT
+from framework.consts import get_base_url
+from mcfw.consts import DEBUG
+
+
+def get_gcs_url(gcs_path):
+    if DEBUG:
+        return '%s%s%s' % (get_base_url(), LOCAL_GCS_ENDPOINT, gcs_path)
+    return 'https://storage.googleapis.com%s' % gcs_path

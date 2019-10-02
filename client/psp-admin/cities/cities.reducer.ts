@@ -1,4 +1,6 @@
+import { removeItem } from '../../../../framework/client/ngrx';
 import { onLoadableError, onLoadableLoad, onLoadableSuccess } from '../../../app/src/app/loadable';
+import { Merchant } from './cities';
 import { CitiesActions, CitiesActionTypes } from './cities.actions';
 import { CitiesState, initialCitiesState } from './cities.state';
 
@@ -62,6 +64,28 @@ export function citiesReducer(state = initialCitiesState, action: CitiesActions)
       return { ...state, merchant: onLoadableSuccess(action.payload) };
     case CitiesActionTypes.SAVE_MERCHANT_FAILED:
       return { ...state, merchant: onLoadableError(action.payload) };
+    case CitiesActionTypes.UPLOAD_FILE:
+      return { ...state, uploadPictureStatus: onLoadableLoad() };
+    case CitiesActionTypes.UPLOAD_FILE_COMPLETE:
+      return {
+        ...state,
+        uploadPictureStatus: onLoadableSuccess(action.payload),
+        merchant: onLoadableSuccess({ ...state.merchant.data, photos: [ ...(state.merchant.data as Merchant).photos, action.payload ] }),
+      };
+    case CitiesActionTypes.UPLOAD_FILE_FAILED:
+      return { ...state, uploadPictureStatus: onLoadableError(action.payload) };
+    case CitiesActionTypes.DELETE_FILE:
+      return state;
+    case CitiesActionTypes.DELETE_FILE_COMPLETE:
+      return {
+        ...state,
+        merchant: onLoadableSuccess({
+          ...state.merchant.data,
+          photos: removeItem((state.merchant.data as Merchant).photos, action.payload.id, 'id'),
+        }),
+      };
+    case CitiesActionTypes.DELETE_FILE_FAILED:
+      return state;
   }
   return state;
 }

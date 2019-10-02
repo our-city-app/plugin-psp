@@ -29,7 +29,7 @@ from framework.i18n_utils import translate
 from mcfw.exceptions import HttpException
 from plugins.psp.bizz.general import get_general_settings
 from plugins.psp.consts import PREFIX
-from plugins.psp.models import OpeningHour, OpeningPeriod
+from plugins.psp.models import OpeningHour, OpeningPeriod, UploadedFile, GeneralSettings, UploadedFileOrigin
 from plugins.psp.to import WeekDayTextTO
 
 MIDNIGHT = datetime.time(hour=0, minute=0)
@@ -68,12 +68,12 @@ def search_places(query, location):
     raise err
 
 
-def get_place_details(place_id):
-    # type: (str) -> dict
+def get_place_details(general_settings, place_id, fields):
+    # type: (GeneralSettings, str, list[str]) -> dict
     parameters = {
-        'key': get_general_settings().google_maps_key,
+        'key': general_settings.google_maps_key,
         'placeid': place_id,
-        'fields': 'geometry,name,place_id,formatted_address,opening_hours,formatted_phone_number,website',
+        'fields': ','.join(fields),
     }
     url = 'https://maps.googleapis.com/maps/api/place/details/json?%s' % (urllib.urlencode(parameters))
     result = urlfetch.fetch(url)
@@ -82,6 +82,18 @@ def get_place_details(place_id):
         if content['status'] == 'OK':
             return content['result']
     err = HttpException(result.content)
+    err.http_code = result.status_code
+    raise err
+
+
+def get_place_photo(general_settings, reference):
+    # type: (GeneralSettings, str) -> tuple[str, str]
+    url = UploadedFile.file_url(general_settings, UploadedFileOrigin.GOOGLE_PLACES, reference)
+    logging.debug(url)
+    result = urlfetch.fetch(url)  # type: urlfetch._URLFetchResult
+    if result.status_code == 200:
+        return result.content, result.headers.get('Content-Type')
+    err = HttpException()
     err.http_code = result.status_code
     raise err
 

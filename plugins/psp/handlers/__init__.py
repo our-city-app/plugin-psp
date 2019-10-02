@@ -21,8 +21,10 @@ import webapp2
 from framework.bizz.authentication import get_current_session
 from framework.handlers import render_logged_in_page
 from framework.plugin_loader import get_auth_plugin
+from plugins.psp.bizz.general import get_general_settings
+from plugins.psp.bizz.photos import sync_google_places
 from plugins.psp.bizz.projects import schedule_invalidate_caches
-from plugins.psp.models import AppleAppAssociation
+from plugins.psp.models import AppleAppAssociation, UploadedFile
 
 
 class ScheduleInvalidateCachesHandler(webapp2.RequestHandler):
@@ -41,14 +43,15 @@ class IndexPageHandler(webapp2.RequestHandler):
 
 class QRHandler(webapp2.RequestHandler):
     def get(self, city_id, qr_id):
+        # TODO: proper page
         url = 'https:///rogerthat-server.appspot.com/install/%s' % city_id
         html = '<html><body><p><a href="%s">Click here to install the app</a></p></body></html>' % url
         self.response.write(html)
 
 
-class TestHandler(webapp2.RequestHandler):
+class MerchantSyncHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('<a style="font-size:48px" href="/qr/osa-demo2/2000001">Click here</a>')
+        sync_google_places()
 
 
 class AppleAppSiteAssociationHandler(webapp2.RequestHandler):
@@ -57,3 +60,13 @@ class AppleAppSiteAssociationHandler(webapp2.RequestHandler):
         self.response.headers['Cache-Control'] = 'max-age=3600, public'
         model = AppleAppAssociation.create_key().get()
         json.dump(model.config, self.response.out)
+
+
+class FilesHandler(webapp2.RequestHandler):
+    def get(self, file_id):
+        file_id = long(file_id)
+        uploaded_file = UploadedFile.create_key(file_id).get()  # type: UploadedFile
+        if not uploaded_file:
+            self.abort(404)
+        url = UploadedFile.file_url(get_general_settings(), uploaded_file.origin, uploaded_file.reference)
+        self.redirect(url.encode('utf-8'))

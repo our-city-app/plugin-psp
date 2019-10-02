@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Action } from '@ngrx/store';
-import { ActivateMerchant, City, Merchant, MerchantList } from './cities';
+import { ActivateMerchant, City, Merchant, MerchantList, UploadedFile } from './cities';
 
 export const enum CitiesActionTypes {
   SEARCH_PLACES = '[cities] Search places',
@@ -29,6 +29,12 @@ export const enum CitiesActionTypes {
   SAVE_MERCHANT = '[cities] Save merchant',
   SAVE_MERCHANT_COMPLETE = '[cities] Save merchant complete',
   SAVE_MERCHANT_FAILED = '[cities] Save merchant failed',
+  UPLOAD_FILE = '[cities] Upload file',
+  UPLOAD_FILE_COMPLETE = '[cities] Upload file complete',
+  UPLOAD_FILE_FAILED = '[cities] Upload file failed',
+  DELETE_FILE = '[cities] Delete file',
+  DELETE_FILE_COMPLETE = '[cities] Delete file complete',
+  DELETE_FILE_FAILED = '[cities] Delete file failed',
 }
 
 export class SearchPlacesAction implements Action {
@@ -213,6 +219,49 @@ export class SaveMerchantFailedAction implements Action {
   }
 }
 
+export class UploadFileAction implements Action {
+  readonly type = CitiesActionTypes.UPLOAD_FILE;
+
+  constructor(public payload: { merchantId: number; file: string }) {
+  }
+}
+
+export class UploadFileCompleteAction implements Action {
+  readonly type = CitiesActionTypes.UPLOAD_FILE_COMPLETE;
+
+  constructor(public payload: UploadedFile) {
+  }
+}
+
+export class UploadFileFailedAction implements Action {
+  readonly type = CitiesActionTypes.UPLOAD_FILE_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
+  }
+}
+
+
+export class DeleteFileAction implements Action {
+  readonly type = CitiesActionTypes.DELETE_FILE;
+
+  constructor(public payload: { merchantId: number; id: number }) {
+  }
+}
+
+export class DeleteFileCompleteAction implements Action {
+  readonly type = CitiesActionTypes.DELETE_FILE_COMPLETE;
+
+  constructor(public payload: { id: number }) {
+  }
+}
+
+export class DeleteFileFailedAction implements Action {
+  readonly type = CitiesActionTypes.DELETE_FILE_FAILED;
+
+  constructor(public payload: HttpErrorResponse) {
+  }
+}
+
 export type CitiesActions = SearchPlacesAction
   | SearchPlacesCompleteAction
   | SearchPlacesFailedAction
@@ -238,6 +287,12 @@ export type CitiesActions = SearchPlacesAction
   | GetMerchantFailedAction
   | SaveMerchantAction
   | SaveMerchantCompleteAction
-  | SaveMerchantFailedAction;
+  | SaveMerchantFailedAction
+  | UploadFileAction
+  | UploadFileCompleteAction
+  | UploadFileFailedAction
+  | DeleteFileAction
+  | DeleteFileCompleteAction
+  | DeleteFileFailedAction;
 
 

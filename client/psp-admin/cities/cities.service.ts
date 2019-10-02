@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { PspConfig } from '../../psp-config';
-import { ActivateMerchant, City, Merchant, MerchantList, Project, QRBatch } from './cities';
+import { ActivateMerchant, City, Merchant, MerchantList, Project, QRBatch, UploadedFile } from './cities';
 
 @Injectable({ providedIn: 'root' })
 export class CitiesService {
@@ -64,5 +64,13 @@ export class CitiesService {
 
   updateMerchant(cityId: string, merchant: Merchant) {
     return this.http.put<Merchant>(`${PspConfig.API_URL}/cities/${cityId}/merchants/${merchant.id}`, merchant);
+  }
+
+  uploadPhoto(cityId: string, merchantId: number, file: string) {
+    return this.http.post<UploadedFile>(`${PspConfig.API_URL}/cities/${cityId}/merchants/${merchantId}/photos`, { photo: file });
+  }
+
+  deletePhoto(cityId: string, merchantId: number, photoId: number) {
+    return this.http.delete(`${PspConfig.API_URL}/cities/${cityId}/merchants/${merchantId}/photos/${photoId}`);
   }
 }

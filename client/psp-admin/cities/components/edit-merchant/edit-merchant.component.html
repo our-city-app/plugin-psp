@@ -25,7 +25,23 @@
   <h4>{{ 'psp.opening_hours' | translate }}</h4>
   <psp-opening-hours [openingHours]="merchant.opening_hours"
                      (changed)="setOpeningHours($event)"></psp-opening-hours>
-
+  <ng-container *ngIf="merchant.id">
+    <h4>{{ 'psp.pictures' | translate }}</h4>
+    <div>
+      <button type="button" mat-raised-button (click)="fileInput.click()">{{ 'psp.add_photo' | translate }}</button>
+      <input name="file_input" type="file" accept="image/png,image/jpeg" #fileInput (change)="fileChanged($event)"
+             hidden>
+      <mat-spinner [diameter]="40" *ngIf="uploadPictureStatus.loading" style="margin: 8px;"></mat-spinner>
+    </div>
+    <div>
+      <div *ngFor="let pic of merchant.photos" class="image-container">
+        <img [src]="pic.url">
+        <button type="button" mat-mini-fab class="delete-button" (click)="deletePicture.emit(pic.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+  </ng-container>
 </div>
 <div class="submit-btn">
   <mat-spinner [diameter]="40" *ngIf="status.loading"></mat-spinner>

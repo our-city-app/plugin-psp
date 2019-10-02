@@ -32,6 +32,7 @@ export class ActivateQrPageComponent implements OnInit {
       opening_hours: [],
       website: null,
       place_id: null,
+      photos: [],
     },
   };
   currentDevice: MediaDeviceInfo | null = null;

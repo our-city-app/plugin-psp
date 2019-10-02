@@ -5,7 +5,7 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Loadable } from '../../../../../app/src/app/loadable';
 import { OpeningHourPeriod } from '../../../../../app/src/app/projects/projects';
-import { ActivateMerchant, Merchant } from '../../cities';
+import { ActivateMerchant, Merchant, UploadedFile } from '../../cities';
 import { GetPlaceDetailsAction, SearchPlacesAction } from '../../cities.actions';
 import { CitiesService } from '../../cities.service';
 import { CitiesState, getPlaceDetails, getPlaces } from '../../cities.state';
@@ -27,7 +27,10 @@ export class EditMerchantComponent implements OnInit, OnDestroy {
   }
 
   @Input() status: Loadable<ActivateMerchant>;
+  @Input() uploadPictureStatus: Loadable<UploadedFile>;
   @Output() saved = new EventEmitter<Merchant>();
+  @Output() deletePicture = new EventEmitter<number>();
+  @Output() fileChosen = new EventEmitter<File>();
 
   currentPosition: Position;
   positionDenied = false;
@@ -102,5 +105,13 @@ export class EditMerchantComponent implements OnInit, OnDestroy {
     }, () => {
       this.positionDenied = true;
     }, { maximumAge: 60000 });
+  }
+
+  fileChanged($event: Event) {
+    const target = $event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+      this.fileChosen.emit(target.files[0]);
+      target.value = '';
+    }
   }
 }

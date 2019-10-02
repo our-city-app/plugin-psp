@@ -7,6 +7,10 @@
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding" *ngIf="(merchant$ | async)?.data as merchant">
+  <div class="images-container">
+    <img class="merchant-image" [src]="photo.url" *ngFor="let photo of merchant.photos"
+         (click)="showFullScreen(photo.url)"/>
+  </div>
   <ion-list>
     <ion-item [href]="mapsUrl$ | async">
       <ion-icon name="pin" slot="start"></ion-icon>
@@ -49,4 +53,8 @@
       </ion-item>
     </ng-container>
   </ion-list>
+  <div class="fullscreen-image-container" [class.fullscreen-active]="fullscreenActive" (click)="closeOverlay()">
+    <img [src]="fullscreenImage" *ngIf="fullscreenImage">
+    <ion-icon name="close" class="close-button"></ion-icon>
+  </div>
 </ion-content>

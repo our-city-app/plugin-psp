@@ -18,19 +18,19 @@ from urlparse import urlparse
 
 from google.appengine.api.app_identity import app_identity
 from google.appengine.ext import ndb
-from google.appengine.ext.ndb import GeoPt
+from google.appengine.ext.deferred import deferred
 
 import cloudstorage
-from cloudstorage.common import LOCAL_GCS_ENDPOINT
-from framework.consts import get_base_url
-from mcfw.consts import DEBUG, MISSING
+from mcfw.consts import MISSING
 from mcfw.exceptions import HttpBadRequestException, HttpNotFoundException, HttpConflictException
 from plugins.psp.bizz.cities import get_city
 from plugins.psp.bizz.general import get_general_settings
+from plugins.psp.bizz.photos import sync_pictures_from_google_places
+from plugins.psp.bizz.gcs_util import get_gcs_url
 from plugins.psp.bizz.projects import _update_merchant
 from plugins.psp.consts import NAMESPACE
-from plugins.psp.models import QRBatch, QRCode, Merchant, OpeningPeriod
-from plugins.psp.to import QRBatchTO, LinkQRTO
+from plugins.psp.models import QRBatch, QRCode, Merchant
+from plugins.psp.to import LinkQRTO
 
 
 def list_qr_batches(city_id):
@@ -62,13 +62,7 @@ def download_qr_code_batch(batch_id):
     with cloudstorage.open(file_path, 'w') as f:
         f.write('Url\n')
         f.write('\n'.join(qr.content for qr in qr_codes).encode('utf-8'))
-    return get_serving_url(file_path)
-
-
-def get_serving_url(filename):
-    if DEBUG:
-        return '%s%s%s' % (get_base_url(), LOCAL_GCS_ENDPOINT, filename)
-    return 'https://storage.googleapis.com%s' % filename
+    return get_gcs_url(file_path)
 
 
 def link_qr_code(city_id, data):
@@ -103,4 +97,5 @@ def link_qr_code(city_id, data):
     merchant.put()
     qr.merchant_id = merchant.id
     qr.put()
+    deferred.defer(sync_pictures_from_google_places, merchant.key)
     return merchant
