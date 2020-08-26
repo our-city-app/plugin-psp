@@ -30,7 +30,7 @@ class ListResultTO(TO):
 
 
 class AppCityTO(TO):
-    id = unicode_property('id')
+    id = long_property('id')
     avatar_url = unicode_property('avatar_url')
     name = unicode_property('name')
     info = unicode_property('info')
@@ -38,6 +38,7 @@ class AppCityTO(TO):
 
 class CityTO(AppCityTO):
     secret = unicode_property('secret')
+    app_id = unicode_property('app_id')
     api_key = unicode_property('api_key')
 
 
@@ -82,7 +83,7 @@ class AppMerchantTO(TO):
     name = unicode_property('name')
     formatted_address = unicode_property('formatted_address')
     location = typed_property('location', GeoPointTO)
-    city_id = unicode_property('city_id')
+    city_id = long_property('city_id')
     opening_hours = typed_property('opening_hours', OpeningInfoTO)
     place_id = unicode_property('place_id')
     place_url = unicode_property('place_url')
@@ -124,7 +125,7 @@ class MerchantListResultTO(ListResultTO):
 
 class QRBatchTO(TO):
     id = long_property('id')
-    city_id = unicode_property('city_id')
+    city_id = long_property('city_id')
     date = unicode_property('date')
     amount = long_property('amount')
 
@@ -146,7 +147,7 @@ class ProjectStatisticsTO(TO):
 
 class ProjectTO(TO):
     id = long_property('id')
-    city_id = unicode_property('city_id')
+    city_id = long_property('city_id')
     title = unicode_property('title')
     description = unicode_property('description')
     start_date = unicode_property('start_date')
@@ -189,7 +190,7 @@ class UploadedFileTO(TO):
 
 class MerchantTO(TO):
     id = long_property('id')
-    city_id = unicode_property('city_id')
+    city_id = long_property('city_id')
     name = unicode_property('name')
     formatted_address = unicode_property('formatted_address')
     location = typed_property('location', GeoPointTO)  # type: LocationTO
@@ -259,4 +260,5 @@ class UserSettingsTO(TO):
 
 
 class RegisterAppleIdTO(TO):
+    app_id = unicode_property('app_id')
     ios_dev_team = unicode_property('ios_dev_team')

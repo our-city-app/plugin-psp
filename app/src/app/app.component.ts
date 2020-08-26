@@ -7,7 +7,7 @@ import { Actions } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 import { RogerthatContext, RogerthatContextType } from 'rogerthat-plugin';
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locale';
+import { DEFAULT_LOCALE } from './locale';
 import { RogerthatService } from './rogerthat/rogerthat.service';
 
 @Component({
@@ -49,14 +49,6 @@ export class AppComponent {
         this.loaded = true;
         this.rogerthatService.initialize();
         this.rogerthatService.getContext().subscribe(context => this.processContext(context));
-        let lang;
-        for (const supportedLang of SUPPORTED_LOCALES) {
-          if (rogerthat.user.language.startsWith(supportedLang)) {
-            lang = supportedLang;
-            break;
-          }
-        }
-        this.translate.use(lang || DEFAULT_LOCALE);
         this.translate.get('back').subscribe(back => {
           this.config.set('backButtonText', back);
         });

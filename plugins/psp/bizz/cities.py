@@ -33,12 +33,12 @@ def list_cities():
 
 
 def get_cities_by_ids(city_ids):
-    # type: (list[unicode]) -> list[City]
+    # type: (list[long]) -> list[City]
     return ndb.get_multi([City.create_key(city_id) for city_id in city_ids])
 
 
 def get_city(city_id):
-    # type: (unicode) -> City
+    # type: (long) -> City
     city = City.create_key(city_id).get()
     if not city:
         raise HttpNotFoundException('city_not_found', {'id': city_id})
@@ -85,7 +85,7 @@ def _get_roles_for_city(city):
 
 @ndb.transactional(xg=True)
 def update_city(city_id, data):
-    # type: (unicode, CityTO) -> City
+    # type: (long, CityTO) -> City
     city = get_city(city_id)
     _populate_city(city, data)
     get_basic_auth_plugin().update_group(_get_group_for_city(city))
@@ -98,6 +98,7 @@ def _populate_city(city, data):
     city.populate(
         avatar_url=data.avatar_url,
         name=data.name,
+        app_id=data.app_id,
         info=data.info
     )
     if isinstance(data, CityTO):

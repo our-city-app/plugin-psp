@@ -28,15 +28,16 @@ from plugins.psp.bizz.photos import upload_merchant_photo, remove_merchant_photo
 from plugins.psp.bizz.projects import get_merchant, update_merchant
 from plugins.psp.permissions import PspPermission, CityPermission
 from plugins.psp.to import CityTO, AppCityTO, MerchantTO, RegisterAppleIdTO, UploadPhotoTO, UploadedFileTO
+from typing import List, Union
 
 
 def _get_city_ids_from_scopes(scopes):
-    # type: (list[str]) -> list[str]
+    # type: (List[str]) -> List[long]
     city_ids = []
     for permission in scopes:
         if permission.startswith('role/psp.cities.'):
             city_id = permission.replace('role/psp.cities.', '').rsplit('.', 1)[0]
-            city_ids.append(city_id)
+            city_ids.append(long(city_id))
     return city_ids
 
 
@@ -69,7 +70,7 @@ def _city_auth(func, handler):
 @rest('/cities/<city_id:[^/]+>', 'get', custom_auth_method=_city_auth,
       scopes=[CityPermission.GET_CITY, PspPermission.GET_CITY])
 @returns((CityTO, AppCityTO))
-@arguments(city_id=unicode)
+@arguments(city_id=(int, long))
 def api_get_city(city_id):
     handler = GenericRESTRequestHandler()
     handler.request = GenericRESTRequestHandler.get_current_request()
@@ -84,9 +85,9 @@ def api_get_city(city_id):
 @rest('/cities/<city_id:[^/]+>', 'put', custom_auth_method=_city_auth,
       scopes=[CityPermission.UPDATE_CITY, PspPermission.UPDATE_CITY])
 @returns((CityTO, AppCityTO))
-@arguments(city_id=unicode, data=CityTO)
+@arguments(city_id=(int, long), data=CityTO)
 def api_save_city(city_id, data):
-    # type: (unicode, CityTO) -> CityTO
+    # type: (long, CityTO) -> Union[CityTO, AppCityTO]
     handler = GenericRESTRequestHandler()
     handler.request = GenericRESTRequestHandler.get_current_request()
     if validate_admin_request_auth(api_save_city, handler):
@@ -97,19 +98,18 @@ def api_save_city(city_id, data):
         raise HttpForbiddenException()
 
 
-@rest('/cities/<city_id:[^/]+>/register', 'post', custom_auth_method=validate_admin_request_auth,
-      scopes=PspPermission.CREATE_CITY)
+@rest('/register-app', 'post', custom_auth_method=validate_admin_request_auth, scopes=PspPermission.CREATE_CITY)
 @returns()
-@arguments(city_id=unicode, data=RegisterAppleIdTO)
-def api_register_app(city_id, data):
-    # type: (unicode, RegisterAppleIdTO) -> None
-    add_app_to_apple_association(city_id, data.ios_dev_team)
+@arguments(data=RegisterAppleIdTO)
+def api_register_app(data):
+    # type: (RegisterAppleIdTO) -> None
+    add_app_to_apple_association(data.app_id, data.ios_dev_team)
 
 
 @rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'get',
       scopes=[PspPermission.GET_MERCHANT, CityPermission.GET_MERCHANT])
 @returns(MerchantTO)
-@arguments(city_id=unicode, merchant_id=(int, long))
+@arguments(city_id=(int, long), merchant_id=(int, long))
 def api_get_merchant(city_id, merchant_id):
     merchant = get_merchant(merchant_id)
     photos = ndb.get_multi(merchant.photos) if merchant.photos else []
@@ -119,7 +119,7 @@ def api_get_merchant(city_id, merchant_id):
 @rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'put',
       scopes=[PspPermission.UPDATE_MERCHANT, CityPermission.UPDATE_MERCHANT])
 @returns(MerchantTO)
-@arguments(city_id=unicode, merchant_id=(int, long), data=MerchantTO)
+@arguments(city_id=(int, long), merchant_id=(int, long), data=MerchantTO)
 def api_update_merchant(city_id, merchant_id, data):
     merchant = update_merchant(merchant_id, data)
     photos = ndb.get_multi(merchant.photos) if merchant.photos else []
@@ -129,9 +129,9 @@ def api_update_merchant(city_id, merchant_id, data):
 @rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>/photos', 'post',
       scopes=[PspPermission.UPDATE_MERCHANT, CityPermission.UPDATE_MERCHANT], silent=True)
 @returns(UploadedFileTO)
-@arguments(city_id=unicode, merchant_id=(int, long), data=UploadPhotoTO)
+@arguments(city_id=(int, long), merchant_id=(int, long), data=UploadPhotoTO)
 def api_upload_merchant_photo(city_id, merchant_id, data):
-    # type: (str, str, UploadPhotoTO) -> UploadedFileTO
+    # type: (long, str, UploadPhotoTO) -> UploadedFileTO
     user_id = int(get_current_session().user_id)
     uploaded_file = upload_merchant_photo(user_id, merchant_id, data.photo)
     return UploadedFileTO.from_model(uploaded_file, get_general_settings())
@@ -140,7 +140,7 @@ def api_upload_merchant_photo(city_id, merchant_id, data):
 @rest('/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>/photos/<photo_id:[^/]+>', 'delete',
       scopes=[PspPermission.UPDATE_MERCHANT, CityPermission.UPDATE_MERCHANT], silent=True)
 @returns()
-@arguments(city_id=unicode, merchant_id=(int, long), photo_id=(int, long))
+@arguments(city_id=(int, long), merchant_id=(int, long), photo_id=(int, long))
 def api_delete_merchant_photo(city_id, merchant_id, photo_id):
-    # type: (str, str, int) -> None
+    # type: (long, str, int) -> None
     remove_merchant_photo(merchant_id, photo_id)

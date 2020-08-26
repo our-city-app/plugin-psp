@@ -30,28 +30,28 @@ from plugins.psp.to import ProjectTO, ProjectDetailsTO, QRScanTO, AppMerchantTO,
 
 @rest('/app/cities/<city_id:[^/]+>/projects', 'get', cors=True)
 @returns([ProjectTO])
-@arguments(city_id=unicode)
+@arguments(city_id=(int, long))
 def api_app_list_projects(city_id):
     return [ProjectTO.from_model(project) for project in list_active_projects(city_id)]
 
 
 @rest('/app/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/details', 'get', cors=True)
 @returns(ProjectDetailsTO)
-@arguments(city_id=unicode, project_id=long, app_user=unicode)
+@arguments(city_id=(int, long), project_id=long, app_user=unicode)
 def api_app_get_project_details(city_id, project_id, app_user=None):
     return get_project_details(city_id, project_id, app_user)
 
 
 @rest('/app/cities/<city_id:[^/]+>/merchants', 'get', cors=True)
 @returns(MerchantListResultTO)
-@arguments(city_id=unicode, lang=unicode, cursor=unicode)
+@arguments(city_id=(int ,long), lang=unicode, cursor=unicode)
 def api_app_get_merchants(city_id, lang=None, cursor=None):
     return get_merchants(city_id, lang, cursor)
 
 
 @rest('/app/cities/<city_id:[^/]+>/merchants/<merchant_id:[^/]+>', 'get', cors=True)
 @returns(AppMerchantTO)
-@arguments(city_id=unicode, merchant_id=(int, long), lang=unicode)
+@arguments(city_id=(int, long), merchant_id=(int, long), lang=unicode)
 def api_app_get_merchant(city_id, merchant_id, lang=None):
     lang = get_supported_locale(lang) if lang else get_browser_language()
     city = get_city(city_id)
@@ -76,7 +76,7 @@ def api_scanned_options():
 
 @rest('/app/cities/<city_id:[^/]+>', 'get', cors=True)
 @returns(AppCityTO)
-@arguments(city_id=unicode)
+@arguments(city_id=(int, long))
 def api_get_city(city_id):
     return AppCityTO.from_model(get_city(city_id))
 

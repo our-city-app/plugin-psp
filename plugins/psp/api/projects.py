@@ -34,7 +34,7 @@ from plugins.psp.to import ProjectTO, ProjectDetailsTO, AppMerchantTO, MerchantL
 @rest('/cities/<city_id:[^/]+>/projects', 'get', custom_auth_method=validate_city_request_auth,
       scopes=PspPermission.GET_CITY)
 @returns([ProjectTO])
-@arguments(city_id=unicode)
+@arguments(city_id=(int, long))
 def api_list_projects(city_id):
     return [ProjectTO.from_model(project) for project in list_projects(city_id)]
 
@@ -42,7 +42,7 @@ def api_list_projects(city_id):
 @rest('/cities/<city_id:[^/]+>/projects', 'post', custom_auth_method=validate_city_request_auth,
       scopes=[CityPermission.UPDATE_CITY, PspPermission.UPDATE_CITY])
 @returns(ProjectTO)
-@arguments(city_id=unicode, data=ProjectTO)
+@arguments(city_id=(int, long), data=ProjectTO)
 def api_create_project(city_id, data):
     return ProjectTO.from_model(create_project(city_id, data))
 
@@ -50,7 +50,7 @@ def api_create_project(city_id, data):
 @rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>', 'get', custom_auth_method=validate_city_request_auth,
       scopes=[CityPermission.GET_CITY, PspPermission.GET_CITY])
 @returns(ProjectTO)
-@arguments(city_id=unicode, project_id=long)
+@arguments(city_id=(int, long), project_id=long)
 def api_get_project(city_id, project_id):
     return ProjectTO.from_model(get_project(city_id, project_id))
 
@@ -58,7 +58,7 @@ def api_get_project(city_id, project_id):
 @rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>', 'put', custom_auth_method=validate_city_request_auth,
       scopes=[CityPermission.UPDATE_CITY, PspPermission.UPDATE_CITY])
 @returns(ProjectTO)
-@arguments(city_id=unicode, project_id=long, data=ProjectTO)
+@arguments(city_id=(int, long), project_id=long, data=ProjectTO)
 def api_save_project(city_id, project_id, data):
     return ProjectTO.from_model(update_project(city_id, project_id, data))
 
@@ -66,7 +66,7 @@ def api_save_project(city_id, project_id, data):
 @rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/details', 'get',
       custom_auth_method=validate_city_request_auth, scopes=[CityPermission.GET_CITY, PspPermission.GET_CITY])
 @returns(ProjectDetailsTO)
-@arguments(city_id=unicode, project_id=long)
+@arguments(city_id=(int, long), project_id=long)
 def api_get_project_details(city_id, project_id):
     return get_project_details(city_id, project_id)
 
@@ -83,7 +83,7 @@ def get_project_details(city_id, project_id, app_user=None):
 @rest('/cities/<city_id:[^/]+>/projects/<project_id:[^/]+>/statistics', 'get',
       custom_auth_method=validate_city_request_auth, scopes=[CityPermission.GET_CITY, PspPermission.GET_CITY])
 @returns(MerchantStatisticsListTO)
-@arguments(city_id=unicode, project_id=long, cursor=unicode)
+@arguments(city_id=(int, long), project_id=long, cursor=unicode)
 def api_get_project_statistics(city_id, project_id, cursor=None):
     return get_merchant_statistics(city_id, project_id, cursor)
 
@@ -91,7 +91,7 @@ def api_get_project_statistics(city_id, project_id, cursor=None):
 @rest('/cities/<city_id:[^/]+>/merchants', 'get', custom_auth_method=validate_city_request_auth,
       scopes=[CityPermission.LIST_MERCHANTS, PspPermission.LIST_MERCHANTS])
 @returns(MerchantListResultTO)
-@arguments(city_id=unicode, lang=unicode, cursor=unicode)
+@arguments(city_id=(int, long), lang=unicode, cursor=unicode)
 def api_get_city_merchants(city_id, lang=None, cursor=None):
     return get_merchants(city_id, lang, cursor)
 

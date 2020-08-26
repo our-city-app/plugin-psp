@@ -24,32 +24,31 @@ import cloudstorage
 from mcfw.consts import MISSING
 from mcfw.exceptions import HttpBadRequestException, HttpNotFoundException, HttpConflictException
 from plugins.psp.bizz.cities import get_city
+from plugins.psp.bizz.gcs_util import get_gcs_url
 from plugins.psp.bizz.general import get_general_settings
 from plugins.psp.bizz.photos import sync_pictures_from_google_places
-from plugins.psp.bizz.gcs_util import get_gcs_url
 from plugins.psp.bizz.projects import _update_merchant
-from plugins.psp.consts import NAMESPACE
 from plugins.psp.models import QRBatch, QRCode, Merchant
 from plugins.psp.to import LinkQRTO
 
 
 def list_qr_batches(city_id):
-    # type: (unicode) -> list[QRBatch]
+    # type: (long) -> list[QRBatch]
     return sorted(QRBatch.list_by_city(city_id), key=lambda q: q.date, reverse=True)
 
 
 def create_qr_batch(city_id, amount):
-    # type: (unicode, long) -> QRBatch
+    # type: (long, long) -> QRBatch
     settings = get_general_settings()
-    get_city(city_id)
-    batch = QRBatch(city_id=city_id, amount=amount, namespace=NAMESPACE)
+    city = get_city(city_id)
+    batch = QRBatch(city_id=city_id, amount=amount)
     batch.put()
     min_id, max_id = QRCode.allocate_ids(amount)
     iterable = xrange(min_id, max_id + 1)
     to_put = [QRCode(key=QRCode.create_key(id_),
                      city_id=city_id,
                      batch_id=batch.id,
-                     content='%s/qr/%s/%s' % (settings.qr_domain, city_id, id_)) for id_ in iterable]
+                     content='%s/qr/%s/%s' % (settings.qr_domain, city.app_id, id_)) for id_ in iterable]
     ndb.put_multi(to_put)
     return batch
 
@@ -62,11 +61,12 @@ def download_qr_code_batch(batch_id):
     with cloudstorage.open(file_path, 'w') as f:
         f.write('Url\n')
         f.write('\n'.join(qr.content for qr in qr_codes).encode('utf-8'))
+    deferred.defer(cloudstorage.delete, file_path, _countdown=3600)
     return get_gcs_url(file_path)
 
 
 def link_qr_code(city_id, data):
-    # type: (unicode, LinkQRTO) -> Merchant
+    # type: (long, LinkQRTO) -> Merchant
     get_city(city_id)
     place_id = MISSING.default(data.merchant.place_id, None)
     url = urlparse(data.qr_content)
@@ -74,9 +74,10 @@ def link_qr_code(city_id, data):
     try:
         if split_path[0] != 'qr':
             raise HttpBadRequestException('psp.errors.invalid_qr_code')
-        if split_path[1] != city_id:
+        qr_city_id = long(split_path[1])
+        if qr_city_id != city_id:
             raise HttpBadRequestException('psp.errors.qr_code_for_different_city', {'expected': city_id,
-                                                                                    'actual': split_path[1]})
+                                                                                    'actual': qr_city_id})
         qr_id = long(split_path[2])
     except TypeError:
         raise HttpBadRequestException('psp.errors.invalid_qr_code')

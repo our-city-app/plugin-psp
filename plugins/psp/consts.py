@@ -16,7 +16,6 @@
 # @@license_version:1.3@@
 from __future__ import unicode_literals
 
-NAMESPACE = 'PSP'
 PREFIX = 'psp'
 PLUGIN_NAME = 'psp'
 SCHEDULED_QUEUE = "scheduled-queue"

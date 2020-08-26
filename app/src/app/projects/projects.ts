@@ -1,6 +1,6 @@
 export interface Project {
   action_count: number;
-  city_id: string;
+  city_id: number;
   budget: {
     amount: number;
     currency: string;
@@ -68,7 +68,7 @@ export interface GeoPoint {
 }
 
 export interface AppMerchant {
-  city_id: string;
+  city_id: number;
   formatted_address: string;
   formatted_phone_number: string | null;
   id: number;
@@ -96,7 +96,7 @@ export interface AddParticipationData {
 }
 
 export interface City {
-  id: string;
+  id: number;
   name: string;
   info: string;
   avatar_url: string;

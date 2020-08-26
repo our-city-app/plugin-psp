@@ -25,7 +25,7 @@ from plugins.psp.to import QRBatchTO, LinkQRTO, MerchantTO
 @rest('/cities/<city_id:[^/]+>/qr-batches', 'get',
       scopes=[PspPermission.LIST_QR_BATCHES, CityPermission.LIST_QR_BATCHES])
 @returns([dict])
-@arguments(city_id=unicode)
+@arguments(city_id=(int, long))
 def api_list_qr_batches(city_id):
     return [b.to_dict() for b in list_qr_batches(city_id)]
 
@@ -33,7 +33,7 @@ def api_list_qr_batches(city_id):
 @rest('/cities/<city_id:[^/]+>/qr-batches', 'post',
       scopes=[PspPermission.CREATE_QR_BATCH, CityPermission.CREATE_QR_BATCH])
 @returns(QRBatchTO)
-@arguments(city_id=unicode, data=QRBatchTO)
+@arguments(city_id=(int, long), data=QRBatchTO)
 def api_create_qr_batch(city_id, data):
     # type: (unicode, QRBatchTO) -> QRBatchTO
     return QRBatchTO.from_model(create_qr_batch(city_id, data.amount))
@@ -42,14 +42,14 @@ def api_create_qr_batch(city_id, data):
 @rest('/cities/<city_id:[^/]+>/qr-batches/<batch_id:[^/]+>/download', 'get',
       scopes=[PspPermission.GET_QR_BATCH, CityPermission.GET_QR_BATCH])
 @returns(dict)
-@arguments(city_id=unicode, batch_id=(int, long))
+@arguments(city_id=(int, long), batch_id=(int, long))
 def api_download_qr_batch(city_id, batch_id):
     return {'download_url': download_qr_code_batch(batch_id)}
 
 
 @rest('/cities/<city_id:[^/]+>/link', 'post', scopes=[PspPermission.CREATE_MERCHANT, CityPermission.CREATE_MERCHANT])
 @returns(MerchantTO)
-@arguments(city_id=unicode, data=LinkQRTO)
+@arguments(city_id=(int, long), data=LinkQRTO)
 def api_link_qr(city_id, data):
     merchant = link_qr_code(city_id, data)
     return MerchantTO.from_model(merchant, [], get_general_settings())

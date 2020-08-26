@@ -13,15 +13,15 @@ export class ProjectsService {
   constructor(private http: HttpClient) {
   }
 
-  getCity(cityId: string) {
+  getCity(cityId: number) {
     return this.http.get<City>(`${this.BASE_URL}/cities/${cityId}`);
   }
 
-  getProjects(cityId: string): Observable<Project[]> {
+  getProjects(cityId: number): Observable<Project[]> {
     return this.http.get<Project[]>(`${this.BASE_URL}/cities/${cityId}/projects`);
   }
 
-  getProjectDetails(cityId: string, projectId: number, appUser: string): Observable<ProjectDetails> {
+  getProjectDetails(cityId: number, projectId: number, appUser: string): Observable<ProjectDetails> {
     const params = new HttpParams({ fromObject: { app_user: encodeURIComponent(appUser) } });
     return this.http.get<ProjectDetails>(`${this.BASE_URL}/cities/${cityId}/projects/${projectId}/details`, { params });
   }
@@ -30,7 +30,7 @@ export class ProjectsService {
     return this.http.post<ProjectDetails>(`${this.BASE_URL}/scan`, data);
   }
 
-  getCityMerchants(cityId: string, cursor?: string | null): Observable<AppMerchantList> {
+  getCityMerchants(cityId: number, cursor?: string | null): Observable<AppMerchantList> {
     let params = new HttpParams({ fromObject: { lang: rogerthat.user.language } });
     if (cursor) {
       params = params.set('cursor', cursor);
@@ -38,7 +38,7 @@ export class ProjectsService {
     return this.http.get<AppMerchantList>(`${this.BASE_URL}/cities/${cityId}/merchants`, { params });
   }
 
-  getMerchant(cityId: string, id: number) {
+  getMerchant(cityId: number, id: number) {
     const params = new HttpParams({ fromObject: { lang: rogerthat.user.language } });
     return this.http.get<AppMerchant>(`${this.BASE_URL}/cities/${cityId}/merchants/${id}`, { params });
   }

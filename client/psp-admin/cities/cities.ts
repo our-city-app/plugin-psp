@@ -4,6 +4,7 @@ export interface City {
   id: string;
   name: string;
   secret: string;
+  app_id: string;
   api_key: string;
   avatar_url: string;
 }

@@ -49,21 +49,21 @@ export class ProjectsEffects {
 
   @Effect() getCity$ = this.actions$.pipe(
     ofType<GetCityAction>(ProjectsActionTypes.GET_CITY),
-    switchMap(() => this.projectsService.getCity(rogerthat.system.appId).pipe(
+    switchMap(() => this.projectsService.getCity(rogerthat.user.communityId).pipe(
       map(data => new GetCityCompleteAction(data)),
       catchError(err => of(new GetCityFailedAction(err)))),
     ));
 
   @Effect() getProjects$ = this.actions$.pipe(
     ofType<GetProjectsAction>(ProjectsActionTypes.GET_PROJECTS),
-    switchMap(() => this.projectsService.getProjects(rogerthat.system.appId).pipe(
+    switchMap(() => this.projectsService.getProjects(rogerthat.user.communityId).pipe(
       map(data => new GetProjectsCompleteAction(data)),
       catchError(err => of(new GetProjectsFailedAction(err)))),
     ));
 
   @Effect() getProjectDetails$ = this.actions$.pipe(
     ofType<GetProjectDetailsAction>(ProjectsActionTypes.GET_PROJECT_DETAILS),
-    switchMap(action => this.projectsService.getProjectDetails(rogerthat.system.appId, action.payload.id,
+    switchMap(action => this.projectsService.getProjectDetails(rogerthat.user.communityId, action.payload.id,
       createAppUser(rogerthat.user.account, rogerthat.system.appId)).pipe(
       map(data => new GetProjectDetailsCompleteAction(data)),
       catchError(err => of(new GetProjectDetailsFailedAction(err)))),
@@ -125,7 +125,7 @@ export class ProjectsEffects {
             return of(new GetMerchantCompleteAction(merchant));
           }
         }
-        return this.projectsService.getMerchant(rogerthat.system.appId, action.payload.id).pipe(
+        return this.projectsService.getMerchant(rogerthat.user.communityId, action.payload.id).pipe(
           map(data => new GetMerchantCompleteAction(data)),
           catchError(err => of(new GetMerchantFailedAction(err))));
       },
@@ -133,7 +133,7 @@ export class ProjectsEffects {
 
   @Effect() getCityMerchants$ = this.actions$.pipe(
     ofType<GetMerchantsAction>(ProjectsActionTypes.GET_MERCHANTS),
-    switchMap(() => this.projectsService.getCityMerchants(rogerthat.system.appId).pipe(
+    switchMap(() => this.projectsService.getCityMerchants(rogerthat.user.communityId).pipe(
       map(data => new GetMerchantsCompleteAction(data)),
       catchError(err => of(new GetMerchantsFailedAction(err)))),
     ));

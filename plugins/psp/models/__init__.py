@@ -19,7 +19,6 @@ import datetime
 import random
 from urllib import urlencode
 
-from google.appengine.api import users
 from google.appengine.ext import ndb
 
 from framework.consts import get_base_url
@@ -28,11 +27,10 @@ from mcfw.cache import CachedModelMixIn, invalidate_cache
 from mcfw.consts import DEBUG
 from mcfw.serialization import register, List, s_any, ds_any
 from plugins.psp.bizz.gcs_util import get_gcs_url
-from plugins.psp.consts import NAMESPACE
 
 
 def parent_key(user):
-    return ndb.Key(NAMESPACE, user.email(), namespace=NAMESPACE)
+    return ndb.Key('User', user.email())
 
 
 class UploadedFileOrigin(object):
@@ -45,7 +43,6 @@ class UploadedFileOrigin(object):
 
 
 class UploadedFile(NdbModel):
-    NAMESPACE = NAMESPACE
     reference = ndb.StringProperty(indexed=False)
     origin = ndb.IntegerProperty(indexed=False, choices=UploadedFileOrigin.all())
     uploaded_by = ndb.IntegerProperty()
@@ -60,7 +57,7 @@ class UploadedFile(NdbModel):
 
     @classmethod
     def create_key(cls, file_id):
-        return ndb.Key(cls, file_id, namespace=NAMESPACE)
+        return ndb.Key(cls, file_id)
 
     @classmethod
     def file_url(cls, general_settings, origin, reference):
@@ -85,8 +82,6 @@ class UploadedFile(NdbModel):
 
 
 class GeneralSettings(NdbModel):
-    NAMESPACE = NAMESPACE
-
     secret = ndb.StringProperty(indexed=False)
     qr_domain = ndb.StringProperty(indexed=False)
     google_maps_key = ndb.StringProperty(indexed=False)
@@ -94,7 +89,7 @@ class GeneralSettings(NdbModel):
 
     @classmethod
     def create_key(cls):
-        return ndb.Key(cls, 'GeneralSettings', namespace=NAMESPACE)
+        return ndb.Key(cls, 'GeneralSettings')
 
     @classmethod
     def instance(cls):
@@ -102,7 +97,7 @@ class GeneralSettings(NdbModel):
 
 
 class City(NdbModel):
-    NAMESPACE = NAMESPACE
+    app_id = ndb.StringProperty()
     secret = ndb.StringProperty(indexed=False)
     api_key = ndb.StringProperty(indexed=False)
     avatar_url = ndb.StringProperty(indexed=False)
@@ -114,11 +109,11 @@ class City(NdbModel):
 
     @property
     def id(self):
-        return self.key.id().decode('utf-8')
+        return self.key.id()
 
     @classmethod
     def create_key(cls, city_id):
-        return ndb.Key(cls, city_id, namespace=NAMESPACE)
+        return ndb.Key(cls, city_id)
 
     @classmethod
     def list(cls):
@@ -131,21 +126,17 @@ class ProjectBudget(ndb.Model):
 
 
 class Project(CachedModelMixIn, NdbModel):
-    NAMESPACE = NAMESPACE
     title = ndb.StringProperty(indexed=False)
     description = ndb.TextProperty()
     start_date = ndb.DateTimeProperty()
     end_date = ndb.DateTimeProperty()
     budget = ndb.LocalStructuredProperty(ProjectBudget)
     action_count = ndb.IntegerProperty(indexed=False)
+    city_id = ndb.IntegerProperty()
 
     @property
     def id(self):
         return self.key.id()
-
-    @property
-    def city_id(self):
-        return self.key.parent().id().decode('utf-8')
 
     @property
     def is_active(self):
@@ -156,7 +147,7 @@ class Project(CachedModelMixIn, NdbModel):
 
     @classmethod
     def create_key(cls, city_id, project_id):
-        return ndb.Key(cls, project_id, parent=City.create_key(city_id), namespace=NAMESPACE)
+        return ndb.Key(cls, project_id, parent=City.create_key(city_id))
 
     @classmethod
     def list_by_city(cls, city_id):
@@ -173,15 +164,10 @@ class Project(CachedModelMixIn, NdbModel):
         from plugins.psp.bizz.projects import list_active_project_keys
         invalidate_cache(list_active_project_keys, self.city_id)
 
-    def to_dict(self, extra_properties=None, include=None, exclude=None):
-        extra_properties = extra_properties or ['id', 'city_id']
-        return super(Project, self).to_dict(extra_properties, include, exclude)
-
 
 class QRBatch(NdbModel):
-    NAMESPACE = NAMESPACE
     date = ndb.DateTimeProperty(auto_now_add=True)
-    city_id = ndb.StringProperty()
+    city_id = ndb.IntegerProperty()
     amount = ndb.IntegerProperty(indexed=False)
 
     @property
@@ -190,7 +176,7 @@ class QRBatch(NdbModel):
 
     @classmethod
     def create_key(cls, id_):
-        return ndb.Key(cls, id_, namespace=NAMESPACE)
+        return ndb.Key(cls, id_)
 
     @classmethod
     def list_by_city(cls, city_id):
@@ -198,8 +184,7 @@ class QRBatch(NdbModel):
 
 
 class QRCode(NdbModel):
-    NAMESPACE = NAMESPACE
-    city_id = ndb.StringProperty()
+    city_id = ndb.IntegerProperty()
     merchant_id = ndb.IntegerProperty()
     batch_id = ndb.IntegerProperty()
     content = ndb.StringProperty(indexed=False)  # Should be an url
@@ -214,7 +199,7 @@ class QRCode(NdbModel):
 
     @classmethod
     def create_key(cls, id_):
-        return ndb.Key(cls, id_, namespace=NAMESPACE)
+        return ndb.Key(cls, id_)
 
 
 def _validate_opening_time(prop, value):
@@ -255,12 +240,11 @@ class OpeningPeriod(NdbModel):
 
 
 class Merchant(NdbModel):
-    NAMESPACE = NAMESPACE
     name = ndb.StringProperty()
     formatted_address = ndb.TextProperty()
     location = ndb.GeoPtProperty()
     opening_hours = ndb.LocalStructuredProperty(OpeningPeriod, repeated=True)
-    city_id = ndb.StringProperty()
+    city_id = ndb.IntegerProperty()
     qr_id = ndb.IntegerProperty()
     place_id = ndb.StringProperty()
     formatted_phone_number = ndb.StringProperty(indexed=False)
@@ -281,43 +265,41 @@ class Merchant(NdbModel):
 
     @classmethod
     def create_key(cls, merchant_id):
-        return ndb.Key(cls, merchant_id, namespace=NAMESPACE)
+        return ndb.Key(cls, merchant_id)
 
 
 class Scan(NdbModel):
-    NAMESPACE = NAMESPACE
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
     merchant_id = ndb.IntegerProperty()
     project_id = ndb.IntegerProperty()
+    user_id = ndb.StringProperty()
 
     @property
     def id(self):
         return self.key.id()
 
-    @property
-    def app_user(self):
-        return users.User(self.key.parent().id())
-
     @classmethod
     def list_by_user(cls, app_user, project_id):
-        return cls.query(ancestor=parent_key(app_user)).filter(Scan.project_id == project_id)
+        return cls.query() \
+            .filter(cls.user_id == app_user.email()) \
+            .filter(Scan.project_id == project_id)
 
     @classmethod
     def get_recent_scan(cls, app_user, merchant_id, max_date_time):
-        return cls.query(ancestor=parent_key(app_user)) \
+        return cls.query() \
+            .filter(cls.user_id == app_user.email()) \
             .filter(Scan.merchant_id == merchant_id) \
             .filter(Scan.timestamp > max_date_time).get()
 
 
 class ProjectStatisticShard(NdbModel):
-    NAMESPACE = NAMESPACE
     SHARD_KEY_TEMPLATE = '%d-%d'
     total = ndb.IntegerProperty(indexed=False, default=0)
     merchants = ndb.JsonProperty(compressed=True)  # {str(merchant_id): count}
 
     @classmethod
     def create_key(cls, project_id, shard_number):
-        return ndb.Key(cls, cls.SHARD_KEY_TEMPLATE % (project_id, shard_number), namespace=NAMESPACE)
+        return ndb.Key(cls, cls.SHARD_KEY_TEMPLATE % (project_id, shard_number))
 
 
 class ProjectStatisticShardConfig(NdbModel):
@@ -335,7 +317,7 @@ class ProjectStatisticShardConfig(NdbModel):
 
     @classmethod
     def create_key(cls, project_id):
-        return ndb.Key(cls, project_id, namespace=NAMESPACE)
+        return ndb.Key(cls, project_id)
 
     @classmethod
     def get_all_keys(cls, project_id):
@@ -348,13 +330,12 @@ class ProjectStatisticShardConfig(NdbModel):
 
 
 class ProjectUserStatistics(NdbModel):
-    NAMESPACE = NAMESPACE
     total = ndb.IntegerProperty(indexed=False, default=0)
     last_entry = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
     def create_key(cls, project_id, app_user):
-        return ndb.Key(cls, project_id, parent=parent_key(app_user), namespace=NAMESPACE)
+        return ndb.Key(cls, project_id, parent=parent_key(app_user))
 
 
 class UserSettings(NdbModel):
@@ -362,7 +343,7 @@ class UserSettings(NdbModel):
 
     @classmethod
     def create_key(cls, app_user_email):
-        return ndb.Key(cls, app_user_email, namespace=NAMESPACE)
+        return ndb.Key(cls, app_user_email)
 
 
 register(List(ndb.Key), s_any, ds_any)
@@ -374,4 +355,4 @@ class AppleAppAssociation(NdbModel):
 
     @classmethod
     def create_key(cls):
-        return ndb.Key(cls, 'config', namespace=NAMESPACE)
+        return ndb.Key(cls, 'config')

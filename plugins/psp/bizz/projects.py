@@ -36,6 +36,7 @@ from plugins.psp.models import Project, ProjectBudget, City, QRCode, Scan, Proje
     ProjectStatisticShard, ProjectStatisticShardConfig, Merchant, parent_key, OpeningPeriod
 from plugins.psp.to import ProjectTO, QRScanTO, MerchantStatisticsListTO, MerchantStatisticsTO, \
     MerchantTO, GeoPointTO  # @UnusedImport
+from typing import List
 
 
 def list_projects(city_id):
@@ -46,7 +47,7 @@ def list_projects(city_id):
 # This cache is cleared when a Project is updated, or when the end_date is reached
 @cached(version=1, lifetime=0, request=True, memcache=True, datastore='list_active_project_keys')
 @returns([ndb.Key])
-@arguments(city_id=unicode)
+@arguments(city_id=(int, long))
 def list_active_project_keys(city_id):
     now = datetime.now()
     return [p.key for p in Project.list_projects_after(now, city_id)
@@ -54,12 +55,12 @@ def list_active_project_keys(city_id):
 
 
 def list_active_projects(city_id):
-    # type: (unicode) -> [Project]
+    # type: (long) -> [Project]
     return ndb.get_multi(list_active_project_keys(city_id))
 
 
 def get_project(city_id, project_id):
-    # type: (unicode, int) -> Project
+    # type: (long, int) -> Project
     project = Project.create_key(city_id, project_id).get()
     if not project:
         raise HttpNotFoundException('project_not_found', {'id': project_id, 'city_id': city_id})
@@ -202,14 +203,14 @@ def _get_total_from_merchant(stats_models, merchant_id):
 
 
 def get_merchant_statistics(city_id, project_id, cursor):
-    # type: (int, int, unicode) -> object
+    # type: (long, int, unicode) -> object
     page_size = 200
     cursor = Cursor.from_websafe_string(cursor) if cursor else None
     merchant_future = Merchant.list_by_city_id(city_id).fetch_page_async(page_size, start_cursor=cursor)
     shard_keys = ProjectStatisticShardConfig.get_all_keys(project_id)
-    stats_models = [s for s in ndb.get_multi(shard_keys) if s]  # type: list[ProjectStatisticShard]
+    stats_models = [s for s in ndb.get_multi(shard_keys) if s]  # type: List[ProjectStatisticShard]
     total = sum(m.total for m in stats_models)
-    items, new_cursor, more = merchant_future.get_result()  # type: list[Merchant], ndb.Cursor, bool
+    items, new_cursor, more = merchant_future.get_result()  # type: List[Merchant], ndb.Cursor, bool
     results = [MerchantStatisticsTO(id=merchant.id,
                                     name=merchant.name,
                                     formatted_address=merchant.formatted_address,
@@ -220,7 +221,7 @@ def get_merchant_statistics(city_id, project_id, cursor):
 
 
 def list_merchants(city_id, cursor=None):
-    # type: (unicode, unicode) -> tuple[list[Merchant], unicode, bool]
+    # type: (long, unicode) -> tuple[list[Merchant], unicode, bool]
     merchants, new_cursor, has_more = Merchant.list_by_city_id(city_id).fetch_page(
         50, start_cursor=Cursor.from_websafe_string(cursor) if cursor else None, keys_only=False)
     new_cursor = new_cursor.to_websafe_string().decode('utf-8') if new_cursor and has_more else None
