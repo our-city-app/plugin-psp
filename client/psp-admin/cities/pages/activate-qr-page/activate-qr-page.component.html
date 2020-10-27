@@ -19,7 +19,7 @@
   </ng-container>
   <mat-form-field>
     <mat-label>{{ 'psp.qr_content' | translate }}</mat-label>
-    <input matInput name="qr_content" [ngModel]="data.qr_content" readonly required>
+    <input matInput name="qr_content" [(ngModel)]="data.qr_content" required>
     <mat-error>{{ 'psp.please_scan_a_qr_code' | translate }}</mat-error>
   </mat-form-field>
   <psp-edit-merchant [merchant]="data.merchant"

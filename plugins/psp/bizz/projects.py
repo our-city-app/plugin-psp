@@ -47,7 +47,7 @@ def list_projects(city_id):
 # This cache is cleared when a Project is updated, or when the end_date is reached
 @cached(version=1, lifetime=0, request=True, memcache=True, datastore='list_active_project_keys')
 @returns([ndb.Key])
-@arguments(city_id=(int, long))
+@arguments(city_id=long)
 def list_active_project_keys(city_id):
     now = datetime.now()
     return [p.key for p in Project.list_projects_after(now, city_id)
@@ -155,14 +155,18 @@ def qr_scanned(data):
     return project, user_stats, get_project_stats(project.id, None)[1]
 
 
-@ndb.transactional(xg=True)
-def add_project_scan(project_shard_config, project_id, merchant_id, app_user, min_interval):
-    # type: (ProjectStatisticShardConfig, long, long, users.User, long) -> ProjectUserStatistics
+@ndb.non_transactional()
+def _check_latest_scan(app_user, merchant_id, min_interval):
     scan = Scan.get_recent_scan(app_user, merchant_id, datetime.now() - timedelta(seconds=min_interval))
     if scan:
         raise HttpConflictException('psp.errors.already_scanned_recently',
                                     {'date': scan.timestamp.isoformat().decode('utf-8') + u'Z'})
 
+
+@ndb.transactional(xg=True)
+def add_project_scan(project_shard_config, project_id, merchant_id, app_user, min_interval):
+    # type: (ProjectStatisticShardConfig, long, long, users.User, long) -> ProjectUserStatistics
+    _check_latest_scan(app_user, merchant_id, min_interval)
     scan = Scan(parent=parent_key(app_user), merchant_id=merchant_id, project_id=project_id)
 
     user_stats_key = ProjectUserStatistics.create_key(project_id, app_user)

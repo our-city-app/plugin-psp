@@ -8,15 +8,15 @@ indexes:
 - kind: Merchant
   properties:
   - name: city_id
-  - name: name
+  - name: nam
 
 - kind: Scan
-  ancestor: yes
   properties:
   - name: merchant_id
+  - name: user_id
   - name: timestamp
 
 - kind: Scan
-  ancestor: yes
   properties:
   - name: project_id
+  - name: user_id

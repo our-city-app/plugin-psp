@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # @@license_version:1.3@@
+import logging
 from urlparse import urlparse
 
 from google.appengine.api.app_identity import app_identity
@@ -74,10 +75,8 @@ def link_qr_code(city_id, data):
     try:
         if split_path[0] != 'qr':
             raise HttpBadRequestException('psp.errors.invalid_qr_code')
-        qr_city_id = long(split_path[1])
-        if qr_city_id != city_id:
-            raise HttpBadRequestException('psp.errors.qr_code_for_different_city', {'expected': city_id,
-                                                                                    'actual': qr_city_id})
+        app_identifier = split_path[1]
+        logging.debug('App identifier: %s', app_identifier)
         qr_id = long(split_path[2])
     except TypeError:
         raise HttpBadRequestException('psp.errors.invalid_qr_code')
