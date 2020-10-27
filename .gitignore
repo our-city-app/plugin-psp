@@ -13,20 +13,6 @@ log.txt
 npm-debug.log*
 
 .idea/
-app/.ionic/
-app/.sourcemaps/
-app/.sass-cache/
-app/.tmp/
-app/.versions/
-app/coverage/
-app/www/
-app/node_modules/
-app/tmp/
-app/temp/
-app/platforms/
-app/plugins/
-app/plugins/android.json
-app/plugins/ios.json
 $RECYCLE.BIN/
 
 .DS_Store
