@@ -8,7 +8,7 @@ indexes:
 - kind: Merchant
   properties:
   - name: city_id
-  - name: nam
+  - name: name
 
 - kind: Scan
   properties:
