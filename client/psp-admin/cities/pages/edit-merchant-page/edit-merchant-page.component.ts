@@ -4,7 +4,7 @@ import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { filterNull } from '../../../../../../framework/client/ngrx';
-import { Loadable } from '../../../../../app/src/app/loadable';
+import { Loadable } from '../../../loadable';
 import { Merchant } from '../../cities';
 import { DeleteFileAction, GetMerchantAction, SaveMerchantAction, UploadFileAction } from '../../cities.actions';
 import { CitiesState, getMerchant, getPictureStatus } from '../../cities.state';

@@ -1,5 +1,5 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { DEFAULT_LIST_LOADABLE, DEFAULT_LOADABLE, Loadable } from '../../../app/src/app/loadable';
+import { DEFAULT_LIST_LOADABLE, DEFAULT_LOADABLE, Loadable } from '../loadable';
 import { City, Merchant, MerchantList, UploadedFile } from './cities';
 
 export interface CitiesState {

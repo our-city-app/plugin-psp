@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { OpeningHourPeriod } from '../../../../../app/src/app/projects/projects';
+import { OpeningHourPeriod } from '../../cities';
 
 
 const enum DAY {

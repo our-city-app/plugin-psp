@@ -54,6 +54,7 @@ class PspPlugin(Plugin):
             yield Handler(url='/admin/cron/psp/sync_merchants', handler=MerchantSyncHandler)
         yield Handler(url='/qr/<city_id:[^/]+>/<qr_id:\d+>', handler=QRHandler)
         yield Handler(url='/apple-app-site-association', handler=AppleAppSiteAssociationHandler)
+        yield Handler(url='/.well-known/apple-app-site-association', handler=AppleAppSiteAssociationHandler)
         yield Handler(url='/files/<file_id:\d+>', handler=FilesHandler)
 
     def get_modules(self):

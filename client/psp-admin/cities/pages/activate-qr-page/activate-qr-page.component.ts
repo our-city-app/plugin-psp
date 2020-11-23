@@ -1,11 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { select, Store } from '@ngrx/store';
-
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { filterNull } from '../../../../../../framework/client/ngrx';
-import { Loadable } from '../../../../../app/src/app/loadable';
+import { Loadable } from '../../../loadable';
 import { ActivateMerchant, Merchant } from '../../cities';
 import { LinkQRActionAction } from '../../cities.actions';
 import { CitiesService } from '../../cities.service';

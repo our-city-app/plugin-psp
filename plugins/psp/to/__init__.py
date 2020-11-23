@@ -247,13 +247,6 @@ class MerchantStatisticsListTO(TO):
     total = long_property('total')
     results = typed_property('results', MerchantStatisticsTO, True)
 
-    def __init__(self, cursor, more, results, project_id, total):
-        self.cursor = cursor
-        self.more = more
-        self.results = results
-        self.project_id = project_id
-        self.total = total
-
 
 class UserSettingsTO(TO):
     tour_date = unicode_property('tour_date')

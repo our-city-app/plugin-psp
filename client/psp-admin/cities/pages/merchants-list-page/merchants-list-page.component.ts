@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { Loadable } from '../../../../../app/src/app/loadable';
+import { Loadable } from '../../../loadable';
 import { MerchantList } from '../../cities';
 import { GetMerchantsAction, GetMoreMerchantsAction } from '../../cities.actions';
 import { CitiesState, getMerchants } from '../../cities.state';

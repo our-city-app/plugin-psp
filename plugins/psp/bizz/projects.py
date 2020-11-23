@@ -167,7 +167,7 @@ def _check_latest_scan(app_user, merchant_id, min_interval):
 def add_project_scan(project_shard_config, project_id, merchant_id, app_user, min_interval):
     # type: (ProjectStatisticShardConfig, long, long, users.User, long) -> ProjectUserStatistics
     _check_latest_scan(app_user, merchant_id, min_interval)
-    scan = Scan(parent=parent_key(app_user), merchant_id=merchant_id, project_id=project_id)
+    scan = Scan(parent=parent_key(app_user), merchant_id=merchant_id, project_id=project_id, user_id=app_user.email())
 
     user_stats_key = ProjectUserStatistics.create_key(project_id, app_user)
     user_stats = user_stats_key.get() or ProjectUserStatistics(key=user_stats_key)
@@ -221,7 +221,11 @@ def get_merchant_statistics(city_id, project_id, cursor):
                                     location=GeoPointTO(lat=merchant.location.lat, lon=merchant.location.lon),
                                     total=_get_total_from_merchant(stats_models, merchant.id))
                for merchant in items]
-    return MerchantStatisticsListTO(new_cursor and new_cursor.to_websafe_string(), more, results, project_id, total)
+    return MerchantStatisticsListTO(cursor=new_cursor and new_cursor.to_websafe_string(),
+                                    more=more,
+                                    results=results,
+                                    project_id=project_id,
+                                    total=total)
 
 
 def list_merchants(city_id, cursor=None):

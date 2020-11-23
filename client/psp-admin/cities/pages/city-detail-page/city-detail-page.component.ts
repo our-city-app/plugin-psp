@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { Loadable } from '../../../../../app/src/app/loadable';
+import { Loadable } from '../../../loadable';
 import { City } from '../../cities';
 import { GetCityAction, SaveCityAction } from '../../cities.actions';
 import { CitiesState, getCity } from '../../cities.state';
